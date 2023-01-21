@@ -7,6 +7,7 @@ import xlrd
 import mysql.connector
 from distutils.log import ERROR
 import database as db
+from database import teste_conection as testeConexão
 
 #Back-End
 #script de Gasometria
@@ -107,18 +108,25 @@ def janela_inserirPlanilha():
     [sg.Text('Escolha um script', size=(30, 1), justification='center', font=("Helvetica", 13),
     relief=sg.RELIEF_RIDGE, k='-TEXT HEADING-', enable_events=True)],
     [sg.Combo(['HEM', 'GAS'],size =(37,1),key='escolhascript')],
-    [sg.Text('Conexão com o Banco', size=(30, 1), justification='center', font=("Helvetica", 13),
-    relief=sg.RELIEF_RIDGE, k='-TEXT HEADING-', enable_events=True)],
-    [sg.Text('Usuario',size=8),sg.Input(key='user',size=(20,1))],
-    [sg.Text('Senha  ',size=8),sg.Input(key='senha',size=(20,1),password_char='*')],
-    [sg.Text('Porta  ',size=8),sg.Input(key='porta',size=(20,1))],
-    [sg.Radio('MySQL50X32',"tipobanco", default=False,key='mysql'), sg.Radio('MariaDB',"tipobanco", default=False,key='mariadb')],
     [sg.Text('Id Interface',size=8),sg.Input(key='numeroPlanilha',size =(20,1))],
     [sg.Button('Enviar',size=8), sg.Button('Voltar') ]
     ]
     return sg.Window('Inserir Prontos', layout5,finalize=True)
 
 def janela_inicial():
+    sg.theme('DarkGrey12')
+    layout6 = [
+    [sg.Text('Conexão com o Banco', size=(30, 1), justification='center', font=("Helvetica", 13),
+    relief=sg.RELIEF_RIDGE, k='-TEXT HEADING-', enable_events=True)],
+    [sg.Text('Usuario',size=8),sg.Input(key='user',size=(20,1))],
+    [sg.Text('Senha  ',size=8),sg.Input(key='senha',size=(20,1),password_char='*')],
+    [sg.Text('Porta  ',size=8),sg.Input(key='porta',size=(20,1))],
+    [sg.Radio('MySQL50X32',"tipobanco", default=False,key='mysql'), sg.Radio('MariaDB',"tipobanco", default=False,key='mariadb')],
+    [sg.Button('Continuar')]
+    ]
+    return sg.Window('Inicial', layout6,finalize=True)
+
+def janela_2():
     sg.theme('DarkGrey12')
     layout1= [
     [sg.Text('Bem vindo', size=(30, 1), justification='center', font=("Helvetica", 13),
@@ -132,9 +140,6 @@ def janela_inserir():
     sg.theme('DarkGrey12')
     layout2= [
     [sg.Text('Digite as informações do banco', size=(30, 1), justification='center', font=("Helvetica", 13),)],
-    [sg.Text('Usuario', size=8),sg.Input(key='user',size=(20,1))],
-    [sg.Text('Senha  ', size=8),sg.Input(key='senha',size=(20,1),password_char='*')],
-    [sg.Text('Porta  ', size=8),sg.Input(key='porta',size=(20,1))],
     [sg.Radio('MySQL50X32','tipobanco',default=False,key='mysql'), sg.Radio('MariaDB','tipobanco',default=False,key='mariadb')],
     [sg.Text('Linhas ', size=8),sg.Input(key='qtLinhas',size=(20,1)),],
     [sg.Text('Id inter.', size=8),sg.Input(key='numeroPlanilha',size =(20,1))],
@@ -142,7 +147,7 @@ def janela_inserir():
     ]
     return sg.Window('Inserir planilha', layout2,finalize=True)
 
-janela1,janela2,janela3,janela4 = janela_inicial(),None,None,None
+janela1,janela2,janela3,janela4,janela5 = janela_inicial(),None,None,None,None
 while True:
     window,eventos,valores = sg.read_all_windows()
 
@@ -150,12 +155,9 @@ while True:
       if eventos == sg.WIN_CLOSED:
         break
       if eventos == 'Continuar':
-        if valores['inserirP'] == True:
-          janela1.hide()
-          janela2 = janela_inserir()
-        if valores['mProntos'] == True:
-          janela1.hide()
-          janela3 = janela_inserirPlanilha()
+        testeConexão(valores['user'],valores['senha'],valores['porta'])
+        janela2 = janela_2()
+        janela1.hide()
 
     if window == janela2:
       if eventos == sg.WIN_CLOSED:
@@ -163,10 +165,9 @@ while True:
       if eventos == 'Voltar':
         janela2.hide()
         janela1.un_hide()
-      if eventos == 'Enviar':
-        if valores['mysql'] == True and valores['mariadb'] == True:
-          sg.popup('ESCOLHA SOMENTE UM BANCO DE CADA VEZ')
-          break
+      if  window == janela2 and  eventos == 'mProntos':
+        janela3 == janela_inserir()
+        janela2.hide()
         
         if valores['mysql'] == True:
           inserir_iexam(Ler_Planilha(), valores, 'mysql')

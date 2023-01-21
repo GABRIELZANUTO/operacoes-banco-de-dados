@@ -55,3 +55,18 @@ def selectToDatabase(select_string, valores, tipo_conexao = 'mysql', quantidade 
   finally:
       if (conn.is_connected()):
           conn.close()
+
+def teste_conection(user, senha, porta, charset='utf8'):
+  try:
+    mysql.connector.connect(
+    host="localhost",
+    user=str(user),
+    passwd = str(senha),
+    port = str(porta),
+    database = "equipamento",
+    charset = charset)
+  except ERROR as e:
+    print(e)
+    
+
+  
