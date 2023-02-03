@@ -1,25 +1,23 @@
 import mysql.connector
 from distutils.log import ERROR
 
-def getConection(user, senha, porta, charset='utf8'):
+def getConection(user, senha, porta, tBanco):
   return mysql.connector.connect(
     host="localhost",
     user=str(user),
     passwd = str(senha),
     port = str(porta),
     database = "equipamento",
-    charset = charset)
+    charset = tBanco)
 
-def insertToDatabase(insert_string, data, valores, tipo_conexao = 'mysql'):
-  charset = 'utf8'
-  if tipo_conexao != 'mysql':
-    charset = 'utf8mb4'
+def insertToDatabase(insert_string, data, valores, tBanco):
+
 
   conn = getConection(
     valores['user'],
     valores['senha'],
     valores['porta'],
-    charset
+    tBanco
   )
 
   cursor = conn.cursor()
@@ -32,16 +30,13 @@ def insertToDatabase(insert_string, data, valores, tipo_conexao = 'mysql'):
       if (conn.is_connected()):
           conn.close()
 
-def selectToDatabase(select_string, valores, tipo_conexao = 'mysql', quantidade = 'one'):
-  charset = 'utf8'
-  if tipo_conexao != 'mysql':
-    charset = 'utf8mb4'
+def selectToDatabase(select_string, valores, tBanco , quantidade = 'one'):
 
   conn = getConection(
     valores['user'],
     valores['senha'],
     valores['porta'],
-    charset
+    tBanco
   )
   cursor = conn.cursor()
   try:
@@ -56,17 +51,29 @@ def selectToDatabase(select_string, valores, tipo_conexao = 'mysql', quantidade 
       if (conn.is_connected()):
           conn.close()
 
-def teste_conection(user, senha, porta, charset='utf8'):
+def selectHemcompleto(select_string, valores, tBanco):
+  conn = getConection(
+    valores['user'],
+    valores['senha'],
+    valores['porta'],
+    tBanco
+  )
+  cursor = conn.cursor()
   try:
-    mysql.connector.connect(
-    host="localhost",
-    user=str(user),
-    passwd = str(senha),
-    port = str(porta),
-    database = "equipamento",
-    charset = charset)
-  except ERROR as e:
-    print(e)
-    
+      cursor.execute(select_string)
+      return cursor.fetchall()
+  except ERROR as erro:
+      print("Falha: {}".format(erro))
+  finally:
+      if (conn.is_connected()):
+          conn.close()
 
+def testeConexão(valores,tBanco):
+  
+  conn = getConection(
+    valores['user'],
+    valores['senha'],
+    valores['porta'],
+    tBanco
+  )
   
