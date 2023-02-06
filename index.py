@@ -15,69 +15,84 @@ import database as db
 U=''
 p=''
 #script de Gasometria
-def inserir_Gav(valores, tipo_conexao):
+def inserir_Gav(valores,user,senha,porta,tipo_conexao):
     NIDIFACE = (valores['numeroPlanilha'])
 
     db.insertToDatabase(
       "insert into ie_exam""(NIDIFACE,CEXAMEQUIEXAM,CEXAMLISEXAM,CDESCEXAM,EDESMEMBRADOEXAM,NINDEXEXAM,TINC) values ('"+NIDIFACE+"',%s,%s,%s,%s,%s,now())",
       [('GASOV', 'GASV', 'GASOMETRIA VENOSA', 'N', 1)],
-      valores,
+      user,
+      senha,
+      porta,
       tipo_conexao
     )
 
     result_select = db.selectToDatabase(
       "SELECT NIDEXAM FROM ie_exam WHERE NIDIFACE = '"+NIDIFACE+"' ",
-      valores,
+      user,
+      senha,
+      porta,
       tipo_conexao
     )
 
     db.insertToDatabase(
       "insert into ie_var""(NIDEXAM,CNOMEEQUIVAR,CNOMELISVAR,NORDEMVAR,CFATORVAR,TINC) values ('"+str(result_select[0])+"',%s,%s,%s,%s,now())",
       [('pH', 'PH', 1, None), ('PO2', 'PO2', 2, None), ('PCO2', 'PCO2', 3, None), ('SO2', 'SO2', 4, None), ('cHCO3', 'HCO3', 5, None), ('BE', 'BE', 6, None), ('Na', 'SODIO', 7, None), ('K', 'POTASSIO', 8, None), ('Ca', 'CAIO', 9, None), ('Cl', 'CLORETO', 10, None), ('Glu', 'GLICOSE', 11, None), ('Lac', 'LACT', 12, None)],
-      valores,
+      user,
+      senha,
+      porta,
       tipo_conexao
     )
-
     return sg.popup('Dados gravados com sucesso !!!!')
 
 #Script de Hemograma
-def inserir_hem(valores, tipo_conexao):
+def inserir_hem(valores,user,senha,porta, tipo_conexao):
     NIDIFACE = (valores['numeroPlanilha'])
 
     db.insertToDatabase(
       "insert into ie_exam (NIDIFACE,CEXAMEQUIEXAM,CEXAMLISEXAM,CDESCEXAM,EDESMEMBRADOEXAM,NINDEXEXAM,CDIFFROUNDEXAM,TINC) values ('"+NIDIFACE+"',%s,%s,%s,%s,%s,%s,now())",
       [('HEM', 'HEM', 'HEM', 'N', 1, 'SEGMENTADOS|BLASTOS|PROMIELOCITOS|MIELOCITOS|METAMIELOCITOS|BASTONETES|EOSINOFILOS|BASOFILOS|LINFOCITOS|MONOCITOS')],
-      valores,
+      user,
+      senha,
+      porta,
       tipo_conexao
     )
 
     result_sql = db.selectToDatabase(
       "SELECT NIDEXAM FROM ie_exam WHERE NIDIFACE = '"+NIDIFACE+"' ",
-      valores,
+      user,
+      senha,
+      porta,
       tipo_conexao
     )
 
     db.insertToDatabase(
       "insert into ie_var""(NIDEXAM,CNOMEEQUIVAR,CNOMELISVAR,NORDEMVAR,CFATORVAR,TINC) values ('"+str(result_sql[0])+"',%s,%s,%s,%s,now())",
       [('Hemacias', 'HEMACIA', 1, None), ('Hemoglobinas', 'HEMOGLOBINA', 2, None), ('Hematocritos', 'HEMATOCRITO', 3, None), ('RDW', 'RDW', 4, None), ('Leucocitos', 'LEUCOCITOS', 5, '*1000'), ('Blastos_P', 'BLASTOS', 6, None), ('PMielocitos_P', 'PROMIELOCITOS', 7, None), ('MIELOCITOS_P', 'MIELOCITOS', 8, None), ('MetaMielocitos_P', 'METAMIELOCITOS', 9, None), ('Bastoes_P', 'BASTONETES', 10, None), ('Segmentados_P', 'SEGMENTADOS', 11, None), ('LINFOCITOS_P', 'LINFOCITOS', 12, None), ('Monocitos_P', 'MONOCITOS', 13, None), ('Eosinofilos_P', 'EOSINOFILOS', 14, None), ('Basofilos_P', 'BASOFILOS', 15, None), ('Plaquetas', 'PLAQUETAS', 16, '*1000')],
-      valores,
+      user,
+      senha,
+      porta,
       tipo_conexao
     )
 
     return sg.popup('Dados Gravados com Sucesso !!!!')
 
-def inserir_hemCompleto(valores,tipo_conexao):
+def inserir_hemCompleto(valores,user,senha,porta,tipo_conexao):
     NIDIFACE = (valores['numeroPlanilha'])
 
     db.insertToDatabase(
       "insert into ie_exam"" (NIDIFACE,CEXAMEQUIEXAM,CEXAMLISEXAM,CDESCEXAM,EDESMEMBRADOEXAM,NINDEXEXAM,TINC) values ('"+NIDIFACE+"',%s,%s,%s,%s,%s,now())",
      [( 'HEM', 'HEM', 'HEM', 'N', 1), ('HEM', 'PLA', 'PLAQUETAS', 'N', 2), ( 'HEM', 'HMG', 'HEMOGLOBINA', 'N', 3), ( 'HEM', 'HMT', 'HEMATOCRITO', 'N', 4), ( 'HEM', 'ERI', 'ERITROGRAMA', 'N', 5), ( 'HEM', 'LEU', 'LEUCOGRAMA', 'N', 6)],
-      valores,
+      user,
+      senha,
+      porta,
       tipo_conexao
     )
     result_sql = db.selectHemcompleto(
       "SELECT NIDEXAM FROM ie_exam WHERE NIDIFACE = '"+NIDIFACE+"' ",
-      valores,
+      user,
+      senha,
+      porta,
       tipo_conexao
     )
     
@@ -85,46 +100,60 @@ def inserir_hemCompleto(valores,tipo_conexao):
     db.insertToDatabase(
       "insert into ie_var""(NIDEXAM,CNOMEEQUIVAR,CNOMELISVAR,NORDEMVAR,CFATORVAR,TINC) values('"+str(result_sql[0][0])+"',%s,%s,%s,%s,now())",
      [( 'Hemacias', 'HEMACIA', 1, None), ( 'Hemoglobinas', 'HEMOGLOBINA', 2, None), ( 'Hematocritos', 'HEMATOCRITO', 3, None), ('RDW', 'RDW', 4, None), ( 'Leucocitos', 'LEUCOCITOS', 5, '*1000'), ( 'Blastos_P', 'BLASTOS', 6, None), ( 'PMielocitos_P', 'PROMIELOCITOS', 7, None), ( 'MIELOCITOS_P', 'MIELOCITOS', 8, None), ( 'MetaMielocitos_P', 'METAMIELOCITOS', 9, None), ( 'Bastoes_P', 'BASTONETES', 10, None), ( 'Segmentados_P', 'SEGMENTADOS', 11, None), ( 'LINFOCITOS_P', 'LINFOCITOS', 12, None), ('Monocitos_P', 'MONOCITOS', 13, None), ('Eosinofilos_P', 'EOSINOFILOS', 14, None), ( 'Basofilos_P', 'BASOFILOS', 15, None), ( 'Plaquetas', 'PLAQUETAS', 16, '*1000')],
-      valores,
+      user,
+      senha,
+      porta,
       tipo_conexao
     )
     db.insertToDatabase(
       "insert into ie_var""(NIDEXAM,CNOMEEQUIVAR,CNOMELISVAR,NORDEMVAR,CFATORVAR,TINC) values('"+str(result_sql[1][0])+"',%s,%s,%s,%s,now())",
      [( 'Plaquetas', 'PLAQUETAS', 1, '*1000')],
-      valores,
+      user,
+      senha,
+      porta,
       tipo_conexao
     )
     db.insertToDatabase(
       "insert into ie_var""(NIDEXAM,CNOMEEQUIVAR,CNOMELISVAR,NORDEMVAR,CFATORVAR,TINC) values('"+str(result_sql[2][0])+"',%s,%s,%s,%s,now())",
      [( 'Hemoglobinas', 'HEMOGLOBINA', 1, None)],
-      valores,
+      user,
+      senha,
+      porta,
       tipo_conexao
     )
     db.insertToDatabase(
       "insert into ie_var""(NIDEXAM,CNOMEEQUIVAR,CNOMELISVAR,NORDEMVAR,CFATORVAR,TINC) values('"+str(result_sql[3][0])+"',%s,%s,%s,%s,now())",
      [( 'Hematocritos', 'HEMATOCRITO', 1, None)],
-      valores,
+      user,
+      senha,
+      porta,
       tipo_conexao
     )
     db.insertToDatabase(
       "insert into ie_var""(NIDEXAM,CNOMEEQUIVAR,CNOMELISVAR,NORDEMVAR,CFATORVAR,TINC) values('"+str(result_sql[4][0])+"',%s,%s,%s,%s,now())",
      [( 'Hemacias', 'HEMACIAS', 1, None), ( 'Hemoglobinas', 'HEMOGLOBINA', 2, None), ( 'Hematocritos', 'HEMATOCRITO', 3, None), ( 'RDW', 'RDW', 4, None)],
-      valores,
+      user,
+      senha,
+      porta,
       tipo_conexao
     )
     db.insertToDatabase(
       "insert into ie_var""(NIDEXAM,CNOMEEQUIVAR,CNOMELISVAR,NORDEMVAR,CFATORVAR,TINC) values('"+str(result_sql[5][0])+"',%s,%s,%s,%s,now())",
      [( 'Leucocitos', 'LEUCOCITOS', 1, '*1000'), ( 'Blastos_P', 'BLASTOS', 2, None), ( 'PMielocitos_P', 'PROMIELOCITOS', 3, None), ( 'MIELOCITOS_P', 'MIELOCITOS', 4, None), ( 'MetaMielocitos_P', 'METAMIELOCITOS', 5, None), ( 'Segmentados_P', 'NEUTROFILOS', 6, None), ( 'Eosinofilos_P', 'EOSINOFILOS', 7, None), ( 'Segmentados', 'SEGMENTADOS', 8, None), ( 'Bastoes_P', 'BASTONETES', 9, None), ( 'Basofilos_P', 'BASOFILOS', 10, None), ( 'LINFOCITOS_P', 'LINFOCITOS', 11, None), ( 'LinfocitosA_P', 'LINFOCITOSATIPICOS', 12, None), ( 'Monocitos_P', 'MONOCITOS', 13, None)],
-      valores,
+      user,
+      senha,
+      porta,
       tipo_conexao
     )
 
     return sg.popup('Dados Gravados com Sucesso !!!!')
 #Função de Select
-def Buscar_Dados(valores, tipo_conexao):
+def Buscar_Dados(user,senha,porta, tipo_conexao):
   result_sql = db.selectToDatabase(
     "SELECT NIDEXAM,CEXAMLISEXAM FROM ie_exam WHERE NIDIFACE = '"+valores['numeroPlanilha']+"' ",
-    valores,
+    user,
+    senha,
+    porta,
     tipo_conexao,
     'all'
   )
@@ -132,24 +161,28 @@ def Buscar_Dados(valores, tipo_conexao):
   db.insertToDatabase(
     "insert into ie_var""(NIDEXAM,CNOMEEQUIVAR,CNOMELISVAR,NORDEMVAR,TINC) values (%s,'"+'Quantitativo'+"',%s,'"+'1'+"',now())",
     list(result_sql),
-    valores,
+    user,
+    senha,
+    porta,
     tipo_conexao
   )
 
   return sg.popup('Dados Gravados com Sucesso !!!!')
 
 #Função para inserir planilha 
-def inserir_iexam(lista, conexao, tipo_conexao):
+def inserir_iexam(lista, user,senha,porta, tipo_conexao):
     db.insertToDatabase(
       "insert into ie_exam""(NIDIFACE,CEXAMLISEXAM,CEXAMEQUIEXAM,CDESCEXAM,EDESMEMBRADOEXAM,NINDEXEXAM,TINC) values ('"+valores['numeroPlanilha']+"',%s,%s,%s,'"+str('N')+"',%s,now())",
       lista,
-      conexao,
+      user,
+      senha,
+      porta,
       tipo_conexao
     )
 
 #Função para Ler planilha
 def Ler_Planilha():
-    loc= ("C:\\Projetos\\Gravdor\\Gravando-xlsx-no-MariaDB\\Exames.xlsx")
+    loc= ("Exames.xlsx")
     lista= list()
     cursor = xlrd.open_workbook(loc)
     folha =cursor.sheet_by_index(0)
@@ -181,7 +214,7 @@ def janela_Conectar():
     [sg.Radio('MySQL50X32',"tipobanco", default=False,key='mysql'), sg.Radio('MariaDB',"tipobanco", default=False,key='mariadb')],
     [sg.Button('Conectar',size=8) ]
     ]
-    return sg.Window('Inserir Prontos', layout5,finalize=True)
+    return sg.Window('Conexão', layout5,finalize=True)
 
 
 def janela_Prontos():
@@ -198,12 +231,12 @@ def janela_Prontos():
 def janela_Operacao():
     sg.theme('DarkGrey12')
     layout1= [
-    [sg.Text('Bem vindo', size=(30, 1), justification='center', font=("Helvetica", 13),
+    [sg.Text('Escolha uma opção', size=(30, 1), justification='center', font=("Helvetica", 13),
     relief=sg.RELIEF_RIDGE, k='-TEXT HEADING-', enable_events=True)],
     [sg.Radio('Modelos Prontos','opcaoincial',default=False,key='mProntos'), sg.Radio('Inserir Planilha','opcaoincial',default=False,key='inserirP')],
     [sg.Button('Continuar')]
     ]
-    return sg.Window('Janela Incial', layout1,finalize=True)
+    return sg.Window('Decisão', layout1,finalize=True)
 
 def janela_inserir():
     sg.theme('DarkGrey12')
@@ -238,6 +271,9 @@ while True:
             if valores['mariadb'] == True:
               tBanco = "utf8mb4"
             db.testeConexão(valores,tBanco)
+            user = valores['user']
+            senha = valores['senha']
+            porta = valores['porta']
             jConexao.hide()
             jOperacao=janela_Operacao()
           except:
@@ -253,7 +289,8 @@ while True:
         jProntos=janela_Prontos() 
       if eventos == "Continuar" and valores['inserirP'] == True:
         jOperacao.hide()
-        jInserir=janela_inserir() 
+        jInserir=janela_inserir()
+        print(user)
     if window == jInserir:
       if eventos == sg.WIN_CLOSED:
         break
@@ -261,29 +298,17 @@ while True:
         jOperacao.un_hide()
         jInserir.hide()
       if eventos == 'Enviar':
-        inserir_iexam(Ler_Planilha(),valores,tBanco)
-        Buscar_Dados(valores, tBanco)
-        sg.popup("Dados inseridos com sucesso !!")
-
-        
-
-       
-        
-        
-        
-        
-        
-        
-        
-        
-        
-        
-
-    # if window == jProntos:
-    #   if eventos == sg.WIN_CLOSED:
-    #     break
-    #   if eventos == "Voltar":
-    #     jOperacao.un_hide()
-    #     jProntos.hide()
-
-
+        inserir_iexam(Ler_Planilha(),user,senha,porta,tBanco)
+        Buscar_Dados(user,senha,porta, tBanco)
+    if window == jProntos:
+      if eventos == sg.WIN_CLOSED:
+        break
+      if eventos == "Voltar":
+        jOperacao.un_hide()
+        jProntos.hide()
+      if eventos == "Enviar" and valores['escolhascript'] == "HEM":
+        inserir_hem(valores,user,senha,porta,tBanco)
+      if eventos == "Enviar" and valores['escolhascript'] == "GAS":
+        inserir_Gav(valores,user,senha,porta,tBanco)
+      if eventos == "Enviar" and valores['escolhascript'] == "HEMCOMPLETO":
+        inserir_hemCompleto(valores,user,senha,porta,tBanco)

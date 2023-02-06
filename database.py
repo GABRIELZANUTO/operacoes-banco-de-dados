@@ -10,13 +10,13 @@ def getConection(user, senha, porta, tBanco):
     database = "equipamento",
     charset = tBanco)
 
-def insertToDatabase(insert_string, data, valores, tBanco):
+def insertToDatabase(insert_string, data, user,senha,porta, tBanco):
 
 
   conn = getConection(
-    valores['user'],
-    valores['senha'],
-    valores['porta'],
+    user,
+    senha,
+    porta,
     tBanco
   )
 
@@ -30,12 +30,12 @@ def insertToDatabase(insert_string, data, valores, tBanco):
       if (conn.is_connected()):
           conn.close()
 
-def selectToDatabase(select_string, valores, tBanco , quantidade = 'one'):
+def selectToDatabase(select_string,user,senha,porta, tBanco , quantidade = 'one'):
 
   conn = getConection(
-    valores['user'],
-    valores['senha'],
-    valores['porta'],
+    user,
+    senha,
+    porta,
     tBanco
   )
   cursor = conn.cursor()
@@ -51,11 +51,11 @@ def selectToDatabase(select_string, valores, tBanco , quantidade = 'one'):
       if (conn.is_connected()):
           conn.close()
 
-def selectHemcompleto(select_string, valores, tBanco):
+def selectHemcompleto(select_string, user,senha,porta, tBanco):
   conn = getConection(
-    valores['user'],
-    valores['senha'],
-    valores['porta'],
+    user,
+    senha,
+    porta,
     tBanco
   )
   cursor = conn.cursor()
