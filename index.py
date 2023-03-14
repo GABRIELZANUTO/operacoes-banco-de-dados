@@ -12,7 +12,7 @@ import database as db
 
 #Usario
 
-U=''
+U='equipamento'
 p=''
 #script de Gasometria
 def inserir_Gav(valores,user,senha,porta,tipo_conexao):
@@ -193,15 +193,7 @@ def Ler_Planilha():
 
 #Fronte End
 
-def janela_Login():
-  sg.theme('DarkGrey12')
-  layout1= [
-      [sg.Text('         Bem Vindo !', size=(20, 1), justification='center', font=("Helvetica", 15))],
-      [sg.Text('Usuario',size=(6, 1),font=("Arial", 12)),sg.Input(key='login',size=(20, 1))],
-      [sg.Text('Senha',size=(6, 1),font=("Arial", 12)),sg.Input(key='senhal',password_char='*',size=(20, 1))],
-      [sg.Button("Login",size=(30,1))]
-    ]
-  return sg.Window('Login', layout1,finalize=True)
+
 
 def janela_Conectar():
     sg.theme('DarkGrey12')
@@ -247,20 +239,9 @@ def janela_inserir():
     ]
     return sg.Window('Inserir planilha', layout2,finalize=True)
 
-jLogin,jConexao,jOperacao,jProntos,jInserir = janela_Login(),None,None,None,None
+jConexao,jOperacao,jProntos,jInserir = janela_Conectar(),None,None,None
 while True:
     window,eventos,valores = sg.read_all_windows()
-    if window == jLogin:
-          if eventos == sg.WIN_CLOSED:
-            break
-          if eventos == 'Login':
-            if valores['senhal'] == p and valores['login'] == U:
-              jLogin.hide()
-              jConexao = janela_Conectar()
-            else:
-              sg.popup('Usuario Incorreto')
-              window.FindElement('login').Update('')
-              window.FindElement('senhal').Update('')
     if window == jConexao:
       if eventos == sg.WIN_CLOSED:
             break
