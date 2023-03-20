@@ -1,6 +1,7 @@
 import mysql.connector
 from distutils.log import ERROR
 
+#Função de conexão com o bacno
 def getConection(user, senha, porta, tBanco):
   return mysql.connector.connect(
     host="localhost",
@@ -10,16 +11,14 @@ def getConection(user, senha, porta, tBanco):
     database = "equipamento",
     charset = tBanco)
 
+#Função de Inserção no banco
 def insertToDatabase(insert_string, data, user,senha,porta, tBanco):
-
-
   conn = getConection(
     user,
     senha,
     porta,
     tBanco
   )
-
   cursor = conn.cursor()
   try:
       cursor.executemany(insert_string, data)
@@ -30,8 +29,8 @@ def insertToDatabase(insert_string, data, user,senha,porta, tBanco):
       if (conn.is_connected()):
           conn.close()
 
+#Função adaptavel de SELECT no banco
 def selectToDatabase(select_string,user,senha,porta, tBanco , quantidade = 'one'):
-
   conn = getConection(
     user,
     senha,
@@ -43,14 +42,15 @@ def selectToDatabase(select_string,user,senha,porta, tBanco , quantidade = 'one'
       cursor.execute(select_string)
       if quantidade == 'one':
         return cursor.fetchone()
-      
-      return cursor.fetchall()
+      else:
+        return cursor.fetchall()
   except ERROR as erro:
       print("Falha: {}".format(erro))
   finally:
       if (conn.is_connected()):
           conn.close()
 
+#Função específica para SELECT quando usam a opção HEMCOMPLETO dos scripts prontos
 def selectHemcompleto(select_string, user,senha,porta, tBanco):
   conn = getConection(
     user,
@@ -68,12 +68,13 @@ def selectHemcompleto(select_string, user,senha,porta, tBanco):
       if (conn.is_connected()):
           conn.close()
 
+#teste de conexão para login no banco
 def testeConexão(valores,tBanco):
-  
   conn = getConection(
     valores['user'],
     valores['senha'],
     valores['porta'],
     tBanco
   )
+     
   

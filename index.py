@@ -4,16 +4,12 @@ from logging import shutdown
 from sqlite3 import connect
 from PySimpleGUI import PySimpleGUI as sg
 import xlrd
-import mysql.connector
 from distutils.log import ERROR
 import database as db
+import pandas as pd
 
-#Back-End
+#--------------------------------------------------------------------------------Back-End------------------------------------------------------
 
-#Usario
-
-U='equipamento'
-p=''
 #script de Gasometria
 def inserir_Gav(valores,user,senha,porta,tipo_conexao):
     NIDIFACE = (valores['numeroPlanilha'])
@@ -191,9 +187,39 @@ def Ler_Planilha():
         lista.append(tuple(folha.row_values(i)))
     return lista
 
-#Fronte End
+def extrair_config(user,senha,porta, tipo_conexao,planilha):
+  #Select nas colunas do menmônico e nome do exame com INNER JOIN na coluna da variavel do LIS
 
+  retorno = db.selectToDatabase(
+    "SELECT ie_exam.CEXAMLISEXAM,ie_exam.CDESCEXAM,ie_var.CNOMELISVAR FROM ie_exam  INNER JOIN ie_var ON ie_exam.NIDEXAM = ie_var.NIDEXAM WHERE ie_exam.NIDIFACE ="+str(planilha),
+    user,
+    senha,
+    porta,
+    tipo_conexao,
+    'all')
+  dic = {}
+  mnemonico = []
+  nome = []
+  lis = []
 
+  #separação das lista que retono do select em colunas
+  for i in retorno:
+    mnemonico.append(i[0])
+    nome.append(i[1])
+    lis.append(i[2])
+  dic['mnemonico'] = mnemonico
+  dic['nome'] = nome
+  dic['lis'] =lis
+
+   #criação do arquivo excell com os dados 
+  dados= pd.DataFrame.from_dict(dic, orient='index')
+  dados = dados.transpose()
+  dados.to_excel("dados_interface="+str(planilha)+".xls",index=False)
+
+  return sg.popup('Gerado com Sucesso!!!!')
+  
+
+#--------------------------------------------------------------------------Fronte End---------------------------------------------------------------------------------------------------------
 
 def janela_Conectar():
     sg.theme('DarkGrey12')
@@ -223,9 +249,11 @@ def janela_Prontos():
 def janela_Operacao():
     sg.theme('DarkGrey12')
     layout1= [
-    [sg.Text('Escolha uma opção', size=(30, 1), justification='center', font=("Helvetica", 13),
+    [sg.Text('Escolha uma opção', size=(45, 1), justification='center', font=("Helvetica", 13),
     relief=sg.RELIEF_RIDGE, k='-TEXT HEADING-', enable_events=True)],
-    [sg.Radio('Modelos Prontos','opcaoincial',default=False,key='mProntos'), sg.Radio('Inserir Planilha','opcaoincial',default=False,key='inserirP')],
+    [sg.Radio('Modelos Prontos','opcaoincial',default=False,key='mProntos'),
+      sg.Radio('Inserir Planilha','opcaoincial',default=False,key='inserirP'),
+      sg.Radio('Extrair Config','opcaoincial',default=False,key='extraird')],
     [sg.Button('Continuar')]
     ]
     return sg.Window('Decisão', layout1,finalize=True)
@@ -239,7 +267,15 @@ def janela_inserir():
     ]
     return sg.Window('Inserir planilha', layout2,finalize=True)
 
-jConexao,jOperacao,jProntos,jInserir = janela_Conectar(),None,None,None
+def janela_extrair():
+    sg.theme('DarkGrey12')
+    layout6= [
+    [sg.Text('Id inter.', size=8),sg.Input(key='numeroPlanilha',size =(20,1))],
+    [sg.Button('Gerar'), sg.Button('Voltar') ]
+    ]
+    return sg.Window('Extrair Configurações', layout6,finalize=True)
+
+jConexao,jOperacao,jProntos,jInserir,jExtrair = janela_Conectar(),None,None,None,None
 while True:
     window,eventos,valores = sg.read_all_windows()
     if window == jConexao:
@@ -271,7 +307,9 @@ while True:
       if eventos == "Continuar" and valores['inserirP'] == True:
         jOperacao.hide()
         jInserir=janela_inserir()
-        print(user)
+      if eventos == "Continuar" and valores['extraird'] == True:
+        jOperacao.hide()
+        jExtrair=janela_extrair()   
     if window == jInserir:
       if eventos == sg.WIN_CLOSED:
         break
@@ -293,3 +331,12 @@ while True:
         inserir_Gav(valores,user,senha,porta,tBanco)
       if eventos == "Enviar" and valores['escolhascript'] == "HEMCOMPLETO":
         inserir_hemCompleto(valores,user,senha,porta,tBanco)
+    if window == jExtrair:
+      if eventos == sg.WIN_CLOSED:
+        break
+      if eventos == "Voltar":
+        jOperacao.un_hide()
+        jExtrair.hide()
+      if eventos == "Gerar":
+         extrair_config(user,senha,porta,tBanco,valores['numeroPlanilha'])
+
