@@ -178,7 +178,7 @@ def inserir_iexam(lista, user,senha,porta, tipo_conexao):
 
 #Função para Ler planilha
 def Ler_Planilha():
-    loc= ("Exames.xlsx")
+    loc= ("Exames.xls")
     lista= list()
     cursor = xlrd.open_workbook(loc)
     folha =cursor.sheet_by_index(0)
