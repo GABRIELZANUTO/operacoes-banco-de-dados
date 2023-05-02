@@ -191,7 +191,7 @@ def extrair_config(user,senha,porta, tipo_conexao,planilha):
   #Select nas colunas do menmônico e nome do exame com INNER JOIN na coluna da variavel do LIS
 
   retorno = db.selectToDatabase(
-    "SELECT ie_exam.CEXAMLISEXAM,ie_exam.CDESCEXAM,ie_var.CNOMELISVAR FROM ie_exam  INNER JOIN ie_var ON ie_exam.NIDEXAM = ie_var.NIDEXAM WHERE ie_exam.NIDIFACE ="+str(planilha),
+    "SELECT ie_exam.CEXAMLISEXAM,ie_exam.CEXAMEQUIEXAM,ie_exam.CDESCEXAM,ie_var.CNOMELISVAR FROM ie_exam  INNER JOIN ie_var ON ie_exam.NIDEXAM = ie_var.NIDEXAM WHERE ie_exam.NIDIFACE ="+str(planilha),
     user,
     senha,
     porta,
@@ -199,22 +199,25 @@ def extrair_config(user,senha,porta, tipo_conexao,planilha):
     'all')
   dic = {}
   mnemonico = []
+  cod_equi = []
   nome = []
   lis = []
 
   #separação das lista que retono do select em colunas
   for i in retorno:
     mnemonico.append(i[0])
-    nome.append(i[1])
-    lis.append(i[2])
+    cod_equi.append(i[1])
+    nome.append(i[2])
+    lis.append(i[3])
   dic['mnemonico'] = mnemonico
+  dic['codigo_equp'] = cod_equi
   dic['nome'] = nome
   dic['lis'] =lis
 
    #criação do arquivo excell com os dados 
   dados= pd.DataFrame.from_dict(dic, orient='index')
   dados = dados.transpose()
-  dados.to_excel("dados_interface="+str(planilha)+".xls",index=False)
+  dados.to_excel("dados_interface="+str(planilha)+".xlsx",index=False)
 
   return sg.popup('Gerado com Sucesso!!!!')
   
@@ -229,8 +232,7 @@ def janela_Conectar():
     [sg.Text('Usuario',size=8),sg.Input(key='user',size=(20,1))],
     [sg.Text('Senha  ',size=8),sg.Input(key='senha',size=(20,1),password_char='*')],
     [sg.Text('Porta  ',size=8),sg.Input(key='porta',size=(20,1))],
-    [sg.Radio('MySQL50X32',"tipobanco", default=False,key='mysql'), sg.Radio('MariaDB',"tipobanco", default=False,key='mariadb')],
-    [sg.Button('Conectar',size=8) ]
+    [sg.Button('Conectar',size=8,button_color='green')]
     ]
     return sg.Window('Conexão', layout5,finalize=True)
 
@@ -242,19 +244,19 @@ def janela_Prontos():
     relief=sg.RELIEF_RIDGE, k='-TEXT HEADING-', enable_events=True)],
     [sg.Combo(['HEM', 'GAS','HEMCOMPLETO'],size =(37,1),key='escolhascript')],
     [sg.Text('Id Interface',size=8),sg.Input(key='numeroPlanilha',size =(20,1))],
-    [sg.Button('Enviar',size=8), sg.Button('Voltar') ]
+    [sg.Button('Enviar',size=8,button_color='green'), sg.Button('Voltar',button_color='red') ]
     ]
     return sg.Window('Modelos Prontos', layout5,finalize=True)
 
 def janela_Operacao():
     sg.theme('DarkGrey12')
     layout1= [
-    [sg.Text('Escolha uma opção', size=(45, 1), justification='center', font=("Helvetica", 13),
+    [sg.Text('Escolha uma opção', size=(29, 1), justification='center', font=("Helvetica", 13),
     relief=sg.RELIEF_RIDGE, k='-TEXT HEADING-', enable_events=True)],
-    [sg.Radio('Modelos Prontos','opcaoincial',default=False,key='mProntos'),
-      sg.Radio('Inserir Planilha','opcaoincial',default=False,key='inserirP'),
-      sg.Radio('Extrair Config','opcaoincial',default=False,key='extraird')],
-    [sg.Button('Continuar')]
+    [sg.Button('Modelos Prontos',size=(15,1)),
+      sg.Button('Inserir Planilha',size=(15,1))],
+    [sg.Button('Extrair Config',size=(15,1)),
+     sg.Button('Backup',size=(15,1))]
     ]
     return sg.Window('Decisão', layout1,finalize=True)
 
@@ -263,19 +265,28 @@ def janela_inserir():
     layout2= [
     [sg.Text('Linhas ', size=8),sg.Input(key='qtLinhas',size=(20,1)),],
     [sg.Text('Id inter.', size=8),sg.Input(key='numeroPlanilha',size =(20,1))],
-    [sg.Button('Enviar'), sg.Button('Voltar') ]
+    [sg.Button('Enviar',button_color='green'), sg.Button('Voltar',button_color='red') ]
     ]
     return sg.Window('Inserir planilha', layout2,finalize=True)
 
 def janela_extrair():
     sg.theme('DarkGrey12')
     layout6= [
-    [sg.Text('Id inter.', size=8),sg.Input(key='numeroPlanilha',size =(20,1))],
-    [sg.Button('Gerar'), sg.Button('Voltar') ]
+    [sg.Text('Id interface', size=10),sg.Input(key='numeroPlanilha',size =(24,1))],
+    [sg.Button('Gerar',button_color='green',size=(15,1)), sg.Button('Voltar',button_color='red',size=(15,1)) ]
     ]
     return sg.Window('Extrair Configurações', layout6,finalize=True)
 
-jConexao,jOperacao,jProntos,jInserir,jExtrair = janela_Conectar(),None,None,None,None
+def janela_backup():
+    sg.theme('DarkGrey12')
+    layout6= [
+    [sg.Text('Adm do Cliente', size=15,font='Helvetica')],
+    [sg.Input(key='cliente',size =(25,1))],
+    [sg.Button('Gerar Backup',size=(10,1),button_color='green'), sg.Button('Voltar',size=(10,1),button_color='red') ]
+    ]
+    return sg.Window('Backup', layout6,finalize=True)
+
+jConexao,jOperacao,jProntos,jInserir,jExtrair,JBackup = janela_Conectar(),None,None,None,None,None
 while True:
     window,eventos,valores = sg.read_all_windows()
     if window == jConexao:
@@ -283,17 +294,15 @@ while True:
             break
       if eventos == 'Conectar':
           try:
-            if valores['mysql'] == True:
-              tBanco = "utf8"
-            if valores['mariadb'] == True:
-              tBanco = "utf8mb4"
+            tBanco = "utf8"
             db.testeConexão(valores,tBanco)
             user = valores['user']
             senha = valores['senha']
             porta = valores['porta']
             jConexao.hide()
             jOperacao=janela_Operacao()
-          except:
+          except Exception as e:
+            print(e)
             sg.popup('Dados Invalidos')
             window.FindElement('user').Update('')
             window.FindElement('senha').Update('')
@@ -301,15 +310,18 @@ while True:
     if window == jOperacao:
       if eventos == sg.WIN_CLOSED:
         break
-      if eventos == "Continuar" and valores['mProntos'] == True:
+      if eventos == "Modelos Prontos":
         jOperacao.hide()
         jProntos=janela_Prontos() 
-      if eventos == "Continuar" and valores['inserirP'] == True:
+      if eventos == "Inserir Planilha":
         jOperacao.hide()
         jInserir=janela_inserir()
-      if eventos == "Continuar" and valores['extraird'] == True:
+      if eventos == "Extrair Config":
         jOperacao.hide()
-        jExtrair=janela_extrair()   
+        jExtrair=janela_extrair() 
+      if eventos =='Backup':
+         jOperacao.hide()
+         JBackup=janela_backup()
     if window == jInserir:
       if eventos == sg.WIN_CLOSED:
         break
@@ -339,4 +351,12 @@ while True:
         jExtrair.hide()
       if eventos == "Gerar":
          extrair_config(user,senha,porta,tBanco,valores['numeroPlanilha'])
-
+    if window == JBackup:
+      if eventos == sg.WIN_CLOSED:
+        break
+      if eventos == "Voltar":
+        jOperacao.un_hide()
+        JBackup.hide()
+      if eventos == "Gerar Backup":
+         db.backup(user,senha,porta,tBanco,valores['cliente'])
+         sg.popup('Backup Feito com Sucesso !!')

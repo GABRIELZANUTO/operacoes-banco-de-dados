@@ -1,5 +1,6 @@
 import mysql.connector
 from distutils.log import ERROR
+import subprocess
 
 #Função de conexão com o bacno
 def getConection(user, senha, porta, tBanco):
@@ -70,11 +71,22 @@ def selectHemcompleto(select_string, user,senha,porta, tBanco):
 
 #teste de conexão para login no banco
 def testeConexão(valores,tBanco):
+    conn = getConection(
+      valores['user'],
+      valores['senha'],
+      valores['porta'],
+      tBanco
+    )
+  
+def backup(user,senha,porta,tBanco,cliente):
   conn = getConection(
-    valores['user'],
-    valores['senha'],
-    valores['porta'],
+    user,
+    senha,
+    porta,
     tBanco
   )
-     
+  filename=f"{cliente}_ConfigIncial.sql"
+  with open(filename, "w") as backup_file:
+    subprocess.Popen(f"mysqldump -u{conn.user} -p{conn._password} -P{conn._port} {conn.database}", stdout=backup_file, shell=True).wait()
+  conn.close()
   
