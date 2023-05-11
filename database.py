@@ -1,6 +1,25 @@
 import mysql.connector
 from distutils.log import ERROR
-import subprocess
+import decimal
+import datetime
+
+#função para formatar possiveis retronos da query que o SQL nos desvolve, como None,Decimal e Datetime
+def formatacao(insert):
+    insert = insert
+    traducao =[]
+    for i in range(len(insert)):
+        if insert[i] is None:
+            insert[i] = "NULL"
+    for result in insert:
+        if isinstance(result, datetime.datetime):
+            result = result.strftime("%Y-%m-%d %H:%M:%S")
+            traducao.append(result)
+        elif isinstance(result,decimal.Decimal):
+            result = float(result)
+            traducao.append(result)
+        else:
+            traducao.append(result)
+    return traducao
 
 #Função de conexão com o bacno
 def getConection(user, senha, porta, tBanco):
@@ -10,7 +29,8 @@ def getConection(user, senha, porta, tBanco):
     passwd = str(senha),
     port = str(porta),
     database = "equipamento",
-    charset = tBanco)
+    charset = tBanco
+    )
 
 #Função de Inserção no banco
 def insertToDatabase(insert_string, data, user,senha,porta, tBanco):
@@ -70,23 +90,46 @@ def selectHemcompleto(select_string, user,senha,porta, tBanco):
           conn.close()
 
 #teste de conexão para login no banco
-def testeConexão(valores,tBanco):
+def testeconexao(valores,tBanco):
     conn = getConection(
       valores['user'],
       valores['senha'],
       valores['porta'],
       tBanco
     )
-  
+
 def backup(user,senha,porta,tBanco,cliente):
-  conn = getConection(
+    conn = getConection(
     user,
     senha,
     porta,
     tBanco
   )
-  filename=f"{cliente}_ConfigIncial.sql"
-  with open(filename, "w") as backup_file:
-    subprocess.Popen(f"mysqldump -u{conn.user} -p{conn._password} -P{conn._port} {conn.database}", stdout=backup_file, shell=True).wait()
-  conn.close()
-  
+    cursor = conn.cursor()
+    try:
+      cursor.execute("SHOW TABLES")
+      retorno = cursor.fetchall()
+      tables = len(retorno)
+      with open(f'Bakcup_{cliente}.sql','w',encoding="utf-8") as f:
+          f.write("USE equipamento;\n")
+          for i in range(tables):
+              table = str(retorno[i])
+              table = table.replace("(", "").replace(")", "").replace("'", "")
+              table2 = table.replace(",", "")
+              cursor.execute(f"SHOW CREATE TABLE {table2}")
+              create= cursor.fetchone()
+              cursor.execute(f"SELECT * FROM {table2}")
+              insert= cursor.fetchall()
+              create2 = create[1]
+              f.write(f"DROP TABLE IF EXISTS `{table2}`;\n")
+              f.write(f"{create2};\n")
+              for i in range(len(insert)):
+                  formatado = formatacao(list(insert[i]))
+                  formatado2 = str(formatado)
+                  formatado2 = formatado2.replace("[","(").replace("]",")").replace("'NULL'","NULL")
+                  f.write(f"INSERT INTO {table2} VALUES {formatado2};\n")
+    except ERROR as erro:
+      print("Falha: {}".format(erro))
+    finally:
+      if (conn.is_connected()):
+          conn.close()

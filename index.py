@@ -7,8 +7,9 @@ import xlrd
 from distutils.log import ERROR
 import database as db
 import pandas as pd
+import datetime
 
-#--------------------------------------------------------------------------------Back-End------------------------------------------------------
+#--------------------------------------------------------------------------------Back-End-----------------------------------------------------------------------------------------------------
 
 #script de Gasometria
 def inserir_Gav(valores,user,senha,porta,tipo_conexao):
@@ -187,6 +188,7 @@ def Ler_Planilha():
         lista.append(tuple(folha.row_values(i)))
     return lista
 
+#Função para gerar planilha com os exames
 def extrair_config(user,senha,porta, tipo_conexao,planilha):
   #Select nas colunas do menmônico e nome do exame com INNER JOIN na coluna da variavel do LIS
 
@@ -218,11 +220,22 @@ def extrair_config(user,senha,porta, tipo_conexao,planilha):
   dados= pd.DataFrame.from_dict(dic, orient='index')
   dados = dados.transpose()
   dados.to_excel("dados_interface="+str(planilha)+".xlsx",index=False)
-
   return sg.popup('Gerado com Sucesso!!!!')
-  
 
-#--------------------------------------------------------------------------Fronte End---------------------------------------------------------------------------------------------------------
+def formatacao(insert):
+    insert = insert
+    traducao =[]
+    for i in range(len(insert)):
+        if insert[i] is None:
+            insert[i] = "NULL"
+    for result in insert:
+        if isinstance(result, datetime.datetime):
+            result = result.strftime("%Y-%m-%d %H:%M:%S")
+            traducao.append(result)
+        else:
+            traducao.append(result)
+    return traducao
+#--------------------------------------------------------------------------Front End---------------------------------------------------------------------------------------------------------
 
 def janela_Conectar():
     sg.theme('DarkGrey12')
@@ -295,7 +308,7 @@ while True:
       if eventos == 'Conectar':
           try:
             tBanco = "utf8"
-            db.testeConexão(valores,tBanco)
+            db.testeconexao(valores,tBanco)
             user = valores['user']
             senha = valores['senha']
             porta = valores['porta']
