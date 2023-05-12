@@ -22,9 +22,9 @@ def formatacao(insert):
     return traducao
 
 #Função de conexão com o bacno
-def getConection(user, senha, porta, tBanco):
+def getConection(host,user, senha, porta, tBanco):
   return mysql.connector.connect(
-    host="localhost",
+    host=str(host),
     user=str(user),
     passwd = str(senha),
     port = str(porta),
@@ -33,8 +33,9 @@ def getConection(user, senha, porta, tBanco):
     )
 
 #Função de Inserção no banco
-def insertToDatabase(insert_string, data, user,senha,porta, tBanco):
+def insertToDatabase(insert_string, data,host,user,senha,porta, tBanco):
   conn = getConection(
+    host,
     user,
     senha,
     porta,
@@ -51,8 +52,9 @@ def insertToDatabase(insert_string, data, user,senha,porta, tBanco):
           conn.close()
 
 #Função adaptavel de SELECT no banco
-def selectToDatabase(select_string,user,senha,porta, tBanco , quantidade = 'one'):
+def selectToDatabase(select_string,host,user,senha,porta, tBanco , quantidade = 'one'):
   conn = getConection(
+    host,
     user,
     senha,
     porta,
@@ -72,8 +74,9 @@ def selectToDatabase(select_string,user,senha,porta, tBanco , quantidade = 'one'
           conn.close()
 
 #Função específica para SELECT quando usam a opção HEMCOMPLETO dos scripts prontos
-def selectHemcompleto(select_string, user,senha,porta, tBanco):
+def selectHemcompleto(select_string,host,user,senha,porta, tBanco):
   conn = getConection(
+    host,
     user,
     senha,
     porta,
@@ -92,14 +95,16 @@ def selectHemcompleto(select_string, user,senha,porta, tBanco):
 #teste de conexão para login no banco
 def testeconexao(valores,tBanco):
     conn = getConection(
+      valores['host'],
       valores['user'],
       valores['senha'],
       valores['porta'],
       tBanco
     )
 
-def backup(user,senha,porta,tBanco,cliente):
+def backup(host,user,senha,porta,tBanco,cliente):
     conn = getConection(
+    host,
     user,
     senha,
     porta,
@@ -110,7 +115,7 @@ def backup(user,senha,porta,tBanco,cliente):
       cursor.execute("SHOW TABLES")
       retorno = cursor.fetchall()
       tables = len(retorno)
-      with open(f'Bakcup_{cliente}.sql','w',encoding="utf-8") as f:
+      with open(f'{cliente}.ulb','w',encoding="utf-8") as f:
           f.write("USE equipamento;\n")
           for i in range(tables):
               table = str(retorno[i])
@@ -118,16 +123,22 @@ def backup(user,senha,porta,tBanco,cliente):
               table2 = table.replace(",", "")
               cursor.execute(f"SHOW CREATE TABLE {table2}")
               create= cursor.fetchone()
-              cursor.execute(f"SELECT * FROM {table2}")
-              insert= cursor.fetchall()
+              if table2 == "ie_amostra" or table2 == "ie_amostra_hist" or table2 =="ie_amostra_resu":
+                pass     
+              else:    
+                cursor.execute(f"SELECT * FROM {table2}")
+                insert= cursor.fetchall()
               create2 = create[1]
               f.write(f"DROP TABLE IF EXISTS `{table2}`;\n")
               f.write(f"{create2};\n")
-              for i in range(len(insert)):
-                  formatado = formatacao(list(insert[i]))
-                  formatado2 = str(formatado)
-                  formatado2 = formatado2.replace("[","(").replace("]",")").replace("'NULL'","NULL")
-                  f.write(f"INSERT INTO {table2} VALUES {formatado2};\n")
+              if table2 == "ie_amostra" or table2 == "ie_amostra_hist" or table2 =="ie_amostra_resu":
+                pass
+              else:
+                for i in range(len(insert)):
+                    formatado = formatacao(list(insert[i]))
+                    formatado2 = str(formatado)
+                    formatado2 = formatado2.replace("[","(").replace("]",")").replace("'NULL'","NULL")
+                    f.write(f"INSERT INTO {table2} VALUES {formatado2};\n")
     except ERROR as erro:
       print("Falha: {}".format(erro))
     finally:
