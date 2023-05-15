@@ -28,7 +28,7 @@ def getConection(host,user, senha, porta, tBanco):
     user=str(user),
     passwd = str(senha),
     port = str(porta),
-    database = "teste",
+    database = "equipamento",
     charset = tBanco
     )
 
@@ -188,9 +188,16 @@ def inserirum_exame(host,user,senha,porta,tBanco,exame,interface_antiga,interfac
     nova_lista.append(list(i_lista))
   ie = list(ie_exam)
   ie = formatacao(ie)
+  print(f"INSERT INTO ie_exam(NIDIFACE,CEXAMEQUIEXAM,CEXAMLISEXAM,CDESCEXAM,EDESMEMBRADOEXAM,CPARAMETROSEXAM,CDIFFROUNDEXAM,TINC,NINDEXEXAM) values({interface_nova},'{ie[1]}','{ie[2]}','{ie[3]}','{ie[4]}',{ie[5]},'{ie[6]}',now(),{nindexexam})")
+  validador_parametro = len(ie[5])
   try:
-    cur.execute(f"INSERT INTO ie_exam(NIDIFACE,CEXAMEQUIEXAM,CEXAMLISEXAM,CDESCEXAM,EDESMEMBRADOEXAM,CPARAMETROSEXAM,CDIFFROUNDEXAM,TINC,NINDEXEXAM) values({interface_nova},'{ie[1]}','{ie[2]}','{ie[3]}','{ie[4]}',{ie[5]},'{ie[6]}',now(),{nindexexam})")
-    conn.commit()
+    if validador_parametro <=4:
+      print(f"passou por aqui {validador_parametro}")
+      cur.execute(f"INSERT INTO ie_exam(NIDIFACE,CEXAMEQUIEXAM,CEXAMLISEXAM,CDESCEXAM,EDESMEMBRADOEXAM,CPARAMETROSEXAM,CDIFFROUNDEXAM,TINC,NINDEXEXAM) values({interface_nova},'{ie[1]}','{ie[2]}','{ie[3]}','{ie[4]}',{ie[5]},'{ie[6]}',now(),{nindexexam})")
+      conn.commit()
+    else:
+      cur.execute(f"INSERT INTO ie_exam(NIDIFACE,CEXAMEQUIEXAM,CEXAMLISEXAM,CDESCEXAM,EDESMEMBRADOEXAM,CPARAMETROSEXAM,CDIFFROUNDEXAM,TINC,NINDEXEXAM) values({interface_nova},'{ie[1]}','{ie[2]}','{ie[3]}','{ie[4]}','{ie[5]}','{ie[6]}',now(),{nindexexam})")
+      conn.commit()     
   except ERROR as error:
      print(error)
   cur.execute("SELECT MAX(NIDEXAM) FROM ie_exam ")
