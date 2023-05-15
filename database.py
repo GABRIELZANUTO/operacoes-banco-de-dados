@@ -144,3 +144,52 @@ def backup(host,user,senha,porta,tBanco,cliente):
     finally:
       if (conn.is_connected()):
           conn.close()
+
+
+def inserirum_exame(host,user,senha,porta,tBanco,exame,interface_antiga,interface_nova):
+  exame = str(exame)
+  interface_antiga = int(interface_antiga)
+  interface_nova = int(interface_nova)
+  conn = getConection(
+    host,
+    user,
+    senha,
+    porta,
+    tBanco
+  )
+  cur = conn.cursor()
+  cur.execute(f"SELECT NIDEXAM,CEXAMEQUIEXAM,CEXAMLISEXAM,CDESCEXAM,EDESMEMBRADOEXAM,CPARAMETROSEXAM,CDIFFROUNDEXAM FROM ie_exam WHERE CEXAMLISEXAM ='{exame}' AND NIDIFACE={interface_antiga}" )
+  ie_exam =cur.fetchone()
+  cur.execute(f'SELECT MAX(NINDEXEXAM) FROM ie_exam WHERE NIDIFACE ={interface_antiga}')
+  nindexexam =cur.fetchone()
+  nindexexam = int(nindexexam[0]+1)
+  nidiface =ie_exam[0]
+  cur.execute(f"SELECT CNOMEEQUIVAR,CNOMELISVAR,NORDEMVAR,CFATORVAR,CEXAMEQUIVAR,NMINIMOVAR,NINFERIORVAR,NSUPERIORVAR,NMAXIMOVAR,CDECIMAISVAR from ie_var WHERE NIDEXAM={nidiface}")
+  ie_var = cur.fetchall()
+  nova_lista = []
+  for i in ie_var:
+    i_lista = []
+    for j in range(len(i)):
+      if i[j] is None:
+        i_lista.append("NULL")
+      else:
+        i_lista.append(i[j])
+    nova_lista.append(list(i_lista))
+  ie = list(ie_exam)
+  print(ie_exam)
+  print(f"INSERT INTO ie_exam(NIDIFACE,CEXAMEQUIEXAM,CEXAMLISEXAM,CDESCEXAM,EDESMEMBRADOEXAM,CPARAMETROSEXAM,CDIFFROUNDEXAM,TINC,NINDEXEXAM) values({interface_nova},'{ie[1]}','{ie[2]}','{ie[3]}','{ie[4]}',{ie[5]},'{ie[6]}',now(),{nindexexam})")
+  try:
+    cur.execute(f"INSERT INTO ie_exam(NIDIFACE,CEXAMEQUIEXAM,CEXAMLISEXAM,CDESCEXAM,EDESMEMBRADOEXAM,CPARAMETROSEXAM,CDIFFROUNDEXAM,TINC,NINDEXEXAM) values({interface_nova},'{ie[1]}','{ie[2]}','{ie[3]}','{ie[4]}',{ie[5]},'{ie[6]}',now(),{nindexexam})")
+    conn.commit()
+  except ERROR as error:
+     print(error)
+  cur.execute("SELECT MAX(NIDEXAM) FROM ie_exam ")
+  nidexam = cur.fetchone()
+  for item in nova_lista:
+    insert = str(i)
+    insert = insert.replace("'NULL'","NULL").replace("[","(").replace("]",")").replace("(","").replace(")","")
+    try:
+      cur.execute(f"INSERT into ie_var(CNOMEEQUIVAR,CNOMELISVAR,NORDEMVAR,CFATORVAR,CEXAMEQUIVAR,NMINIMOVAR,NINFERIORVAR,NSUPERIORVAR,NMAXIMOVAR,CDECIMAISVAR,NIDEXAM,TINC) VALUES({insert},{nidexam[0]},now())")
+      conn.commit()
+    except ERROR as error:
+      print(error)

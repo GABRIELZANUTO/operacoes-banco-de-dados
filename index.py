@@ -274,7 +274,8 @@ def janela_Operacao():
     [sg.Button('Modelos Prontos',size=(15,1)),
       sg.Button('Inserir Planilha',size=(15,1))],
     [sg.Button('Extrair Config',size=(15,1)),
-     sg.Button('Backup',size=(15,1))]
+     sg.Button('Backup',size=(15,1))],
+    [sg.Button('Copiar um Exame',size=(15,1))]
     ]
     return sg.Window('Decisão', layout1,finalize=True)
 
@@ -304,7 +305,16 @@ def janela_backup():
     ]
     return sg.Window('Backup', layout6,finalize=True)
 
-jConexao,jOperacao,jProntos,jInserir,jExtrair,JBackup = janela_Conectar(),None,None,None,None,None
+def janela_umexame():
+    sg.theme('DarkGrey12')
+    layout7= [
+    [sg.Text('Menmonico do exame', size=15,font='Helvetica'),sg.Input(key='mnemonico',size =(10,1))],
+    [sg.Text('Id da interface original', size=15,font='Helvetica'),sg.Input(key='interfaceoriginal',size =(10,1))],
+    [sg.Text('Id da interface destino', size=15,font='Helvetica'),sg.Input(key='interfacedestino',size =(10,1))],
+    [sg.Button('Copiar',size=(10,1),button_color='green'), sg.Button('Voltar',size=(10,1),button_color='red') ]
+    ]
+    return sg.Window('Copiar exame', layout7,finalize=True)
+jConexao,jOperacao,jProntos,jInserir,jExtrair,JBackup,Jumexame = janela_Conectar(),None,None,None,None,None,None
 while True:
     window,eventos,valores = sg.read_all_windows()
     if window == jConexao:
@@ -341,6 +351,9 @@ while True:
       if eventos =='Backup':
          jOperacao.hide()
          JBackup=janela_backup()
+      if eventos == 'Copiar um Exame':
+         jOperacao.hide()
+         Jumexame = janela_umexame()
     if window == jInserir:
       if eventos == sg.WIN_CLOSED:
         break
@@ -379,3 +392,12 @@ while True:
       if eventos == "Gerar Backup":
          db.backup(host,user,senha,porta,tBanco,valores['cliente'])
          sg.popup('Backup Feito com Sucesso !!')
+    if window == Jumexame:
+      if eventos == sg.WIN_CLOSED:
+        break
+      if eventos == "Voltar":
+         jOperacao.un_hide()
+         Jumexame.hide()
+      if eventos == "Copiar":
+         db.inserirum_exame(host,user,senha,porta,tBanco,valores['mnemonico'],valores['interfaceoriginal'],valores['interfacedestino'])
+         sg.popup("Exame Copiado com sucesso !!!")  
