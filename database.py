@@ -170,7 +170,7 @@ def inserirum_exame(host,user,senha,porta,tBanco,exame,interface_antiga,interfac
   cur = conn.cursor()
   cur.execute(f"SELECT NIDEXAM,CEXAMEQUIEXAM,CEXAMLISEXAM,CDESCEXAM,EDESMEMBRADOEXAM,CPARAMETROSEXAM,CDIFFROUNDEXAM FROM ie_exam WHERE CEXAMLISEXAM ='{exame}' AND NIDIFACE={interface_antiga}" )
   ie_exam =cur.fetchone()
-  cur.execute(f'SELECT MAX(NINDEXEXAM) FROM ie_exam WHERE NIDIFACE ={interface_antiga}')
+  cur.execute(f'SELECT MAX(NINDEXEXAM) FROM ie_exam WHERE NIDIFACE ={interface_nova}')
   nindexexam =cur.fetchone()
   nindexexam = int(nindexexam[0]+1)
   nidiface =ie_exam[0]
@@ -183,13 +183,16 @@ def inserirum_exame(host,user,senha,porta,tBanco,exame,interface_antiga,interfac
     for j in range(len(i)):
       if i[j] is None:
         i_lista.append("NULL")
+      elif isinstance(i[j],decimal.Decimal):
+            t = float(i[j])
+            i_lista.append(t)
       else:
         i_lista.append(i[j])
     nova_lista.append(list(i_lista))
   ie = list(ie_exam)
   ie = formatacao(ie)
-  print(f"INSERT INTO ie_exam(NIDIFACE,CEXAMEQUIEXAM,CEXAMLISEXAM,CDESCEXAM,EDESMEMBRADOEXAM,CPARAMETROSEXAM,CDIFFROUNDEXAM,TINC,NINDEXEXAM) values({interface_nova},'{ie[1]}','{ie[2]}','{ie[3]}','{ie[4]}',{ie[5]},'{ie[6]}',now(),{nindexexam})")
-  validador_parametro = len(ie[5])
+  print(f"INSERT INTO ie_exam(NIDIFACE,CEXAMEQUIEXAM,CEXAMLISEXAM,CDESCEXAM,EDESMEMBRADOEXAM,CPARAMETROSEXAM,CDIFFROUNDEXAM,TINC,NINDEXEXAM) values({interface_nova},'{ie[1]}','{ie[2]}','{ie[3]}','{ie[4]}','{ie[5]}','{ie[6]}',now(),{nindexexam})")
+  validador_parametro = len(ie[6])
   try:
     if validador_parametro <=4:
       print(f"passou por aqui {validador_parametro}")
@@ -205,6 +208,7 @@ def inserirum_exame(host,user,senha,porta,tBanco,exame,interface_antiga,interfac
   for item in nova_lista:
     insert = str(item)
     insert = insert.replace("'NULL'","NULL").replace("[","(").replace("]",")").replace("(","").replace(")","")
+    print(insert)
     try:
       cur.execute(f"INSERT into ie_var(CNOMEEQUIVAR,CNOMELISVAR,NORDEMVAR,CFATORVAR,CEXAMEQUIVAR,NMINIMOVAR,NINFERIORVAR,NSUPERIORVAR,NMAXIMOVAR,CDECIMAISVAR,NIDEXAM,TINC) VALUES({insert},{nidexam[0]},now())")
       conn.commit()
