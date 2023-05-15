@@ -191,11 +191,9 @@ def inserirum_exame(host,user,senha,porta,tBanco,exame,interface_antiga,interfac
     nova_lista.append(list(i_lista))
   ie = list(ie_exam)
   ie = formatacao(ie)
-  print(f"INSERT INTO ie_exam(NIDIFACE,CEXAMEQUIEXAM,CEXAMLISEXAM,CDESCEXAM,EDESMEMBRADOEXAM,CPARAMETROSEXAM,CDIFFROUNDEXAM,TINC,NINDEXEXAM) values({interface_nova},'{ie[1]}','{ie[2]}','{ie[3]}','{ie[4]}','{ie[5]}','{ie[6]}',now(),{nindexexam})")
   validador_parametro = len(ie[6])
   try:
     if validador_parametro <=4:
-      print(f"passou por aqui {validador_parametro}")
       cur.execute(f"INSERT INTO ie_exam(NIDIFACE,CEXAMEQUIEXAM,CEXAMLISEXAM,CDESCEXAM,EDESMEMBRADOEXAM,CPARAMETROSEXAM,CDIFFROUNDEXAM,TINC,NINDEXEXAM) values({interface_nova},'{ie[1]}','{ie[2]}','{ie[3]}','{ie[4]}',{ie[5]},'{ie[6]}',now(),{nindexexam})")
       conn.commit()
     else:
@@ -208,7 +206,6 @@ def inserirum_exame(host,user,senha,porta,tBanco,exame,interface_antiga,interfac
   for item in nova_lista:
     insert = str(item)
     insert = insert.replace("'NULL'","NULL").replace("[","(").replace("]",")").replace("(","").replace(")","")
-    print(insert)
     try:
       cur.execute(f"INSERT into ie_var(CNOMEEQUIVAR,CNOMELISVAR,NORDEMVAR,CFATORVAR,CEXAMEQUIVAR,NMINIMOVAR,NINFERIORVAR,NSUPERIORVAR,NMAXIMOVAR,CDECIMAISVAR,NIDEXAM,TINC) VALUES({insert},{nidexam[0]},now())")
       conn.commit()
