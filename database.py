@@ -28,7 +28,7 @@ def getConection(host,user, senha, porta, tBanco):
     user=str(user),
     passwd = str(senha),
     port = str(porta),
-    database = "equipamento",
+    database = "teste",
     charset = tBanco
     )
 
@@ -116,6 +116,16 @@ def backup(host,user,senha,porta,tBanco,cliente):
       retorno = cursor.fetchall()
       tables = len(retorno)
       with open(f'{cliente}.ulb','w',encoding="utf-8") as f:
+          f.write("/*!40101 SET @OLD_CHARACTER_SET_CLIENT=@@CHARACTER_SET_CLIENT */;\n")
+          f.write("/*!40101 SET NAMES utf8 */;\n")
+          f.write("/*!50503 SET NAMES utf8mb4 */;\n")
+          f.write("/*!40103 SET @OLD_TIME_ZONE=@@TIME_ZONE */;\n")
+          f.write("/*!40103 SET TIME_ZONE='+00:00' */;\n")
+          f.write("/*!40014 SET @OLD_FOREIGN_KEY_CHECKS=@@FOREIGN_KEY_CHECKS, FOREIGN_KEY_CHECKS=0 */;\n")
+          f.write("/*!40101 SET @OLD_SQL_MODE=@@SQL_MODE, SQL_MODE='NO_AUTO_VALUE_ON_ZERO' */;\n")
+          f.write("/*!40111 SET @OLD_SQL_NOTES=@@SQL_NOTES, SQL_NOTES=0 */;\n")
+          f.write("\n")
+          f.write("\n")
           f.write("USE equipamento;\n")
           for i in range(tables):
               table = str(retorno[i])
@@ -166,7 +176,7 @@ def inserirum_exame(host,user,senha,porta,tBanco,exame,interface_antiga,interfac
   nidiface =ie_exam[0]
   cur.execute(f"SELECT CNOMEEQUIVAR,CNOMELISVAR,NORDEMVAR,CFATORVAR,CEXAMEQUIVAR,NMINIMOVAR,NINFERIORVAR,NSUPERIORVAR,NMAXIMOVAR,CDECIMAISVAR from ie_var WHERE NIDEXAM={nidiface}")
   ie_var = cur.fetchall()
-  #Formatação do retorno da Select do Ie_var, no retorno vem uma lista de tuplas, essa função acessa o valor verifica se é None, se for ele modifica pra Null para fazermos o Insert depois
+  #Formatação do retorno da Select do Ie_var, no retorno vem uma lista de tuplas, essa função acessa o valor verifica se é None, se for ele modifica pra Null para fazermos o Insert  posteriormente
   nova_lista = []
   for i in ie_var:
     i_lista = []
