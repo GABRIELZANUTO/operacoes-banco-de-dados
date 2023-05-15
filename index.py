@@ -308,9 +308,9 @@ def janela_backup():
 def janela_umexame():
     sg.theme('DarkGrey12')
     layout7= [
-    [sg.Text('Menmonico do exame', size=15,font='Helvetica'),sg.Input(key='mnemonico',size =(10,1))],
-    [sg.Text('Id da interface original', size=15,font='Helvetica'),sg.Input(key='interfaceoriginal',size =(10,1))],
-    [sg.Text('Id da interface destino', size=15,font='Helvetica'),sg.Input(key='interfacedestino',size =(10,1))],
+    [sg.Text('Mnemonico do exame', size=20,font='Helvetica'),sg.Input(key='mnemonico',size =(10,1))],
+    [sg.Text('Id da interface original', size=20,font='Helvetica'),sg.Input(key='interfaceoriginal',size =(10,1))],
+    [sg.Text('Id da interface destino', size=20,font='Helvetica'),sg.Input(key='interfacedestino',size =(10,1))],
     [sg.Button('Copiar',size=(10,1),button_color='green'), sg.Button('Voltar',size=(10,1),button_color='red') ]
     ]
     return sg.Window('Copiar exame', layout7,finalize=True)

@@ -101,7 +101,7 @@ def testeconexao(valores,tBanco):
       valores['porta'],
       tBanco
     )
-
+#Função de backup imitando o comando mysqldump
 def backup(host,user,senha,porta,tBanco,cliente):
     conn = getConection(
     host,
@@ -145,7 +145,7 @@ def backup(host,user,senha,porta,tBanco,cliente):
       if (conn.is_connected()):
           conn.close()
 
-
+#Função para copiar um exame de uma interface e mandar pra outra
 def inserirum_exame(host,user,senha,porta,tBanco,exame,interface_antiga,interface_nova):
   exame = str(exame)
   interface_antiga = int(interface_antiga)
@@ -166,6 +166,7 @@ def inserirum_exame(host,user,senha,porta,tBanco,exame,interface_antiga,interfac
   nidiface =ie_exam[0]
   cur.execute(f"SELECT CNOMEEQUIVAR,CNOMELISVAR,NORDEMVAR,CFATORVAR,CEXAMEQUIVAR,NMINIMOVAR,NINFERIORVAR,NSUPERIORVAR,NMAXIMOVAR,CDECIMAISVAR from ie_var WHERE NIDEXAM={nidiface}")
   ie_var = cur.fetchall()
+  #Formatação do retorno da Select do Ie_var, no retorno vem uma lista de tuplas, essa função acessa o valor verifica se é None, se for ele modifica pra Null para fazermos o Insert depois
   nova_lista = []
   for i in ie_var:
     i_lista = []
@@ -176,8 +177,7 @@ def inserirum_exame(host,user,senha,porta,tBanco,exame,interface_antiga,interfac
         i_lista.append(i[j])
     nova_lista.append(list(i_lista))
   ie = list(ie_exam)
-  print(ie_exam)
-  print(f"INSERT INTO ie_exam(NIDIFACE,CEXAMEQUIEXAM,CEXAMLISEXAM,CDESCEXAM,EDESMEMBRADOEXAM,CPARAMETROSEXAM,CDIFFROUNDEXAM,TINC,NINDEXEXAM) values({interface_nova},'{ie[1]}','{ie[2]}','{ie[3]}','{ie[4]}',{ie[5]},'{ie[6]}',now(),{nindexexam})")
+  ie = formatacao(ie)
   try:
     cur.execute(f"INSERT INTO ie_exam(NIDIFACE,CEXAMEQUIEXAM,CEXAMLISEXAM,CDESCEXAM,EDESMEMBRADOEXAM,CPARAMETROSEXAM,CDIFFROUNDEXAM,TINC,NINDEXEXAM) values({interface_nova},'{ie[1]}','{ie[2]}','{ie[3]}','{ie[4]}',{ie[5]},'{ie[6]}',now(),{nindexexam})")
     conn.commit()
@@ -186,7 +186,7 @@ def inserirum_exame(host,user,senha,porta,tBanco,exame,interface_antiga,interfac
   cur.execute("SELECT MAX(NIDEXAM) FROM ie_exam ")
   nidexam = cur.fetchone()
   for item in nova_lista:
-    insert = str(i)
+    insert = str(item)
     insert = insert.replace("'NULL'","NULL").replace("[","(").replace("]",")").replace("(","").replace(")","")
     try:
       cur.execute(f"INSERT into ie_var(CNOMEEQUIVAR,CNOMELISVAR,NORDEMVAR,CFATORVAR,CEXAMEQUIVAR,NMINIMOVAR,NINFERIORVAR,NSUPERIORVAR,NMAXIMOVAR,CDECIMAISVAR,NIDEXAM,TINC) VALUES({insert},{nidexam[0]},now())")
