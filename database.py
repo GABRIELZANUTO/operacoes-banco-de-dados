@@ -193,7 +193,7 @@ def inserirum_exame(host,user,senha,porta,tBanco,exame,interface_antiga,interfac
   ie = formatacao(ie)
   validador_parametro = len(ie[6])
   try:
-    if validador_parametro <=4:
+    if validador_parametro == 4:
       cur.execute(f"INSERT INTO ie_exam(NIDIFACE,CEXAMEQUIEXAM,CEXAMLISEXAM,CDESCEXAM,EDESMEMBRADOEXAM,CPARAMETROSEXAM,CDIFFROUNDEXAM,TINC,NINDEXEXAM) values({interface_nova},'{ie[1]}','{ie[2]}','{ie[3]}','{ie[4]}',{ie[5]},'{ie[6]}',now(),{nindexexam})")
       conn.commit()
     else:
