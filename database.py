@@ -4,16 +4,10 @@ from distutils.log import ERROR
 import decimal
 import datetime
 
-host ="localhost"
-user = "UNIWARE"
-passwd = "DBUCFGS"
-port = 3309
-exame = "URIG"
-interface_antiga = 1
-interface_nova = 2
 ie_exam = c_ie_exam()
 ie_var = c_ie_var()
 
+#Função para formatar os dados que o python não reconhece nativamente que vem na Select
 def formatacao(insert):
   insert = insert
   traducao =[]
@@ -31,6 +25,7 @@ def formatacao(insert):
           traducao.append(result)
   return traducao
 
+#Função de conexão do banco
 def getConection(host,user, senha, porta):
   return mysql.connector.connect(
     host=str(host),
@@ -41,6 +36,7 @@ def getConection(host,user, senha, porta):
     charset = 'utf8'
     )
 
+#Função Backend para inserir os dados da planilha no banco ie_exam e ie_var
 def insert_planilha(host,user,passwd,port,nidiface,conteudo):
   conn =getConection(host,user,passwd,port)
   conn.autocommit = False
@@ -61,7 +57,8 @@ def insert_planilha(host,user,passwd,port,nidiface,conteudo):
   finally:
     cur.close()
     conn.close()
-  
+
+#Função de inserir scripts prontos que estão no código, como HEM e GASOV
 def insert_modelpronto(host,user,passwd,port,nidiface,conteudo_ieexam,conteudo_ievar):
   conn =getConection(host,user,passwd,port)
   conn.autocommit = False
@@ -83,6 +80,7 @@ def insert_modelpronto(host,user,passwd,port,nidiface,conteudo_ieexam,conteudo_i
     cur.close()
     conn.close()
 
+#Função de select para otimizar as querys
 def select_database(host,user,passwd,port,comando,modo="ONE"):
   conn =getConection(host,user,passwd,port)
   conn.autocommit = False
@@ -93,7 +91,8 @@ def select_database(host,user,passwd,port,comando,modo="ONE"):
   else:
     cur.execute(comando)
     return cur.fetchall()
-  
+
+#Função para montar o arquivo .ulb de backup
 def backup(host,user,senha,porta,cliente):
   conn = getConection(host,user,senha,porta)
   cursor = conn.cursor()
@@ -161,15 +160,14 @@ def backup(host,user,senha,porta,cliente):
     if (conn.is_connected()):
         conn.close()
 
+#Função para copiar um exame de uma interface para outra
 def inserirum_exame(host,user,passwd,port,exame,interface_antiga,interface_nova):
-
   exame = str(exame)
   interface_antiga = int(interface_antiga)
   interface_nova = int(interface_nova)
   comando_ieexam = f"SELECT NIDEXAM,CEXAMEQUIEXAM,CEXAMLISEXAM,CDESCEXAM,EDESMEMBRADOEXAM,CPARAMETROSEXAM,CDIFFROUNDEXAM FROM ie_exam WHERE CEXAMLISEXAM ='{exame}' AND NIDIFACE={interface_antiga}" 
   comando_nindexam = f'SELECT MAX(NINDEXEXAM) FROM ie_exam WHERE NIDIFACE ={interface_nova}'
   comando_nidexam = f"SELECT MAX(NIDEXAM) FROM ie_exam"
-
   conn = getConection(host,user,passwd,port)
   cur = conn.cursor()
   ie_exam_retorno = list(select_database(host,user,passwd,port,comando_ieexam))

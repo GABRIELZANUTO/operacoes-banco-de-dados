@@ -3,6 +3,7 @@ from PySimpleGUI import PySimpleGUI as sg
 import database as db
 from distutils.log import ERROR
 
+# -----------------------------------------------------------------------------BackEnd--------------------------------------------------------------------------------------------------
 def inserir_planilha(host,user,passwd,port,nidiface):
     dataframe = pd.read_excel("Exames.xls")
     lista = dataframe.values.tolist()
@@ -40,6 +41,7 @@ def extrair_config(host,user,passwd,port,planilha):
   dados = dados.transpose()
   dados.to_excel("dados_interface="+str(planilha)+".xlsx",index=False)
 
+# -----------------------------------------------------------------------------FrontEnd--------------------------------------------------------------------------------------------------
 def janela_Conectar():
   sg.theme('DarkGrey12')
   layout5= [
@@ -113,6 +115,8 @@ def janela_umexame():
   return sg.Window('Copiar exame', layout7,finalize=True)
 
 jConexao,jOperacao,jProntos,jInserir,jExtrair,JBackup,Jumexame = janela_Conectar(),None,None,None,None,None,None
+
+#Inicio das operações nas telas da interface
 while True:
     window,eventos,valores = sg.read_all_windows()
     if window == jConexao:

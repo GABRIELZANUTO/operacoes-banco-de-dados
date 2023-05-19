@@ -1,5 +1,5 @@
 import decimal
-
+#Funções de validação de dados, como o pyhton não aceita todos os tipos de dados, temos que tratar se não da erro no Insert depois
 def validacao_numero(valor):
     if valor is None:
         valor = "NULL"
@@ -16,7 +16,7 @@ def validacao_caracter(valor):
         pass
     return valor
     
-
+#Representação das colunas que precisamos usar da tabela ie_exam
 class c_ie_exam:
     def __init__(self,cexamlisexam=None,cexamequiexam=None,cdescexam=None,edesmembradoexam=None,nindexam=None,cparametrosexam=None,cdiffroundexam=None,tinc=None):
 
@@ -53,7 +53,8 @@ class c_ie_exam:
             self.nindexam = validacao_numero(lista[4])
             self.cdiffroundexam = ""
             self.tinc = "now()"
-            
+
+#Representação das colunas que precisamos usar da tabela ie_var            
 class c_ie_var:
     def __init__(self,nidexam=None,cnomeequivar=None,cnomelisvar=None,nordemvar=None,cfatorvar=None,cexamequivar=None,nminimovar=None,ninferiorvar=None,nsuperiorvar=None,nmaximovar=None,cdecimaisvar=None,tinc=None):
         
@@ -90,8 +91,7 @@ class c_ie_var:
             self.nmaximovar = validacao_numero(lista[8])
             self.cdecimaisvar = validacao_caracter(lista[9])
             self.tinc = "now()"
-
-    
+            
     def __repr__(self):
         return f"{self.nidexam},{self.cnomeequivar},{self.cnomelisvar},{self.nordemvar},{self.cfatorvar},{self.tinc},{self.cexamequivar},{self.nminimovar},{self.ninferiorvar},{self.nsuperiorvar},{self.nmaximovar},{self.cdecimaisvar}"
 
