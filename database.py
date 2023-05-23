@@ -6,8 +6,9 @@ import datetime
 
 ie_exam = c_ie_exam()
 ie_var = c_ie_var()
+comando_nidexam = "SELECT MAX(NIDEXAM) FROM ie_exam"
 
-#Função para formatar os dados que o python não reconhece nativamente que vem na Select
+#Função para formatar os dados que vem na Select na função de Bakcup
 def formatacao(insert):
   insert = insert
   traducao =[]
@@ -24,7 +25,6 @@ def formatacao(insert):
       else:
           traducao.append(result)
   return traducao
-
 #Função de conexão do banco
 def getConection(host,user, senha, porta):
   return mysql.connector.connect(
@@ -35,51 +35,6 @@ def getConection(host,user, senha, porta):
     database = "equipamento",
     charset = 'utf8'
     )
-
-#Função Backend para inserir os dados da planilha no banco ie_exam e ie_var
-def insert_planilha(host,user,passwd,port,nidiface,conteudo):
-  conn =getConection(host,user,passwd,port)
-  conn.autocommit = False
-  contador = 1
-  try:
-    conn.start_transaction()
-    cur = conn.cursor()
-    for i in conteudo:
-      ie_exam.gravar_ieexam(i)
-      cur.execute(f"INSERT INTO ie_exam(NIDIFACE,CEXAMLISEXAM,CEXAMEQUIEXAM,CDESCEXAM,EDESMEMBRADOEXAM,NINDEXEXAM,TINC) VALUES({nidiface},'{ie_exam.cexamlisexam}','{ie_exam.cexamequiexam}','{ie_exam.cdescexam}','{ie_exam.edesmembradoexam}',{contador},{ie_exam.tinc})")
-      cur.execute("SELECT MAX(NIDEXAM) FROM ie_exam")
-      nidexam = cur.fetchone()
-      cur.execute(f"INSERT INTO ie_var(NIDEXAM,CNOMEEQUIVAR,CNOMELISVAR,NORDEMVAR,TINC) values({nidexam[0]},'Quantitativo','{ie_exam.cexamlisexam}',1,{ie_exam.tinc})")
-      conn.commit()
-      contador = contador+1 
-  except:
-    conn.rollback()
-  finally:
-    cur.close()
-    conn.close()
-
-#Função de inserir scripts prontos que estão no código, como HEM e GASOV
-def insert_modelpronto(host,user,passwd,port,nidiface,conteudo_ieexam,conteudo_ievar):
-  conn =getConection(host,user,passwd,port)
-  conn.autocommit = False
-  try:
-    conn.start_transaction()
-    cur = conn.cursor()
-    ie_exam.gravar_ieexam(conteudo_ieexam)
-    cur.execute(f"INSERT INTO ie_exam (NIDIFACE,CEXAMEQUIEXAM,CEXAMLISEXAM,CDESCEXAM,EDESMEMBRADOEXAM,NINDEXEXAM,CDIFFROUNDEXAM,TINC) VALUES({nidiface},'{ie_exam.cexamequiexam}','{ie_exam.cexamlisexam}','{ie_exam.cdescexam}','{ie_exam.edesmembradoexam}',{ie_exam.nindexam},'{ie_exam.cdiffroundexam}',{ie_exam.tinc})")
-    cur.execute("SELECT MAX(NIDEXAM) FROM ie_exam")
-    nidexam = cur.fetchone()
-    for indice in conteudo_ievar:
-      ie_var.gravar_ievar(indice)
-      cur.execute(f"insert into ie_var(NIDEXAM,CNOMEEQUIVAR,CNOMELISVAR,NORDEMVAR,CFATORVAR,TINC) values ({nidexam[0]},'{ie_var.cnomeequivar}','{ie_var.cnomelisvar}',{ie_var.nordemvar},'{ie_var.cfatorvar}',{ie_var.tinc})")
-      conn.commit()
-  except ERROR as error:
-    conn.rollback()
-    print(f"erro {error}")
-  finally:
-    cur.close()
-    conn.close()
-
 #Função de select para otimizar as querys
 def select_database(host,user,passwd,port,comando,modo="ONE"):
   conn =getConection(host,user,passwd,port)
@@ -91,7 +46,41 @@ def select_database(host,user,passwd,port,comando,modo="ONE"):
   else:
     cur.execute(comando)
     return cur.fetchall()
-
+#Função usada para todos os inserts
+def insert(host,user,passwd,port,comando):
+  conn = getConection(host,user,passwd,port)
+  conn.autocommit = False
+  try:
+     cur = conn.cursor()
+     cur.execute(comando)
+     conn.commit()
+  except ERROR as e:
+     conn.rollback()
+     print(e)
+  finally:
+    cur.close()
+    conn.close() 
+#Função Backend para inserir os dados da planilha no banco ie_exam e ie_var
+def insert_planilha(host,user,passwd,port,nidiface,conteudo):
+  contador = 1
+  for i in conteudo:
+    dados_ieexam =ie_exam.gravar_planilha_ieexam(i,contador,nidiface)
+    comando_ieexam = "INSERT INTO ie_exam(NIDIFACE,CEXAMLISEXAM,CEXAMEQUIEXAM,CDESCEXAM,EDESMEMBRADOEXAM,NINDEXEXAM,TINC) VALUES "+dados_ieexam
+    insert(host,user,passwd,port,comando_ieexam)
+    nidexam = select_database(host,user,passwd,port,comando_nidexam)
+    comando_ieevar = f"INSERT INTO ie_var(NIDEXAM,CNOMEEQUIVAR,CNOMELISVAR,NORDEMVAR,TINC) values({nidexam[0]},'Quantitativo','{ie_exam.cexamlisexam}',1,{ie_exam.tinc})"
+    insert(host,user,passwd,port,comando_ieevar)
+    contador=contador+1
+#Função de inserir scripts prontos que estão no código, como HEM e GASOV
+def insert_modelpronto(host,user,passwd,port,nidiface,conteudo_ieexam,conteudo_ievar):
+  dados = ie_exam.gravar_modelopronto(conteudo_ieexam,nidiface)
+  comando_ieexam = "INSERT INTO ie_exam (NIDIFACE,CEXAMEQUIEXAM,CEXAMLISEXAM,CDESCEXAM,EDESMEMBRADOEXAM,NINDEXEXAM,CDIFFROUNDEXAM,TINC) VALUES"+dados
+  insert(host,user,passwd,port,comando_ieexam)
+  nidexam = select_database(host,user,passwd,port,comando_nidexam)
+  for indice in conteudo_ievar:
+    dados = ie_var.gravar_modelopronto(indice,nidexam[0])
+    comando_ievar = "insert into ie_var(NIDEXAM,CNOMEEQUIVAR,CNOMELISVAR,NORDEMVAR,CFATORVAR,TINC) values"+dados
+    insert(host,user,passwd,port,comando_ievar)
 #Função para montar o arquivo .ulb de backup
 def backup(host,user,senha,porta,cliente):
   conn = getConection(host,user,senha,porta)
@@ -159,36 +148,26 @@ def backup(host,user,senha,porta,cliente):
   finally:
     if (conn.is_connected()):
         conn.close()
-
 #Função para copiar um exame de uma interface para outra
 def inserirum_exame(host,user,passwd,port,exame,interface_antiga,interface_nova):
-  exame = str(exame)
-  interface_antiga = int(interface_antiga)
-  interface_nova = int(interface_nova)
-  comando_ieexam = f"SELECT NIDEXAM,CEXAMEQUIEXAM,CEXAMLISEXAM,CDESCEXAM,EDESMEMBRADOEXAM,CPARAMETROSEXAM,CDIFFROUNDEXAM FROM ie_exam WHERE CEXAMLISEXAM ='{exame}' AND NIDIFACE={interface_antiga}" 
-  comando_nindexam = f'SELECT MAX(NINDEXEXAM) FROM ie_exam WHERE NIDIFACE ={interface_nova}'
-  comando_nidexam = f"SELECT MAX(NIDEXAM) FROM ie_exam"
-  conn = getConection(host,user,passwd,port)
-  cur = conn.cursor()
-  ie_exam_retorno = list(select_database(host,user,passwd,port,comando_ieexam))
-  nindexexam = select_database(host,user,passwd,port,comando_nindexam)
-  nindexexam = int(nindexexam[0]+1)
-  nidiface =ie_exam_retorno.pop(0)
-  comando_ievar = f"SELECT CNOMEEQUIVAR,CNOMELISVAR,NORDEMVAR,CFATORVAR,CEXAMEQUIVAR,NMINIMOVAR,NINFERIORVAR,NSUPERIORVAR,NMAXIMOVAR,CDECIMAISVAR from ie_var WHERE NIDEXAM={nidiface}"
-  ie_var_retorno = select_database(host,user,passwd,port,comando_ievar,"ALL")
-  ie_exam.gravar_ieexam(ie_exam_retorno)
-  try:
-    # conn.start_transaction()
-    cur.execute(f"INSERT INTO ie_exam(NIDIFACE,CEXAMEQUIEXAM,CEXAMLISEXAM,CDESCEXAM,EDESMEMBRADOEXAM,CPARAMETROSEXAM,CDIFFROUNDEXAM,TINC,NINDEXEXAM) values({interface_nova},'{ie_exam.cexamequiexam}','{ie_exam.cexamlisexam}','{ie_exam.cdescexam}','{ie_exam.edesmembradoexam}','{ie_exam.cparametrosexam}','{ie_exam.cdiffroundexam}',now(),{nindexexam})")
-    conn.commit()
-    nidexam = select_database(host,user,passwd,port,comando_nidexam)
-    for i in ie_var_retorno:
-      ie_var.gravar_ievar(i)
-      cur.execute(f"INSERT into ie_var(CNOMEEQUIVAR,CNOMELISVAR,NORDEMVAR,CFATORVAR,CEXAMEQUIVAR,NMINIMOVAR,NINFERIORVAR,NSUPERIORVAR,NMAXIMOVAR,CDECIMAISVAR,NIDEXAM,TINC) VALUES('{ie_var.cnomeequivar}','{ie_var.cnomelisvar}','{ie_var.nordemvar}','{ie_var.cfatorvar}','{ie_var.cexamequivar}',{ie_var.nminimovar},{ie_var.ninferiorvar},{ie_var.nsuperiorvar},{ie_var.nmaximovar},'{ie_var.cdecimaisvar}','{nidexam[0]}',now())")      
-    conn.commit()
-  except ERROR as e:
-    conn.rollback()
-    print(e)
-  finally:
-    cur.close()
-    conn.close()
+  #Comandos SQL
+  select_ieexam = f"SELECT NIDEXAM,CEXAMEQUIEXAM,CEXAMLISEXAM,CDESCEXAM,EDESMEMBRADOEXAM,CPARAMETROSEXAM,CDIFFROUNDEXAM FROM ie_exam WHERE CEXAMLISEXAM ='{exame}' AND NIDIFACE={interface_antiga}" 
+  select_nindexexam = f'SELECT MAX(NINDEXEXAM) FROM ie_exam WHERE NIDIFACE ={interface_nova}'
+  #Chamadas das Selects
+  retorno_ieexam = select_database(host,user,passwd,port,select_ieexam)
+  retorno_nindexexam =select_database(host,user,passwd,port,select_nindexexam)
+  nindexexam = retorno_nindexexam[0] + 1
+  dados_iexam = ie_exam.gravar_copia(retorno_ieexam,interface_nova,nindexexam)
+  #comando para reconhecer dados do IE_var de acordo com o exame
+  select_ievar = f"SELECT CNOMEEQUIVAR,CNOMELISVAR,NORDEMVAR,CFATORVAR,CEXAMEQUIVAR,NMINIMOVAR,NINFERIORVAR,NSUPERIORVAR,NMAXIMOVAR,CDECIMAISVAR from ie_var WHERE NIDEXAM={ie_exam.nidexam}"
+  retorno_ievar = select_database(host,user,passwd,port,select_ievar,"ALL")
+  #Comando insert do ie_Exam
+  insert_iexam = f"INSERT INTO ie_exam(NIDIFACE,CEXAMEQUIEXAM,CEXAMLISEXAM,CDESCEXAM,TINC,EDESMEMBRADOEXAM,NINDEXEXAM,CPARAMETROSEXAM,CDIFFROUNDEXAM) values " + dados_iexam
+  insert(host,user,passwd,port,insert_iexam)
+  retorno_nidexam = select_database(host,user,passwd,port,comando_nidexam)
+  ie_exam.nidexam = retorno_nidexam[0]
+  for i in retorno_ievar:
+    dados_ievar = ie_var.gravar_copia(i,ie_exam.nidexam)
+    #Comando insert do ie_var
+    insert_ievar = f"INSERT INTO ie_var(NIDEXAM,CNOMEEQUIVAR,CNOMELISVAR,NORDEMVAR,CFATORVAR,TINC,CEXAMEQUIVAR,NMINIMOVAR,NINFERIORVAR,NSUPERIORVAR,NMAXIMOVAR,CDECIMAISVAR) values " + dados_ievar
+    insert(host,user,passwd,port,insert_ievar)

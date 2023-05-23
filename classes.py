@@ -1,4 +1,5 @@
 import decimal
+import datetime
 #Funções de validação de dados, como o pyhton não aceita todos os tipos de dados, temos que tratar se não da erro no Insert depois
 def validacao_numero(valor):
     if valor is None:
@@ -15,84 +16,122 @@ def validacao_caracter(valor):
     else:
         pass
     return valor
-    
-#Representação das colunas que precisamos usar da tabela ie_exam
-class c_ie_exam:
-    def __init__(self,cexamlisexam=None,cexamequiexam=None,cdescexam=None,edesmembradoexam=None,nindexam=None,cparametrosexam=None,cdiffroundexam=None,tinc=None):
 
+def validacao_data(valor):
+    if isinstance(valor, datetime.datetime):
+        valor = valor.strftime("%Y-%m-%d %H:%M:%S")
+    else:
+        pass
+    return valor
+
+#Representação das colunas que precisamos usar da tabela
+class c_ie_exam:
+    def __init__(self,nidiface=None,nidexam=None,cexamlisexam=None,cexamequiexam=None,cdescexam=None,edesmembradoexam=None,nindexexam=None,cparametrosexam=None,cdiffroundexam=None):
+        
+        self.nidexam = validacao_numero(nidexam)
+        self.nidiface = nidiface
         self.cexamlisexam = cexamlisexam
         self.cexamequiexam = cexamequiexam
         self.cdescexam = cdescexam
         self.edesmembradoexam = edesmembradoexam
-        self.nindexam = nindexam
-        self.tinc = tinc
-        self.cparametrosexam = validacao_caracter(cparametrosexam)
+        self.nindexexam = nindexexam
+        self.tinc = "Now()"
+        self.talt = "Now()"
+        self.cparametrosexam = cparametrosexam
         self.cdiffroundexam = validacao_caracter(cdiffroundexam)
 
-    def gravar_ieexam(self,lista):
-        validador = len(lista)
-        if validador == 3:
-            self.cexamlisexam = validacao_caracter(lista[0])
-            self.cexamequiexam = validacao_caracter(lista[1])
-            self.cdescexam = validacao_caracter(lista[2])
-            self.edesmembradoexam = "N"
-            self.tinc = "now()"
-        elif validador == 6:
-            self.cexamequiexam = validacao_caracter(lista[0])
-            self.cexamlisexam = validacao_caracter(lista[1])
-            self.cdescexam = validacao_caracter(lista[2])
-            self.edesmembradoexam = validacao_caracter(lista[3])
-            self.nindexam = validacao_numero(lista[4])
-            self.cdiffroundexam = validacao_numero(lista[5])
-            self.tinc = "now()"
-        elif validador == 5:
-            self.cexamequiexam = validacao_caracter(lista[0])
-            self.cexamlisexam = validacao_caracter(lista[1])
-            self.cdescexam = validacao_caracter(lista[2])
-            self.edesmembradoexam = validacao_caracter(lista[3])
-            self.nindexam = validacao_numero(lista[4])
-            self.cdiffroundexam = ""
-            self.tinc = "now()"
+    def gravar_planilha_ieexam(self,lista,nindexexam,nidiface):
+        self.nidiface = validacao_numero(nidiface)
+        self.cexamlisexam = validacao_caracter(lista[0])
+        self.cexamequiexam = validacao_caracter(lista[1])
+        self.cdescexam = validacao_caracter(lista[2])
+        self.nindexexam = validacao_numero(nindexexam)
+        self.edesmembradoexam = "N"
+        self.tinc = "now()"
 
-#Representação das colunas que precisamos usar da tabela ie_var            
+        return f"({self.nidiface},'{self.cexamlisexam}','{self.cexamequiexam}','{self.cdescexam}','{self.edesmembradoexam}',{self.nindexexam},{self.tinc})"
+    
+    def gravar_modelopronto(self,lista,nidiface):
+        self.nidiface = nidiface
+        self.cexamequiexam = validacao_caracter(lista[0])
+        self.cexamlisexam = validacao_caracter(lista[1])
+        self.cdescexam = validacao_caracter(lista[2])
+        self.edesmembradoexam = validacao_caracter(lista[3])
+        self.nindexexam = validacao_numero(lista[4])
+        if len(lista) == 6 :
+            self.cdiffroundexam = validacao_caracter(lista[5])
+        else:
+            pass
+
+        return f"({self.nidiface},'{self.cexamequiexam}','{self.cexamlisexam}','{self.cdescexam}','{self.edesmembradoexam}',{self.nindexexam},'{self.cdiffroundexam}',{self.tinc})"
+     
+    def gravar_copia(self,lista,nidiface,nindexexam):
+        self.nidexam = lista[0]
+        self.nidiface = validacao_numero(nidiface)
+        self.cexamequiexam = validacao_caracter(lista[1])
+        self.cexamlisexam = validacao_caracter(lista[2])
+        self.cdescexam = validacao_caracter(lista[3])
+        self.edesmembradoexam = validacao_caracter(lista[4])
+        self.nindexexam = validacao_numero(nindexexam)
+        self.cparametrosexam = validacao_caracter(lista[5])
+        self.cdiffroundexam = validacao_caracter(lista[6])
+
+        return f"({self.nidiface},'{self.cexamequiexam}','{self.cexamlisexam}','{self.cdescexam}',{self.tinc},'{self.edesmembradoexam}',{self.nindexexam},'{self.cparametrosexam}','{self.cdiffroundexam}')"
+
+               
 class c_ie_var:
-    def __init__(self,nidexam=None,cnomeequivar=None,cnomelisvar=None,nordemvar=None,cfatorvar=None,cexamequivar=None,nminimovar=None,ninferiorvar=None,nsuperiorvar=None,nmaximovar=None,cdecimaisvar=None,tinc=None):
-        
+    def __init__(self,nidvar=None,nidexam=None,cnomeequivar=None,cnomelisvar=None,nordemvar=None,cfatorvar=None,cexamequivar=None,nminimovar=None,ninferiorvar=None,nsuperiorvar=None,nmaximovar=None,cdecimaisvar=None,tinc=None,talt=None):
+        self.nidvar = nidvar
         self.nidexam = nidexam
         self.cnomeequivar = cnomeequivar
         self.cnomelisvar = cnomelisvar
         self.nordemvar = nordemvar
         self.cfatorvar = cfatorvar
-        self.tinc = tinc
+        self.tinc = "Now()"
+        self.talt = "Now()"
         self.cexamequivar = cexamequivar
-        self.nminimovar = validacao_numero(nminimovar)
-        self.ninferiorvar = validacao_numero(ninferiorvar)
-        self.nsuperiorvar = validacao_numero(nsuperiorvar)
-        self.nmaximovar = validacao_numero(nmaximovar)
+        self.nminimovar = nminimovar
+        self.ninferiorvar = ninferiorvar
+        self.nsuperiorvar = nsuperiorvar
+        self.nmaximovar = nmaximovar
         self.cdecimaisvar = cdecimaisvar
     
-    def gravar_ievar(self,lista):
-        validador = len(lista)
-        if validador == 4:
-            self.cnomeequivar = validacao_caracter(lista[0])
-            self.cnomelisvar = validacao_caracter(lista[1])
-            self.nordemvar = validacao_numero(lista[2])
-            self.cfatorvar = validacao_caracter(lista[3])
-            self.tinc = "now()"
-        elif validador == 10:
-            self.cnomeequivar = validacao_caracter(lista[0])
-            self.cnomelisvar = validacao_caracter(lista[1])
-            self.nordemvar = validacao_numero(lista[2])
-            self.cfatorvar = validacao_caracter(lista[3])
-            self.cexamequivar = validacao_caracter(lista[4])
-            self.nminimovar = validacao_numero(lista[5])
-            self.ninferiorvar = validacao_numero(lista[6])
-            self.nsuperiorvar = validacao_numero(lista[7])
-            self.nmaximovar = validacao_numero(lista[8])
-            self.cdecimaisvar = validacao_caracter(lista[9])
-            self.tinc = "now()"
-            
-    def __repr__(self):
-        return f"{self.nidexam},{self.cnomeequivar},{self.cnomelisvar},{self.nordemvar},{self.cfatorvar},{self.tinc},{self.cexamequivar},{self.nminimovar},{self.ninferiorvar},{self.nsuperiorvar},{self.nmaximovar},{self.cdecimaisvar}"
+    def copiar_exame(self,lista):
+        self.cnomeequivar = validacao_caracter(lista[0])
+        self.cnomelisvar = validacao_caracter(lista[1])
+        self.nordemvar = validacao_numero(lista[2])
+        self.cfatorvar = validacao_caracter(lista[3])
+        self.cexamequivar = validacao_caracter(lista[4])
+        self.nminimovar = validacao_numero(lista[5])
+        self.ninferiorvar = validacao_numero(lista[6])
+        self.nsuperiorvar = validacao_numero(lista[7])
+        self.nmaximovar = validacao_numero(lista[8])
+        self.cdecimaisvar = validacao_caracter(lista[9])
+        
+    def gravar_modelopronto(self,lista,nidexam):
+        self.nidexam = nidexam
+        self.cnomeequivar= validacao_caracter(lista[0])
+        self.cnomelisvar = validacao_caracter(lista[1])
+        self.nordemvar = validacao_numero(lista[2])
+        self.cfatorvar = validacao_caracter(lista[3])
+    
+
+        return f"({self.nidexam},'{self.cnomeequivar}','{self.cnomelisvar}',{self.nordemvar},'{self.cfatorvar}',{self.tinc})"
+        
+    def gravar_copia(self,lista,nidexam):
+        self.nidexam = validacao_numero(nidexam)
+        self.cnomeequivar = validacao_caracter(lista[0])
+        self.cnomelisvar = validacao_caracter(lista[1])
+        self.nordemvar = validacao_numero(lista[2])
+        self.cfatorvar = validacao_numero(lista[3])
+        self.cexamequivar = validacao_caracter(lista[4])
+        self.nminimovar = validacao_numero(lista[5])
+        self.ninferiorvar = validacao_numero(lista[6])
+        self.nsuperiorvar = validacao_numero(lista[7])
+        self.nmaximovar = validacao_numero(lista[8])
+        self.cdecimaisvar = validacao_caracter(lista[9])
+
+        return f"({self.nidexam},'{self.cnomeequivar}','{self.cnomelisvar}',{self.nordemvar},'{self.cfatorvar}',{self.tinc},'{self.cexamequivar}',{self.nminimovar},{self.ninferiorvar},{self.nsuperiorvar},{self.nmaximovar},'{self.cdecimaisvar}')"
+        
 
 

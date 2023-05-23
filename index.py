@@ -2,7 +2,11 @@ import pandas as pd
 from PySimpleGUI import PySimpleGUI as sg
 import database as db
 from distutils.log import ERROR
+from classes import *
+import pickle
 
+ie_exam = c_ie_exam()
+ie_var = c_ie_var()
 # -----------------------------------------------------------------------------BackEnd--------------------------------------------------------------------------------------------------
 def inserir_planilha(host,user,passwd,port,nidiface):
     dataframe = pd.read_excel("Exames.xls")
@@ -41,6 +45,37 @@ def extrair_config(host,user,passwd,port,planilha):
   dados = dados.transpose()
   dados.to_excel("dados_interface="+str(planilha)+".xlsx",index=False)
 
+#Função para cirar modelo do exame
+def criar_modelo(host,user,passwd,port,menmonico,interface,nome):
+    select_ieexam = f"SELECT NIDEXAM,CEXAMEQUIEXAM,CEXAMLISEXAM,CDESCEXAM,EDESMEMBRADOEXAM,CPARAMETROSEXAM,CDIFFROUNDEXAM FROM ie_exam WHERE CEXAMLISEXAM ='{menmonico}' AND NIDIFACE={interface}" 
+    dados_ieexam = db.select_database(host,user,passwd,port,select_ieexam)
+    nidexam = dados_ieexam[0]
+    select_ievar =f"SELECT CNOMEEQUIVAR,CNOMELISVAR,NORDEMVAR,CFATORVAR,CEXAMEQUIVAR,NMINIMOVAR,NINFERIORVAR,NSUPERIORVAR,NMAXIMOVAR,CDECIMAISVAR from ie_var WHERE NIDEXAM={nidexam}"
+    dados_ievar = db.select_database(host,user,passwd,port,select_ievar,"ALL")
+    modelo = [dados_ieexam,dados_ievar]
+    with open(f'{nome}.exam','wb') as arquivo:
+       pickle.dump(modelo,arquivo)
+
+#Função para inserir modelo do exame
+def inserir_modelo(host,user,passwd,port,interface_destino,caminho_modelo):
+    comando_nindexexam = f"SELECT MAX(NINDEXEXAM) FROM ie_exam WHERE NIDIFACE= {interface_destino}"
+    comando_nidexam = "SELECT MAX(NIDEXAM) FROM ie_exam"
+    nindexexam = db.select_database(host,user,passwd,port,comando_nindexexam)
+    with open(caminho_modelo,"rb") as arquivo:
+      lista_recuperada = pickle.load(arquivo)
+    retorno_ieexam = lista_recuperada.pop(0)
+    nindexexam = nindexexam[0]
+    if nindexexam is None:
+       nindexexam=1
+    dados_ieexam = ie_exam.gravar_copia(retorno_ieexam,interface_destino,nindexexam)
+    insert_ieexam= f"INSERT INTO ie_exam(NIDIFACE,CEXAMEQUIEXAM,CEXAMLISEXAM,CDESCEXAM,TINC,EDESMEMBRADOEXAM,NINDEXEXAM,CPARAMETROSEXAM,CDIFFROUNDEXAM) values " +dados_ieexam
+    db.insert(host,user,passwd,port,insert_ieexam)
+    nidexam = db.select_database(host,user,passwd,port,comando_nidexam)
+    for i in lista_recuperada:
+       for j in i:
+          dados_ievar = ie_var.gravar_copia(j,nidexam[0])
+          insert_ievar = f"INSERT INTO ie_var(NIDEXAM,CNOMEEQUIVAR,CNOMELISVAR,NORDEMVAR,CFATORVAR,TINC,CEXAMEQUIVAR,NMINIMOVAR,NINFERIORVAR,NSUPERIORVAR,NMAXIMOVAR,CDECIMAISVAR) values" + dados_ievar
+          db.insert(host,user,passwd,port,insert_ievar) 
 # -----------------------------------------------------------------------------FrontEnd--------------------------------------------------------------------------------------------------
 def janela_Conectar():
   sg.theme('DarkGrey12')
@@ -75,7 +110,8 @@ def janela_Operacao():
     sg.Button('Inserir Planilha',size=(15,1))],
   [sg.Button('Extrair Config',size=(15,1)),
     sg.Button('Backup',size=(15,1))],
-  [sg.Button('Copiar um Exame',size=(15,1))]
+  [sg.Button('Copiar um Exame',size=(15,1)),
+    sg.Button('Modelos',size=(15,1))]  
   ]
   return sg.Window('Decisão', layout1,finalize=True)
 
@@ -114,107 +150,176 @@ def janela_umexame():
   ]
   return sg.Window('Copiar exame', layout7,finalize=True)
 
-jConexao,jOperacao,jProntos,jInserir,jExtrair,JBackup,Jumexame = janela_Conectar(),None,None,None,None,None,None
+def janela_modelos():
+  sg.theme('DarkGrey12')
+  layout8= [
+  [sg.Text('Menu de Modelos', size=(30, 1), justification='center', font=("Helvetica", 13),
+  relief=sg.RELIEF_RIDGE, k='-TEXT HEADING-', enable_events=True)],
+  [sg.Button('Criar Modelo',size=(15,2)),
+    sg.Button('Inserir Modelo',size=(15,2))],
+  [sg.Button('Voltar',size=(32,1),button_color='red') ]
+  ]
+  return sg.Window('Menu Modelos', layout8,finalize=True)
+
+def janela_criarmodelos():
+  sg.theme('DarkGrey12')
+  layout9= [
+  [sg.Text('Mnemonico do exame', size=20,font='Helvetica'),sg.Input(key='mnemonico',size =(10,1))],
+  [sg.Text('Id da interface', size=20,font='Helvetica'),sg.Input(key='interface_criar',size =(10,1))],
+  [sg.Text('Nome do Modelo', size=20,font='Helvetica'),sg.Input(key='nomemodelo',size =(10,1))],
+  [sg.Button('Criar',size=(10,1),button_color='green'), sg.Button('Voltar',size=(10,1),button_color='red') ]
+  ]
+  return sg.Window('Criar Modelo',layout9,finalize=True)
+
+def janela_inserirmodelos():
+  sg.theme('DarkGrey12')
+  layout10= [
+  [sg.Text('Id da interface', size=15,font='Helvetica'),sg.Input(key='interface_inserir',size =(30,1))],
+  [sg.Text('Selecione o Modelo', size=(40, 1), justification='center', font=("Helvetica", 13),
+  relief=sg.RELIEF_RIDGE, k='-TEXT HEADING-', enable_events=True)],
+  [sg.Input(key='caminho_modelo'), sg.FileBrowse()],
+  [sg.Button('Enviar',size=(20,1),button_color='green'), sg.Button('Voltar',size=(20,1),button_color='red') ]
+  ]
+  return sg.Window('Criar Modelo',layout10,finalize=True)
+
+jConexao,jOperacao,jProntos,jInserir,jExtrair,JBackup,Jumexame,Jmodelos,Jcriarmodelos,jInserirmodelos = janela_Conectar(),None,None,None,None,None,None,None,None,None
 
 #Inicio das operações nas telas da interface
 while True:
-    window,eventos,valores = sg.read_all_windows()
-    if window == jConexao:
-        if eventos == sg.WIN_CLOSED:
-            break
-        if eventos == 'Conectar':
-            try:
-                host = valores['host']
-                user = valores['user']
-                senha = valores['senha']
-                porta = valores['porta']
-                db.getConection(host,user, senha, porta)
-                jConexao.hide()
-                jOperacao=janela_Operacao()
-            except Exception as e:
-                sg.popup('Dados Invalidos')
-                window.FindElement('user').Update('')
-                window.FindElement('senha').Update('')
-                window.FindElement('porta').Update('')
-    if window == jOperacao:
-        if eventos == sg.WIN_CLOSED:
-            break
-        if eventos == "Modelos Prontos":
-            jOperacao.hide()
-            jProntos=janela_Prontos() 
-        if eventos == "Inserir Planilha":
-            jOperacao.hide()
-            jInserir=janela_inserir()
-        if eventos == "Extrair Config":
-            jOperacao.hide()
-            jExtrair=janela_extrair() 
-        if eventos =='Backup':
-            jOperacao.hide()
-            JBackup=janela_backup()
-        if eventos == 'Copiar um Exame':
-            jOperacao.hide()
-            Jumexame = janela_umexame()
-    if window == jInserir:
-        if eventos == sg.WIN_CLOSED:
-            break
-        if eventos == 'Voltar':
-            jOperacao.un_hide()
-            jInserir.hide()
-        if eventos == 'Enviar':
-            try:
-                inserir_planilha(host,user,senha,porta,valores['numeroPlanilha'])
-                sg.popup("Dados gravados com Sucesso !!!")
-            except:
-                sg.popup("Erro ao gravar dados")
-    if window == jProntos:
-        if eventos == sg.WIN_CLOSED:
-            break
-        if eventos == "Voltar":
-            jOperacao.un_hide()
-            jProntos.hide()
-        if eventos == "Enviar" and valores['escolhascript'] == "HEM":
-            try:
-                insert_hem(host,user,senha,porta,valores['numeroPlanilha'])
-                sg.popup("Gravado com sucesso !!!")
-            except:
-                sg.popup("Erro ao Gravar")
-        if eventos == "Enviar" and valores['escolhascript'] == "GAS":
-            try:
-                insert_gav(host,user,senha,porta,valores['numeroPlanilha'])
-                sg.popup("Gravado com sucesso !!!")
-            except:
-                sg.popup("Erro ao Gravar")
-    if window == jExtrair:
-        if eventos == sg.WIN_CLOSED:
-            break
-        if eventos == "Voltar":
-            jOperacao.un_hide()
-            jExtrair.hide()
-        if eventos == "Gerar":
-            extrair_config(host,user,senha,porta,valores['numeroPlanilha'])
-            sg.popup("Planilha Gerada !!!")
-    if window == JBackup:
-        if eventos == sg.WIN_CLOSED:
-            break
-        if eventos == "Voltar":
-            jOperacao.un_hide()
-            JBackup.hide()
-        if eventos == "Gerar Backup":
-            try:
-                db.backup(host,user,senha,porta,valores['cliente'])
-                sg.popup('Backup Feito com Sucesso !!')
-            except ERROR as e:
-                sg.popup("Erro ao gerar backup")
-                print(e)
-    if window == Jumexame:
-        if eventos == sg.WIN_CLOSED:
-            break
-        if eventos == "Voltar":
-            jOperacao.un_hide()
-            Jumexame.hide()
-        if eventos == "Copiar":
-            try:
-                db.inserirum_exame(host,user,senha,porta,valores['mnemonico'],valores['interfaceoriginal'],valores['interfacedestino'])
-                sg.popup("Exame Copiado com sucesso !!!")
-            except:
-                sg.popup("Erro ao Copiar !!!") 
+  window,eventos,valores = sg.read_all_windows()
+  if window == jConexao:
+      if eventos == sg.WIN_CLOSED:
+          break
+      if eventos == 'Conectar':
+          try:
+              host = valores['host']
+              user = valores['user']
+              senha = valores['senha']
+              porta = valores['porta']
+              db.getConection(host,user, senha, porta)
+              jConexao.hide()
+              jOperacao=janela_Operacao()
+          except Exception as e:
+              sg.popup('Dados Invalidos')
+              window.FindElement('user').Update('')
+              window.FindElement('senha').Update('')
+              window.FindElement('porta').Update('')
+  if window == jOperacao:
+      if eventos == sg.WIN_CLOSED:
+          break
+      if eventos == "Modelos Prontos":
+          jOperacao.hide()
+          jProntos=janela_Prontos() 
+      if eventos == "Inserir Planilha":
+          jOperacao.hide()
+          jInserir=janela_inserir()
+      if eventos == "Extrair Config":
+          jOperacao.hide()
+          jExtrair=janela_extrair() 
+      if eventos =='Backup':
+          jOperacao.hide()
+          JBackup=janela_backup()
+      if eventos == 'Copiar um Exame':
+          jOperacao.hide()
+          Jumexame = janela_umexame()
+      if eventos == 'Modelos':
+          jOperacao.hide()
+          Jmodelos = janela_modelos()
+  if window == jInserir:
+      if eventos == sg.WIN_CLOSED:
+          break
+      if eventos == 'Voltar':
+          jOperacao.un_hide()
+          jInserir.hide()
+      if eventos == 'Enviar':
+          try:
+              inserir_planilha(host,user,senha,porta,valores['numeroPlanilha'])
+              sg.popup("Dados gravados com Sucesso !!!")
+          except ERROR as e:
+              sg.popup("Erro ao gravar dados")
+              print(e)
+  if window == jProntos:
+      if eventos == sg.WIN_CLOSED:
+          break
+      if eventos == "Voltar":
+          jOperacao.un_hide()
+          jProntos.hide()
+      if eventos == "Enviar" and valores['escolhascript'] == "HEM":
+          try:
+              insert_hem(host,user,senha,porta,valores['numeroPlanilha'])
+              sg.popup("Gravado com sucesso !!!")
+          except ERROR as e:
+              sg.popup("Erro ao Gravar")
+              print(e)
+      if eventos == "Enviar" and valores['escolhascript'] == "GAS":
+          try:
+              insert_gav(host,user,senha,porta,valores['numeroPlanilha'])
+              sg.popup("Gravado com sucesso !!!")
+          except ERROR as e:
+              sg.popup("Erro ao Gravar")
+              print(e)
+  if window == jExtrair:
+      if eventos == sg.WIN_CLOSED:
+          break
+      if eventos == "Voltar":
+          jOperacao.un_hide()
+          jExtrair.hide()
+      if eventos == "Gerar":
+          extrair_config(host,user,senha,porta,valores['numeroPlanilha'])
+          sg.popup("Planilha Gerada !!!")
+  if window == JBackup:
+      if eventos == sg.WIN_CLOSED:
+          break
+      if eventos == "Voltar":
+          jOperacao.un_hide()
+          JBackup.hide()
+      if eventos == "Gerar Backup":
+          try:
+              db.backup(host,user,senha,porta,valores['cliente'])
+              sg.popup('Backup Feito com Sucesso !!')
+          except ERROR as e:
+              sg.popup("Erro ao gerar backup")
+              print(e)
+  if window == Jumexame:
+      if eventos == sg.WIN_CLOSED:
+          break
+      if eventos == "Voltar":
+          jOperacao.un_hide()
+          Jumexame.hide()
+      if eventos == "Copiar":
+          try:
+              db.inserirum_exame(host,user,senha,porta,valores['mnemonico'],valores['interfaceoriginal'],valores['interfacedestino'])
+              sg.popup("Exame Copiado com sucesso !!!")
+          except ERROR as e:
+              sg.popup("Erro ao Copiar !!!") 
+              print(e)
+  if window == Jmodelos:
+    if eventos == sg.WIN_CLOSED:
+      break
+    if eventos == "Voltar":
+      Jmodelos.hide()
+      jOperacao.un_hide()
+    if eventos =="Criar Modelo":
+      Jmodelos.hide()
+      Jcriarmodelos = janela_criarmodelos()
+    if eventos =="Inserir Modelo":
+      Jmodelos.hide()
+      jInserirmodelos = janela_inserirmodelos()
+  if window == Jcriarmodelos:
+    if eventos == sg.WIN_CLOSED:
+      break
+    if eventos == "Voltar":
+      Jcriarmodelos.hide()
+      Jmodelos.un_hide()
+    if eventos == "Criar":
+      criar_modelo(host,user,senha,porta,valores['mnemonico'],valores["interface_criar"],valores['nomemodelo'])
+      sg.popup("Arquivo criado com Sucesso !!!")
+  if window == jInserirmodelos:
+    if eventos == sg.WIN_CLOSED:
+      break
+    if eventos == "Voltar":
+      jInserirmodelos.hide()
+      Jmodelos.un_hide()
+    if eventos == "Enviar":
+        inserir_modelo(host,user,senha,porta,valores['interface_inserir'],valores['caminho_modelo'])
+        sg.popup("Modelo inserido com Sucesso")    
