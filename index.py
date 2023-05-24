@@ -66,7 +66,9 @@ def inserir_modelo(host,user,passwd,port,interface_destino,caminho_modelo):
     retorno_ieexam = lista_recuperada.pop(0)
     nindexexam = nindexexam[0]
     if nindexexam is None:
-       nindexexam=1
+      nindexexam=1
+    else:
+      nindexexam =nindexexam+1
     dados_ieexam = ie_exam.gravar_copia(retorno_ieexam,interface_destino,nindexexam)
     insert_ieexam= f"INSERT INTO ie_exam(NIDIFACE,CEXAMEQUIEXAM,CEXAMLISEXAM,CDESCEXAM,TINC,EDESMEMBRADOEXAM,NINDEXEXAM,CPARAMETROSEXAM,CDIFFROUNDEXAM) values " +dados_ieexam
     db.insert(host,user,passwd,port,insert_ieexam)

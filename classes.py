@@ -123,7 +123,7 @@ class c_ie_var:
         self.cnomeequivar = validacao_caracter(lista[0])
         self.cnomelisvar = validacao_caracter(lista[1])
         self.nordemvar = validacao_numero(lista[2])
-        self.cfatorvar = validacao_numero(lista[3])
+        self.cfatorvar = validacao_caracter(lista[3])
         self.cexamequivar = validacao_caracter(lista[4])
         self.nminimovar = validacao_numero(lista[5])
         self.ninferiorvar = validacao_numero(lista[6])
