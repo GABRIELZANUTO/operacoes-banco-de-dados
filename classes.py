@@ -51,30 +51,36 @@ class c_ie_exam:
 
         return f"({self.nidiface},'{self.cexamlisexam}','{self.cexamequiexam}','{self.cdescexam}','{self.edesmembradoexam}',{self.nindexexam},{self.tinc})"
     
-    def gravar_modelopronto(self,lista,nidiface):
+    def gravar_modelopronto(self,lista,nidiface,nindexexam):
         self.nidiface = nidiface
         self.cexamequiexam = validacao_caracter(lista[0])
         self.cexamlisexam = validacao_caracter(lista[1])
         self.cdescexam = validacao_caracter(lista[2])
         self.edesmembradoexam = validacao_caracter(lista[3])
-        self.nindexexam = validacao_numero(lista[4])
-        if len(lista) == 6 :
-            self.cdiffroundexam = validacao_caracter(lista[5])
+        self.nindexexam = nindexexam
+        if len(lista) == 5 :
+            self.cdiffroundexam = validacao_caracter(lista[4])
         else:
             pass
 
         return f"({self.nidiface},'{self.cexamequiexam}','{self.cexamlisexam}','{self.cdescexam}','{self.edesmembradoexam}',{self.nindexexam},'{self.cdiffroundexam}',{self.tinc})"
      
-    def gravar_copia(self,lista,nidiface,nindexexam):
+    def gravar_copia(self,lista,nidiface,nindexexam=None):
         self.nidexam = lista[0]
         self.nidiface = validacao_numero(nidiface)
         self.cexamequiexam = validacao_caracter(lista[1])
         self.cexamlisexam = validacao_caracter(lista[2])
         self.cdescexam = validacao_caracter(lista[3])
         self.edesmembradoexam = validacao_caracter(lista[4])
-        self.nindexexam = validacao_numero(nindexexam)
-        self.cparametrosexam = validacao_caracter(lista[5])
-        self.cdiffroundexam = validacao_caracter(lista[6])
+        if len(lista) == 8:
+            self.nindexexam = validacao_numero(lista[5])
+            self.cparametrosexam = validacao_caracter(lista[6])
+            self.cdiffroundexam = validacao_caracter(lista[7])
+        else:
+            self.nindexexam = validacao_numero(nindexexam)
+            self.cparametrosexam = validacao_caracter(lista[5])
+            self.cdiffroundexam = validacao_caracter(lista[6])
+
 
         return f"({self.nidiface},'{self.cexamequiexam}','{self.cexamlisexam}','{self.cdescexam}',{self.tinc},'{self.edesmembradoexam}',{self.nindexexam},'{self.cparametrosexam}','{self.cdiffroundexam}')"
 
@@ -133,5 +139,85 @@ class c_ie_var:
 
         return f"({self.nidexam},'{self.cnomeequivar}','{self.cnomelisvar}',{self.nordemvar},'{self.cfatorvar}',{self.tinc},'{self.cexamequivar}',{self.nminimovar},{self.ninferiorvar},{self.nsuperiorvar},{self.nmaximovar},'{self.cdecimaisvar}')"
         
+class c_ie_face():
+    def __init__(self,nidiface = None, nidequi = None, nidsetor = None, cnomeiface = None, etipoenviface = None, etipocomiface = None, nportaiface = None, nbaudiface = None, nbitsdadosiface = None, nbitsparadaiface = None, nparidadeiface = None, cbufferentradaiface = None, cbuffersaidaiface = None, ntcpportiface = None, ntcpport2iface = None, cpathpediface = None, cpathresiface = None, eativoiface = None, nrackiface = None, nposrackiface = None, erevisariface = None, econfirmanormaisiface = None, eenviapariface = None, ewlautoiface = None, nqtdwlautoiface = None, eusaprot2iface = None, eusartsiface = None, ctcphostiface = None, cpathimagemiface = None, etrocaseparadoriface = None, ntcpport3iface = None, ntcpport4iface = None, cwshostiface = None, cloginiface = None, csenhaiface = None, eimportresuimagemiface = None):
+        self.nidiface = nidiface
+        self.nidequi = nidequi
+        self.nidsetor = nidsetor
+        self.cnomeiface = cnomeiface
+        self.etipoenviface = etipoenviface
+        self.etipocomiface = etipocomiface
+        self.nportaiface = nportaiface
+        self.nbaudiface = nbaudiface
+        self.nbitsdadosiface = nbitsdadosiface
+        self.nbitsparadaiface = nbitsparadaiface
+        self.nparidadeiface = nparidadeiface
+        self.cbufferentradaiface = cbufferentradaiface
+        self.cbuffersaidaiface = cbufferentradaiface
+        self.ntcpportiface = ntcpportiface
+        self.ntcpport2iface = ntcpport2iface
+        self.cpathpediface = cpathpediface
+        self.cpathresiface = cpathresiface
+        self.eativoiface = eativoiface
+        self.tinc = "Now()"
+        self.talt = "Now()"
+        self.nrackiface = nrackiface
+        self.nposrackiface = nrackiface
+        self.erevisariface = nrackiface
+        self.econfirmanormaisiface = econfirmanormaisiface
+        self.eenviapariface = eenviapariface
+        self.ewlautoiface = ewlautoiface
+        self.nqtdwlautoiface = nqtdwlautoiface
+        self.eusaprot2iface = eusaprot2iface
+        self.eusartsiface = eusartsiface
+        self.ctcphostiface = ctcphostiface
+        self.cpathimagemiface = cpathimagemiface
+        self.etrocaseparadoriface = etrocaseparadoriface
+        self.ntcpport3iface = ntcpport3iface
+        self.ntcpport4iface = ntcpport4iface
+        self.cwshostiface = cwshostiface
+        self.cloginiface = cloginiface
+        self.csenhaiface = csenhaiface
+        self.eimportresuimagemiface=eimportresuimagemiface
+    
+    def gravar_modeloface(self,lista):
+        self.nidequi = validacao_numero(lista[0])
+        self.nidsetor = validacao_numero(lista[1])
+        self.cnomeiface = validacao_caracter(lista[2])
+        self.etipoenviface = validacao_caracter(lista[3])
+        self.etipocomiface = validacao_caracter(lista[4])
+        self.nportaiface = validacao_numero(lista[5])
+        self.nbaudiface = validacao_numero(lista[6])
+        self.nbitsdadosiface = validacao_numero(lista[7])
+        self.nbitsparadaiface = validacao_numero(lista[8])
+        self.nparidadeiface = validacao_numero(lista[9])
+        self.cbufferentradaiface = validacao_caracter(lista[10])
+        self.cbuffersaidaiface = validacao_caracter(lista[11])
+        self.ntcpportiface = validacao_numero(lista[12])
+        self.ntcpport2iface = validacao_numero(lista[13])
+        self.cpathpediface = validacao_caracter(lista[14])
+        self.cpathresiface = validacao_caracter(lista[15])
+        self.eativoiface = validacao_caracter(lista[16])
+        self.nrackiface = validacao_numero(lista[17])
+        self.nposrackiface = validacao_numero(lista[18])
+        self.erevisariface = validacao_caracter(lista[19])
+        self.econfirmanormaisiface = validacao_caracter(lista[20])
+        self.eenviapariface = validacao_caracter(lista[21])
+        self.ewlautoiface = validacao_caracter(lista[22])
+        self.nqtdwlautoiface = validacao_numero(lista[23])
+        self.eusaprot2iface = validacao_caracter(lista[24])
+        self.eusartsiface = validacao_caracter(lista[25])
+        self.ctcphostiface = validacao_caracter(lista[26])
+        self.cpathimagemiface = validacao_caracter(lista[27])
+        self.etrocaseparadoriface = validacao_caracter(lista[28])
+        self.ntcpport3iface = validacao_numero(lista[29])
+        self.ntcpport4iface = validacao_numero(lista[30])
+        self.cwshostiface = validacao_caracter(lista[31])
+        self.cloginiface = validacao_caracter(lista[32])
+        self.csenhaiface = validacao_caracter(lista[33])
+        self.eimportresuimagemiface=validacao_caracter(lista[34])
+
+        return f"({self.nidequi},{self.nidsetor},'{self.cnomeiface}','{self.etipoenviface}','{self.etipocomiface}',{self.nportaiface},{self.nbaudiface},{self.nbitsdadosiface},{self.nbitsparadaiface},{self.nparidadeiface},'{self.cbufferentradaiface}','{self.cbuffersaidaiface}',{self.ntcpportiface},{self.ntcpport2iface},'{self.cpathpediface}','{self.cpathresiface}','{self.eativoiface}',{self.tinc},{self.nrackiface},{self.nposrackiface},'{self.erevisariface}','{self.econfirmanormaisiface}','{self.eenviapariface}','{self.ewlautoiface}',{self.nqtdwlautoiface},'{self.eusaprot2iface}','{self.eusartsiface}','{self.ctcphostiface}','{self.cpathimagemiface}','{self.etrocaseparadoriface}',{self.ntcpport3iface},{self.ntcpport4iface},'{self.cwshostiface}','{self.cloginiface}','{self.csenhaiface}','{self.eimportresuimagemiface}')"
+
 
 

@@ -7,6 +7,7 @@ import pickle
 
 ie_exam = c_ie_exam()
 ie_var = c_ie_var()
+ie_iface = c_ie_face()
 # -----------------------------------------------------------------------------BackEnd--------------------------------------------------------------------------------------------------
 def inserir_planilha(host,user,passwd,port,nidiface):
     dataframe = pd.read_excel("Exames.xls")
@@ -14,12 +15,12 @@ def inserir_planilha(host,user,passwd,port,nidiface):
     db.insert_planilha(host,user,passwd,port,nidiface,lista)
 
 def insert_hem(host,user,passwd,port,nidiface):
-    hem_ieexam = ('HEM', 'HEM', 'HEM', 'N', 1, 'SEGMENTADOS|BLASTOS|PROMIELOCITOS|MIELOCITOS|METAMIELOCITOS|BASTONETES|EOSINOFILOS|BASOFILOS|LINFOCITOS|MONOCITOS')
+    hem_ieexam = ('HEM', 'HEM', 'HEM', 'N', 'SEGMENTADOS|BLASTOS|PROMIELOCITOS|MIELOCITOS|METAMIELOCITOS|BASTONETES|EOSINOFILOS|BASOFILOS|LINFOCITOS|MONOCITOS')
     hem_ieevar =  [('Hemacias', 'HEMACIA', 1, None), ('Hemoglobinas', 'HEMOGLOBINA', 2, None), ('Hematocritos', 'HEMATOCRITO', 3, None), ('RDW', 'RDW', 4, None), ('Leucocitos', 'LEUCOCITOS', 5, '*1000'), ('Blastos_P', 'BLASTOS', 6, None), ('PMielocitos_P', 'PROMIELOCITOS', 7, None), ('MIELOCITOS_P', 'MIELOCITOS', 8, None), ('MetaMielocitos_P', 'METAMIELOCITOS', 9, None), ('Bastoes_P', 'BASTONETES', 10, None), ('Segmentados_P', 'SEGMENTADOS', 11, None), ('LINFOCITOS_P', 'LINFOCITOS', 12, None), ('Monocitos_P', 'MONOCITOS', 13, None), ('Eosinofilos_P', 'EOSINOFILOS', 14, None), ('Basofilos_P', 'BASOFILOS', 15, None), ('Plaquetas', 'PLAQUETAS', 16, '*1000')]
     db.insert_modelpronto(host,user,passwd,port,nidiface,hem_ieexam,hem_ieevar)
 
 def insert_gav(host,user,passwd,port,nidiface):
-    gav_ieexam= ('GASOV', 'GASV', 'GASOMETRIA VENOSA', 'N', 1)
+    gav_ieexam= ('GASOV', 'GASV', 'GASOMETRIA VENOSA', 'N')
     gav_ieevar = [('pH', 'PH', 1, None), ('PO2', 'PO2', 2, None), ('PCO2', 'PCO2', 3, None), ('SO2', 'SO2', 4, None), ('cHCO3', 'HCO3', 5, None), ('BE', 'BE', 6, None), ('Na', 'SODIO', 7, None), ('K', 'POTASSIO', 8, None), ('Ca', 'CAIO', 9, None), ('Cl', 'CLORETO', 10, None), ('Glu', 'GLICOSE', 11, None), ('Lac', 'LACT', 12, None)]
     db.insert_modelpronto(host,user,passwd,port,nidiface,gav_ieexam,gav_ieevar)
 
@@ -46,7 +47,7 @@ def extrair_config(host,user,passwd,port,planilha):
   dados.to_excel("dados_interface="+str(planilha)+".xlsx",index=False)
 
 #Função para cirar modelo do exame
-def criar_modelo(host,user,passwd,port,menmonico,interface,nome):
+def criar_modeloexam(host,user,passwd,port,menmonico,interface,nome):
     select_ieexam = f"SELECT NIDEXAM,CEXAMEQUIEXAM,CEXAMLISEXAM,CDESCEXAM,EDESMEMBRADOEXAM,CPARAMETROSEXAM,CDIFFROUNDEXAM FROM ie_exam WHERE CEXAMLISEXAM ='{menmonico}' AND NIDIFACE={interface}" 
     dados_ieexam = db.select_database(host,user,passwd,port,select_ieexam)
     nidexam = dados_ieexam[0]
@@ -57,7 +58,7 @@ def criar_modelo(host,user,passwd,port,menmonico,interface,nome):
        pickle.dump(modelo,arquivo)
 
 #Função para inserir modelo do exame
-def inserir_modelo(host,user,passwd,port,interface_destino,caminho_modelo):
+def inserir_modeloexam(host,user,passwd,port,interface_destino,caminho_modelo):
     comando_nindexexam = f"SELECT MAX(NINDEXEXAM) FROM ie_exam WHERE NIDIFACE= {interface_destino}"
     comando_nidexam = "SELECT MAX(NIDEXAM) FROM ie_exam"
     nindexexam = db.select_database(host,user,passwd,port,comando_nindexexam)
@@ -78,6 +79,43 @@ def inserir_modelo(host,user,passwd,port,interface_destino,caminho_modelo):
           dados_ievar = ie_var.gravar_copia(j,nidexam[0])
           insert_ievar = f"INSERT INTO ie_var(NIDEXAM,CNOMEEQUIVAR,CNOMELISVAR,NORDEMVAR,CFATORVAR,TINC,CEXAMEQUIVAR,NMINIMOVAR,NINFERIORVAR,NSUPERIORVAR,NMAXIMOVAR,CDECIMAISVAR) values" + dados_ievar
           db.insert(host,user,passwd,port,insert_ievar) 
+
+def criar_modeloface(host,user,passwd,port,interface,nome):
+  select_ieexam = f"SELECT NIDEXAM,CEXAMEQUIEXAM,CEXAMLISEXAM,CDESCEXAM,EDESMEMBRADOEXAM,NINDEXEXAM,CPARAMETROSEXAM,CDIFFROUNDEXAM FROM ie_exam WHERE NIDIFACE={interface}"
+  select_ieiface = f"SELECT NIDEQUI, NIDSETOR, CNOMEIFACE, ETIPOENVIFACE, ETIPOCOMIFACE, NPORTAIFACE, NBAUDIFACE, NBITSDADOSIFACE, NBITSPARADAIFACE, NPARIDADEIFACE, CBUFFERENTRADAIFACE, CBUFFERSAIDAIFACE, NTCPPORTIFACE, NTCPPORT2IFACE, CPATHPEDIFACE, CPATHRESIFACE, EATIVOIFACE,NRACKIFACE, NPOSRACKIFACE, EREVISARIFACE, ECONFIRMANORMAISIFACE, EENVIAPARIFACE, EWLAUTOIFACE, NQTDWLAUTOIFACE, EUSAPROT2IFACE, EUSARTSIFACE, CTCPHOSTIFACE, CPATHIMAGEMIFACE, ETROCASEPARADORIFACE, NTCPPORT3IFACE, NTCPPORT4IFACE, CWSHOSTIFACE, CLOGINIFACE, CSENHAIFACE, EIMPORTRESUIMAGEMIFACE FROM ie_iface WHERE NIDIFACE= {interface}"
+  retorno_ieexam = db.select_database(host,user,passwd,port,select_ieexam,"ALL")
+  retorno_ieiface = db.select_database(host,user,passwd,port,select_ieiface)
+  dados_ievar = []
+  for i in retorno_ieexam:
+    select_ievar =f"SELECT CNOMEEQUIVAR,CNOMELISVAR,NORDEMVAR,CFATORVAR,CEXAMEQUIVAR,NMINIMOVAR,NINFERIORVAR,NSUPERIORVAR,NMAXIMOVAR,CDECIMAISVAR from ie_var WHERE NIDEXAM={i[0]}"
+    retorno_ievar = db.select_database(host,user,passwd,port,select_ievar,"ALL")
+    dados_ievar.append(retorno_ievar)
+  modelo = [retorno_ieiface,retorno_ieexam,dados_ievar]
+  with open(f'{nome}.face','wb') as arquivo:
+    pickle.dump(modelo,arquivo)
+    
+def inserir_modeloface(host,user,passwd,port,caminho_modelo):
+  comando_nidiface = "SELECT MAX(NIDIFACE) FROM ie_iface"
+  with open(caminho_modelo,"rb") as arquivo:
+    lista_recuperada = pickle.load(arquivo)
+  dados_ieiface = ie_iface.gravar_modeloface(lista_recuperada[0])
+  insert_ieiface =" INSERT INTO ie_iface (NIDEQUI, NIDSETOR, CNOMEIFACE, ETIPOENVIFACE, ETIPOCOMIFACE, NPORTAIFACE, NBAUDIFACE, NBITSDADOSIFACE, NBITSPARADAIFACE, NPARIDADEIFACE, CBUFFERENTRADAIFACE, CBUFFERSAIDAIFACE, NTCPPORTIFACE, NTCPPORT2IFACE, CPATHPEDIFACE, CPATHRESIFACE, EATIVOIFACE,TINC,NRACKIFACE, NPOSRACKIFACE, EREVISARIFACE, ECONFIRMANORMAISIFACE, EENVIAPARIFACE, EWLAUTOIFACE, NQTDWLAUTOIFACE, EUSAPROT2IFACE, EUSARTSIFACE, CTCPHOSTIFACE, CPATHIMAGEMIFACE, ETROCASEPARADORIFACE, NTCPPORT3IFACE, NTCPPORT4IFACE, CWSHOSTIFACE, CLOGINIFACE, CSENHAIFACE, EIMPORTRESUIMAGEMIFACE) values" + dados_ieiface
+  db.insert(host,user,passwd,port,insert_ieiface)
+  nidiface = db.select_database(host,user,passwd,port,comando_nidiface)
+  for i in lista_recuperada[1]:
+    dados_iexam = ie_exam.gravar_copia(i,nidiface[0])
+    insert_ieexam = f"INSERT INTO ie_exam(NIDIFACE,CEXAMEQUIEXAM,CEXAMLISEXAM,CDESCEXAM,TINC,EDESMEMBRADOEXAM,NINDEXEXAM,CPARAMETROSEXAM,CDIFFROUNDEXAM) VALUES " +dados_iexam
+    db.insert(host,user,passwd,port,insert_ieexam)
+  comando_nidexam = f"SELECT NIDEXAM FROM ie_exam WHERE NIDIFACE = {nidiface[0]}"
+  retorno_nidexam = db.select_database(host,user,passwd,port,comando_nidexam,"ALL")
+  contador= 0
+  for i in lista_recuperada[2]:
+    for j in i:
+      dados_ievar = ie_var.gravar_copia(j,retorno_nidexam[contador][0])
+      insert_ievar = f"INSERT INTO ie_var(NIDEXAM,CNOMEEQUIVAR,CNOMELISVAR,NORDEMVAR,CFATORVAR,TINC,CEXAMEQUIVAR,NMINIMOVAR,NINFERIORVAR,NSUPERIORVAR,NMAXIMOVAR,CDECIMAISVAR) values" + dados_ievar
+      db.insert(host,user,passwd,port,insert_ievar)
+    contador=contador+1
+
 # -----------------------------------------------------------------------------FrontEnd--------------------------------------------------------------------------------------------------
 def janela_Conectar():
   sg.theme('DarkGrey12')
@@ -183,6 +221,9 @@ def janela_inserirmodelos():
   [sg.Button('Enviar',size=(20,1),button_color='green'), sg.Button('Voltar',size=(20,1),button_color='red') ]
   ]
   return sg.Window('Criar Modelo',layout10,finalize=True)
+  
+# criar_modeloface(host,user,passwd,port,interface,"Teste")
+# inserir_modeloface(host,user,passwd,port,"Teste.face")  
 
 jConexao,jOperacao,jProntos,jInserir,jExtrair,JBackup,Jumexame,Jmodelos,Jcriarmodelos,jInserirmodelos = janela_Conectar(),None,None,None,None,None,None,None,None,None
 
@@ -314,7 +355,7 @@ while True:
       Jcriarmodelos.hide()
       Jmodelos.un_hide()
     if eventos == "Criar":
-      criar_modelo(host,user,senha,porta,valores['mnemonico'],valores["interface_criar"],valores['nomemodelo'])
+      criar_modeloexam(host,user,senha,porta,valores['mnemonico'],valores["interface_criar"],valores['nomemodelo'])
       sg.popup("Arquivo criado com Sucesso !!!")
   if window == jInserirmodelos:
     if eventos == sg.WIN_CLOSED:
@@ -323,5 +364,5 @@ while True:
       jInserirmodelos.hide()
       Jmodelos.un_hide()
     if eventos == "Enviar":
-        inserir_modelo(host,user,senha,porta,valores['interface_inserir'],valores['caminho_modelo'])
-        sg.popup("Modelo inserido com Sucesso")    
+        inserir_modeloexam(host,user,senha,porta,valores['interface_inserir'],valores['caminho_modelo'])
+        sg.popup("Modelo inserido com Sucesso")      

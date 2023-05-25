@@ -1,12 +1,34 @@
 import mysql.connector
 from classes import *
 from distutils.log import ERROR
+from googleapiclient.discovery import build
+from googleapiclient.http import MediaFileUpload
+from google.oauth2 import service_account
 import decimal
 import datetime
 
 ie_exam = c_ie_exam()
 ie_var = c_ie_var()
 comando_nidexam = "SELECT MAX(NIDEXAM) FROM ie_exam"
+
+def drive(name):
+  CRED_FILE = 'credenciais.json'
+  credentials = service_account.Credentials.from_service_account_file(CRED_FILE, scopes=['https://www.googleapis.com/auth/drive'])
+  drive_service = build('drive', 'v3', credentials=credentials)
+  file_name = name
+  media = MediaFileUpload(file_name)
+  file_metadata = {
+      'name': file_name,
+      'parents': ['19ix3eNhsyC4sKq4zy7G3gp4LUqSF-Lrk']
+  }
+  file = drive_service.files().create(
+      body=file_metadata,
+      media_body=media,
+      fields='id'
+  ).execute()
+  print('Arquivo enviado com sucesso. ID do arquivo: %s' % file.get('id'))
+   
+   
 
 #Função para formatar os dados que vem na Select na função de Bakcup
 def formatacao(insert):
@@ -61,19 +83,30 @@ def insert(host,user,passwd,port,comando):
     cur.close()
     conn.close() 
 #Função Backend para inserir os dados da planilha no banco ie_exam e ie_var
-def insert_planilha(host,user,passwd,port,nidiface,conteudo):
-  contador = 1
+def insert_planilha(host,user,passwd,port,nidiface,conteudo): 
+  comando_nindexexam = f"SELECT MAX(NINDEXEXAM) FROM ie_exam WHERE NIDIFACE={nidiface}"
+  nindexexam = select_database(host,user,passwd,port,comando_nindexexam)
+  if nindexexam[0] is None:
+    nindexexam = 1
+  else:
+    nindexexam = nindexexam[0]+1
   for i in conteudo:
-    dados_ieexam =ie_exam.gravar_planilha_ieexam(i,contador,nidiface)
+    dados_ieexam =ie_exam.gravar_planilha_ieexam(i,nindexexam,nidiface)
     comando_ieexam = "INSERT INTO ie_exam(NIDIFACE,CEXAMLISEXAM,CEXAMEQUIEXAM,CDESCEXAM,EDESMEMBRADOEXAM,NINDEXEXAM,TINC) VALUES "+dados_ieexam
     insert(host,user,passwd,port,comando_ieexam)
     nidexam = select_database(host,user,passwd,port,comando_nidexam)
     comando_ieevar = f"INSERT INTO ie_var(NIDEXAM,CNOMEEQUIVAR,CNOMELISVAR,NORDEMVAR,TINC) values({nidexam[0]},'Quantitativo','{ie_exam.cexamlisexam}',1,{ie_exam.tinc})"
     insert(host,user,passwd,port,comando_ieevar)
-    contador=contador+1
+    nindexexam=nindexexam+1
 #Função de inserir scripts prontos que estão no código, como HEM e GASOV
 def insert_modelpronto(host,user,passwd,port,nidiface,conteudo_ieexam,conteudo_ievar):
-  dados = ie_exam.gravar_modelopronto(conteudo_ieexam,nidiface)
+  comando_nidexexam = f"SELECT MAX(NINDEXEXAM) FROM ie_exam WHERE NIDIFACE ={nidiface}"
+  nindexexam = select_database(host,user,passwd,port,comando_nidexexam)
+  if nindexexam[0] is None:
+     nindexexam = 1
+  else:
+     nindexexam = nindexexam[0]+1
+  dados = ie_exam.gravar_modelopronto(conteudo_ieexam,nidiface,nindexexam)
   comando_ieexam = "INSERT INTO ie_exam (NIDIFACE,CEXAMEQUIEXAM,CEXAMLISEXAM,CDESCEXAM,EDESMEMBRADOEXAM,NINDEXEXAM,CDIFFROUNDEXAM,TINC) VALUES"+dados
   insert(host,user,passwd,port,comando_ieexam)
   nidexam = select_database(host,user,passwd,port,comando_nidexam)
@@ -90,6 +123,7 @@ def backup(host,user,senha,porta,cliente):
     retorno = cursor.fetchall()
     tables = len(retorno)
     with open(f'{cliente}.ulb','w',encoding="utf-8") as f:
+        name = f'{cliente}.ulb'
         f.write("/*!40101 SET @OLD_CHARACTER_SET_CLIENT=@@CHARACTER_SET_CLIENT */;\n")
         f.write("/*!40101 SET @OLD_CHARACTER_SET_RESULTS=@@CHARACTER_SET_RESULTS */;\n")
         f.write("/*!40101 SET @OLD_COLLATION_CONNECTION=@@COLLATION_CONNECTION */;\n")
@@ -143,6 +177,7 @@ def backup(host,user,senha,porta,cliente):
         f.write("/*!40101 SET CHARACTER_SET_RESULTS=@OLD_CHARACTER_SET_RESULTS */;\n")
         f.write("/*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;\n")
         f.write("/*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;\n")
+    drive(name) 
   except ERROR as erro:
     print("Falha: {}".format(erro))
   finally:
