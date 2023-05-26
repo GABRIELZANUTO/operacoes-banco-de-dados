@@ -195,8 +195,10 @@ def janela_modelos():
   layout8= [
   [sg.Text('Menu de Modelos', size=(30, 1), justification='center', font=("Helvetica", 13),
   relief=sg.RELIEF_RIDGE, k='-TEXT HEADING-', enable_events=True)],
-  [sg.Button('Criar Modelo',size=(15,2)),
-    sg.Button('Inserir Modelo',size=(15,2))],
+  [sg.Button('Criar Modelo Exam',size=(15,1)),
+    sg.Button('Inserir Modelo Exam',size=(15,1))],
+  [sg.Button('Criar Modelo Face',size=(15,1)),
+    sg.Button('Inserir Modelo Face',size=(15,1))],
   [sg.Button('Voltar',size=(32,1),button_color='red') ]
   ]
   return sg.Window('Menu Modelos', layout8,finalize=True)
@@ -221,11 +223,27 @@ def janela_inserirmodelos():
   [sg.Button('Enviar',size=(20,1),button_color='green'), sg.Button('Voltar',size=(20,1),button_color='red') ]
   ]
   return sg.Window('Criar Modelo',layout10,finalize=True)
-  
-# criar_modeloface(host,user,passwd,port,interface,"Teste")
-# inserir_modeloface(host,user,passwd,port,"Teste.face")  
 
-jConexao,jOperacao,jProntos,jInserir,jExtrair,JBackup,Jumexame,Jmodelos,Jcriarmodelos,jInserirmodelos = janela_Conectar(),None,None,None,None,None,None,None,None,None
+def janela_criarmodelosface():
+  sg.theme('DarkGrey12')
+  layout11= [
+  [sg.Text('ID da interface', size=20,font='Helvetica'),sg.Input(key='id_face',size =(10,1))],
+  [sg.Text('Nome do Modelo', size=20,font='Helvetica'),sg.Input(key='nomemodelo',size =(10,1))],
+  [sg.Button('Criar',size=(10,1),button_color='green'), sg.Button('Voltar',size=(10,1),button_color='red') ]
+  ]
+  return sg.Window('Criar Modelo',layout11,finalize=True)
+
+def janela_inserirmodelosface():
+  sg.theme('DarkGrey12')
+  layout12= [
+  [sg.Text('Selecione o Modelo', size=(40, 1), justification='center', font=("Helvetica", 13),
+  relief=sg.RELIEF_RIDGE, k='-TEXT HEADING-', enable_events=True)],
+  [sg.Input(key='caminho_modelo'), sg.FileBrowse()],
+  [sg.Button('Enviar',size=(20,1),button_color='green'), sg.Button('Voltar',size=(20,1),button_color='red') ]
+  ]
+  return sg.Window('Criar Modelo',layout12,finalize=True)  
+
+jConexao,jOperacao,jProntos,jInserir,jExtrair,JBackup,Jumexame,Jmodelos,Jcriarmodelos,jInserirmodelos,Jinserirface,Jcriarface = janela_Conectar(),None,None,None,None,None,None,None,None,None,None,None
 
 #Inicio das operações nas telas da interface
 while True:
@@ -342,12 +360,18 @@ while True:
     if eventos == "Voltar":
       Jmodelos.hide()
       jOperacao.un_hide()
-    if eventos =="Criar Modelo":
+    if eventos =="Criar Modelo Exam":
       Jmodelos.hide()
       Jcriarmodelos = janela_criarmodelos()
-    if eventos =="Inserir Modelo":
+    if eventos =="Inserir Modelo Exam":
       Jmodelos.hide()
       jInserirmodelos = janela_inserirmodelos()
+    if eventos == "Criar Modelo Face":
+       Jmodelos.hide()
+       Jcriarface = janela_criarmodelosface()
+    if eventos == "Inserir Modelo Face":
+       Jmodelos.hide()
+       Jinserirface = janela_inserirmodelosface()
   if window == Jcriarmodelos:
     if eventos == sg.WIN_CLOSED:
       break
@@ -365,4 +389,24 @@ while True:
       Jmodelos.un_hide()
     if eventos == "Enviar":
         inserir_modeloexam(host,user,senha,porta,valores['interface_inserir'],valores['caminho_modelo'])
-        sg.popup("Modelo inserido com Sucesso")      
+        sg.popup("Modelo inserido com Sucesso !!!")
+  if window == Jcriarface:
+    if eventos == sg.WIN_CLOSED:
+      break
+    if eventos == "Voltar":
+      Jcriarface.hide()
+      Jmodelos.un_hide()
+    if eventos == "Criar":
+      criar_modeloface(host,user,senha,porta,valores['id_face'],valores['nomemodelo'])
+      sg.popup("Modelo criado com sucesso !!!")
+  if window == Jinserirface:
+    if eventos == sg.WIN_CLOSED:
+      break
+    if eventos == "Voltar":
+      Jinserirface.hide()
+      Jmodelos.un_hide()
+    if eventos == "Enviar":
+      inserir_modeloface(host,user,senha,porta,valores['caminho_modelo'])
+      sg.popup("Interface inserida com sucesso !!!")
+  
+                   

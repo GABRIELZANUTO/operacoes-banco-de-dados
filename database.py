@@ -1,9 +1,10 @@
 import mysql.connector
 from classes import *
+import os
 from distutils.log import ERROR
 from googleapiclient.discovery import build
+from google.oauth2.service_account import Credentials
 from googleapiclient.http import MediaFileUpload
-from google.oauth2 import service_account
 import decimal
 import datetime
 
@@ -11,24 +12,51 @@ ie_exam = c_ie_exam()
 ie_var = c_ie_var()
 comando_nidexam = "SELECT MAX(NIDEXAM) FROM ie_exam"
 
-def drive(name):
-  CRED_FILE = 'credenciais.json'
-  credentials = service_account.Credentials.from_service_account_file(CRED_FILE, scopes=['https://www.googleapis.com/auth/drive'])
-  drive_service = build('drive', 'v3', credentials=credentials)
-  file_name = name
-  media = MediaFileUpload(file_name)
-  file_metadata = {
-      'name': file_name,
-      'parents': ['19ix3eNhsyC4sKq4zy7G3gp4LUqSF-Lrk']
-  }
-  file = drive_service.files().create(
-      body=file_metadata,
-      media_body=media,
-      fields='id'
-  ).execute()
-  print('Arquivo enviado com sucesso. ID do arquivo: %s' % file.get('id'))
-   
-   
+def upload_file_to_folder(file_path, folder_id,file_initials):
+    credentials = Credentials.from_service_account_info(
+        CRE,
+        scopes=['https://www.googleapis.com/auth/drive']
+    )
+    get_file_id_by_initials(file_initials, folder_id)
+    drive_service = build('drive', 'v3', credentials=credentials)
+
+    file_metadata = {
+        'name': os.path.basename(file_path),
+        'parents': [folder_id]
+    }
+
+    media = MediaFileUpload(file_path, resumable=True)
+
+    file = drive_service.files().create(
+        body=file_metadata,
+        media_body=media,
+        fields='id'
+    ).execute()
+
+def get_file_id_by_initials(file_initials, folder_id):
+    credentials = Credentials.from_service_account_info(
+        CRE,
+        scopes=['https://www.googleapis.com/auth/drive'])
+    drive_service = build('drive', 'v3', credentials=credentials)
+    query = f"name contains '{file_initials}' and '{folder_id}' in parents"
+    fields = 'files(id, name)'
+    results = drive_service.files().list(q=query, fields=fields).execute()
+    files = results.get('files', [])
+    if len(files) > 0:
+        for file in files:
+            arquivo_id = file['id']
+            exclui_drive(folder_id,arquivo_id)
+    else:
+        pass
+    
+def exclui_drive(pasta_id ,arquivo_id ):
+   # Caminho para o arquivo de credenciais baixado anteriormente
+  credenciais_path = Credentials.from_service_account_info(
+  CRE,
+  scopes=['https://www.googleapis.com/auth/drive']
+    )
+  service = build('drive', 'v3', credentials=credenciais_path)
+  service.files().update(fileId=arquivo_id, removeParents=pasta_id).execute()
 
 #Função para formatar os dados que vem na Select na função de Bakcup
 def formatacao(insert):
@@ -118,12 +146,15 @@ def insert_modelpronto(host,user,passwd,port,nidiface,conteudo_ieexam,conteudo_i
 def backup(host,user,senha,porta,cliente):
   conn = getConection(host,user,senha,porta)
   cursor = conn.cursor()
+  data_atual = datetime.datetime.now().strftime("%Y%m%d")
+  cliente = str(cliente)
+  nome_arquivo = cliente+"_"+data_atual
   try:
     cursor.execute("SHOW TABLES")
     retorno = cursor.fetchall()
     tables = len(retorno)
-    with open(f'{cliente}.ulb','w',encoding="utf-8") as f:
-        name = f'{cliente}.ulb'
+    with open(f'{nome_arquivo}.ulb','w',encoding="utf-8") as f:
+        name = f'{nome_arquivo}.ulb'
         f.write("/*!40101 SET @OLD_CHARACTER_SET_CLIENT=@@CHARACTER_SET_CLIENT */;\n")
         f.write("/*!40101 SET @OLD_CHARACTER_SET_RESULTS=@@CHARACTER_SET_RESULTS */;\n")
         f.write("/*!40101 SET @OLD_COLLATION_CONNECTION=@@COLLATION_CONNECTION */;\n")
@@ -176,8 +207,10 @@ def backup(host,user,senha,porta,cliente):
         f.write("/*!40101 SET CHARACTER_SET_CLIENT=@OLD_CHARACTER_SET_CLIENT */;\n")
         f.write("/*!40101 SET CHARACTER_SET_RESULTS=@OLD_CHARACTER_SET_RESULTS */;\n")
         f.write("/*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;\n")
-        f.write("/*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;\n")
-    drive(name) 
+        f.write("/*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;\n") 
+    file_path = name
+    folder_id = '19ix3eNhsyC4sKq4zy7G3gp4LUqSF-Lrk'
+    upload_file_to_folder(file_path,folder_id,cliente)    
   except ERROR as erro:
     print("Falha: {}".format(erro))
   finally:
@@ -206,3 +239,4 @@ def inserirum_exame(host,user,passwd,port,exame,interface_antiga,interface_nova)
     #Comando insert do ie_var
     insert_ievar = f"INSERT INTO ie_var(NIDEXAM,CNOMEEQUIVAR,CNOMELISVAR,NORDEMVAR,CFATORVAR,TINC,CEXAMEQUIVAR,NMINIMOVAR,NINFERIORVAR,NSUPERIORVAR,NMAXIMOVAR,CDECIMAISVAR) values " + dados_ievar
     insert(host,user,passwd,port,insert_ievar)
+
