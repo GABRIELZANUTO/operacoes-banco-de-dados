@@ -222,7 +222,7 @@ def janela_inserirmodelos():
   [sg.Input(key='caminho_modelo'), sg.FileBrowse()],
   [sg.Button('Enviar',size=(20,1),button_color='green'), sg.Button('Voltar',size=(20,1),button_color='red') ]
   ]
-  return sg.Window('Criar Modelo',layout10,finalize=True)
+  return sg.Window('Inseir Modelo Exam',layout10,finalize=True)
 
 def janela_criarmodelosface():
   sg.theme('DarkGrey12')
@@ -231,7 +231,7 @@ def janela_criarmodelosface():
   [sg.Text('Nome do Modelo', size=20,font='Helvetica'),sg.Input(key='nomemodelo',size =(10,1))],
   [sg.Button('Criar',size=(10,1),button_color='green'), sg.Button('Voltar',size=(10,1),button_color='red') ]
   ]
-  return sg.Window('Criar Modelo',layout11,finalize=True)
+  return sg.Window('Criar Modelo Face',layout11,finalize=True)
 
 def janela_inserirmodelosface():
   sg.theme('DarkGrey12')
@@ -241,9 +241,18 @@ def janela_inserirmodelosface():
   [sg.Input(key='caminho_modelo'), sg.FileBrowse()],
   [sg.Button('Enviar',size=(20,1),button_color='green'), sg.Button('Voltar',size=(20,1),button_color='red') ]
   ]
-  return sg.Window('Criar Modelo',layout12,finalize=True)  
+  return sg.Window('Inserir Modelo Face',layout12,finalize=True)
 
-jConexao,jOperacao,jProntos,jInserir,jExtrair,JBackup,Jumexame,Jmodelos,Jcriarmodelos,jInserirmodelos,Jinserirface,Jcriarface = janela_Conectar(),None,None,None,None,None,None,None,None,None,None,None
+def janela_confirmaexclusao(dados):
+  sg.theme('DarkGrey12')
+  layout6= [
+  [sg.Text('Foram encontrados os seguintes registros do cliente no drive', size=50,justification='center',font=("Helvetica"))],
+  [sg.Column([[sg.Listbox(values=dados, size=(55, 5),auto_size_text=True)]], justification='center', element_justification='center')],
+  [sg.Text('Deseja exlcuir esses registros e enviar o backup novo ?',size=50,justification='center',font=("Helvetica"))],
+  [sg.Button('Sim',button_color='green',size=(33,1)), sg.Button('Nao',button_color='red',size=(33,1)) ]
+  ]
+  return sg.Window('Exclusão', layout6,finalize=True)  
+jConexao,jOperacao,jProntos,jInserir,jExtrair,JBackup,Jumexame,Jmodelos,Jcriarmodelos,jInserirmodelos,Jinserirface,Jcriarface,Jconfirmadrive = janela_Conectar(),None,None,None,None,None,None,None,None,None,None,None,None
 
 #Inicio das operações nas telas da interface
 while True:
@@ -335,12 +344,16 @@ while True:
           jOperacao.un_hide()
           JBackup.hide()
       if eventos == "Gerar Backup":
-          try:
-              db.backup(host,user,senha,porta,valores['cliente'])
-              sg.popup('Backup Feito com Sucesso !!')
-          except ERROR as e:
-              sg.popup("Erro ao gerar backup")
-              print(e)
+        name,cliente =db.backup(host,user,senha,porta,valores['cliente'])
+        exclusoes = db.get_file_id_by_initials(cliente)
+        if exclusoes is False:
+            db.upload_file_to_folder(name)
+            sg.popup("Backup Enviado ao Drive")
+        else:
+            lista_confirma = []
+            for i in exclusoes:
+              lista_confirma.append(i['name'])
+            Jconfirmadrive = janela_confirmaexclusao(lista_confirma)
   if window == Jumexame:
       if eventos == sg.WIN_CLOSED:
           break
@@ -408,5 +421,17 @@ while True:
     if eventos == "Enviar":
       inserir_modeloface(host,user,senha,porta,valores['caminho_modelo'])
       sg.popup("Interface inserida com sucesso !!!")
-  
+  if window == Jconfirmadrive:
+    if eventos == sg.WIN_CLOSED:
+      break
+    if eventos == "Nao":
+       db.upload_file_to_folder(name)
+       Jconfirmadrive.hide()
+       sg.popup("Backup Enviado")
+    if eventos == "Sim":
+      for i in exclusoes:
+        db.exclui_drive(i['id'])
+      db.upload_file_to_folder(name)
+      Jconfirmadrive.hide()
+      sg.popup("Backup Enviado")  
                    

@@ -8,16 +8,18 @@ from googleapiclient.http import MediaFileUpload
 import decimal
 import datetime
 
+CRE = {
+}
 ie_exam = c_ie_exam()
 ie_var = c_ie_var()
 comando_nidexam = "SELECT MAX(NIDEXAM) FROM ie_exam"
 
-def upload_file_to_folder(file_path, folder_id,file_initials):
+def upload_file_to_folder(file_path):
+    folder_id = '19ix3eNhsyC4sKq4zy7G3gp4LUqSF-Lrk'
     credentials = Credentials.from_service_account_info(
         CRE,
         scopes=['https://www.googleapis.com/auth/drive']
     )
-    get_file_id_by_initials(file_initials, folder_id)
     drive_service = build('drive', 'v3', credentials=credentials)
 
     file_metadata = {
@@ -33,23 +35,22 @@ def upload_file_to_folder(file_path, folder_id,file_initials):
         fields='id'
     ).execute()
 
-def get_file_id_by_initials(file_initials, folder_id):
+def get_file_id_by_initials(file_initials):
     credentials = Credentials.from_service_account_info(
         CRE,
         scopes=['https://www.googleapis.com/auth/drive'])
     drive_service = build('drive', 'v3', credentials=credentials)
-    query = f"name contains '{file_initials}' and '{folder_id}' in parents"
+    query = f"name contains '{file_initials}' and '19ix3eNhsyC4sKq4zy7G3gp4LUqSF-Lrk' in parents"
     fields = 'files(id, name)'
     results = drive_service.files().list(q=query, fields=fields).execute()
     files = results.get('files', [])
-    if len(files) > 0:
-        for file in files:
-            arquivo_id = file['id']
-            exclui_drive(folder_id,arquivo_id)
+    if len(files) >0 and len(files) < 5:
+      return files
     else:
-        pass
+      return False
     
-def exclui_drive(pasta_id ,arquivo_id ):
+def exclui_drive(arquivo_id):
+  pasta_id = "19ix3eNhsyC4sKq4zy7G3gp4LUqSF-Lrk"
    # Caminho para o arquivo de credenciais baixado anteriormente
   credenciais_path = Credentials.from_service_account_info(
   CRE,
@@ -208,9 +209,7 @@ def backup(host,user,senha,porta,cliente):
         f.write("/*!40101 SET CHARACTER_SET_RESULTS=@OLD_CHARACTER_SET_RESULTS */;\n")
         f.write("/*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;\n")
         f.write("/*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;\n") 
-    file_path = name
-    folder_id = '19ix3eNhsyC4sKq4zy7G3gp4LUqSF-Lrk'
-    upload_file_to_folder(file_path,folder_id,cliente)    
+    return name,cliente
   except ERROR as erro:
     print("Falha: {}".format(erro))
   finally:
