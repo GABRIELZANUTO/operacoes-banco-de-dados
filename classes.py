@@ -218,6 +218,3 @@ class c_ie_face():
         self.eimportresuimagemiface=validacao_caracter(lista[34])
 
         return f"({self.nidequi},{self.nidsetor},'{self.cnomeiface}','{self.etipoenviface}','{self.etipocomiface}',{self.nportaiface},{self.nbaudiface},{self.nbitsdadosiface},{self.nbitsparadaiface},{self.nparidadeiface},'{self.cbufferentradaiface}','{self.cbuffersaidaiface}',{self.ntcpportiface},{self.ntcpport2iface},'{self.cpathpediface}','{self.cpathresiface}','{self.eativoiface}',{self.tinc},{self.nrackiface},{self.nposrackiface},'{self.erevisariface}','{self.econfirmanormaisiface}','{self.eenviapariface}','{self.ewlautoiface}',{self.nqtdwlautoiface},'{self.eusaprot2iface}','{self.eusartsiface}','{self.ctcphostiface}','{self.cpathimagemiface}','{self.etrocaseparadoriface}',{self.ntcpport3iface},{self.ntcpport4iface},'{self.cwshostiface}','{self.cloginiface}','{self.csenhaiface}','{self.eimportresuimagemiface}')"
-
-
-

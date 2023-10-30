@@ -4,6 +4,7 @@ import database as db
 from distutils.log import ERROR
 from classes import *
 import pickle
+import templates as temp
 
 ie_exam = c_ie_exam()
 ie_var = c_ie_var()
@@ -116,143 +117,7 @@ def inserir_modeloface(host,user,passwd,port,caminho_modelo):
       db.insert(host,user,passwd,port,insert_ievar)
     contador=contador+1
 
-# -----------------------------------------------------------------------------FrontEnd--------------------------------------------------------------------------------------------------
-def janela_Conectar():
-  sg.theme('DarkGrey12')
-  layout5= [
-  [sg.Text('Conexão com o Banco', size=(30, 1), justification='center', font=("Helvetica", 13),
-  relief=sg.RELIEF_RIDGE, k='-TEXT HEADING-', enable_events=True)],
-  [sg.Text('Host',size=8),sg.Input(key='host',size=(20,1))],
-  [sg.Text('Usuario',size=8),sg.Input(key='user',size=(20,1))],
-  [sg.Text('Senha  ',size=8),sg.Input(key='senha',size=(20,1),password_char='*')],
-  [sg.Text('Porta  ',size=8),sg.Input(key='porta',size=(20,1))],
-  [sg.Button('Conectar',size=8,button_color='green')]
-  ]
-  return sg.Window('Conexão', layout5,finalize=True)
-
-def janela_Prontos():
-  sg.theme('DarkGrey12')
-  layout5= [
-  [sg.Text('Escolha um script', size=(30, 1), justification='center', font=("Helvetica", 13),
-  relief=sg.RELIEF_RIDGE, k='-TEXT HEADING-', enable_events=True)],
-  [sg.Combo(['HEM', 'GAS'],size =(37,1),key='escolhascript')],
-  [sg.Text('Id Interface',size=8),sg.Input(key='numeroPlanilha',size =(20,1))],
-  [sg.Button('Enviar',size=8,button_color='green'), sg.Button('Voltar',button_color='red') ]
-  ]
-  return sg.Window('Modelos Prontos', layout5,finalize=True)
-
-def janela_Operacao():
-  sg.theme('DarkGrey12')
-  layout1= [
-  [sg.Text('Escolha uma opção', size=(29, 1), justification='center', font=("Helvetica", 13),
-  relief=sg.RELIEF_RIDGE, k='-TEXT HEADING-', enable_events=True)],
-  [sg.Button('Modelos Prontos',size=(15,1)),
-    sg.Button('Inserir Planilha',size=(15,1))],
-  [sg.Button('Extrair Config',size=(15,1)),
-    sg.Button('Backup',size=(15,1))],
-  [sg.Button('Copiar um Exame',size=(15,1)),
-    sg.Button('Modelos',size=(15,1))]  
-  ]
-  return sg.Window('Decisão', layout1,finalize=True)
-
-def janela_inserir():
-  sg.theme('DarkGrey12')
-  layout2= [
-  [sg.Text('Id inter.', size=8),sg.Input(key='numeroPlanilha',size =(20,1))],
-  [sg.Button('Enviar',button_color='green'), sg.Button('Voltar',button_color='red') ]
-  ]
-  return sg.Window('Inserir planilha', layout2,finalize=True)
-
-def janela_extrair():
-  sg.theme('DarkGrey12')
-  layout6= [
-  [sg.Text('Id interface', size=10),sg.Input(key='numeroPlanilha',size =(24,1))],
-  [sg.Button('Gerar',button_color='green',size=(15,1)), sg.Button('Voltar',button_color='red',size=(15,1)) ]
-  ]
-  return sg.Window('Extrair Configurações', layout6,finalize=True)
-
-def janela_backup():
-  sg.theme('DarkGrey12')
-  layout6= [
-  [sg.Text('Adm do Cliente', size=15,font='Helvetica')],
-  [sg.Input(key='cliente',size =(25,1))],
-  [sg.Button('Gerar Backup',size=(10,1),button_color='green'), sg.Button('Voltar',size=(10,1),button_color='red') ]
-  ]
-  return sg.Window('Backup', layout6,finalize=True)
-
-def janela_umexame():
-  sg.theme('DarkGrey12')
-  layout7= [
-  [sg.Text('Mnemonico do exame', size=20,font='Helvetica'),sg.Input(key='mnemonico',size =(10,1))],
-  [sg.Text('Id da interface original', size=20,font='Helvetica'),sg.Input(key='interfaceoriginal',size =(10,1))],
-  [sg.Text('Id da interface destino', size=20,font='Helvetica'),sg.Input(key='interfacedestino',size =(10,1))],
-  [sg.Button('Copiar',size=(10,1),button_color='green'), sg.Button('Voltar',size=(10,1),button_color='red') ]
-  ]
-  return sg.Window('Copiar exame', layout7,finalize=True)
-
-def janela_modelos():
-  sg.theme('DarkGrey12')
-  layout8= [
-  [sg.Text('Menu de Modelos', size=(30, 1), justification='center', font=("Helvetica", 13),
-  relief=sg.RELIEF_RIDGE, k='-TEXT HEADING-', enable_events=True)],
-  [sg.Button('Criar Modelo Exam',size=(15,1)),
-    sg.Button('Inserir Modelo Exam',size=(15,1))],
-  [sg.Button('Criar Modelo Face',size=(15,1)),
-    sg.Button('Inserir Modelo Face',size=(15,1))],
-  [sg.Button('Voltar',size=(32,1),button_color='red') ]
-  ]
-  return sg.Window('Menu Modelos', layout8,finalize=True)
-
-def janela_criarmodelos():
-  sg.theme('DarkGrey12')
-  layout9= [
-  [sg.Text('Mnemonico do exame', size=20,font='Helvetica'),sg.Input(key='mnemonico',size =(10,1))],
-  [sg.Text('Id da interface', size=20,font='Helvetica'),sg.Input(key='interface_criar',size =(10,1))],
-  [sg.Text('Nome do Modelo', size=20,font='Helvetica'),sg.Input(key='nomemodelo',size =(10,1))],
-  [sg.Button('Criar',size=(10,1),button_color='green'), sg.Button('Voltar',size=(10,1),button_color='red') ]
-  ]
-  return sg.Window('Criar Modelo',layout9,finalize=True)
-
-def janela_inserirmodelos():
-  sg.theme('DarkGrey12')
-  layout10= [
-  [sg.Text('Id da interface', size=15,font='Helvetica'),sg.Input(key='interface_inserir',size =(30,1))],
-  [sg.Text('Selecione o Modelo', size=(40, 1), justification='center', font=("Helvetica", 13),
-  relief=sg.RELIEF_RIDGE, k='-TEXT HEADING-', enable_events=True)],
-  [sg.Input(key='caminho_modelo'), sg.FileBrowse()],
-  [sg.Button('Enviar',size=(20,1),button_color='green'), sg.Button('Voltar',size=(20,1),button_color='red') ]
-  ]
-  return sg.Window('Inseir Modelo Exam',layout10,finalize=True)
-
-def janela_criarmodelosface():
-  sg.theme('DarkGrey12')
-  layout11= [
-  [sg.Text('ID da interface', size=20,font='Helvetica'),sg.Input(key='id_face',size =(10,1))],
-  [sg.Text('Nome do Modelo', size=20,font='Helvetica'),sg.Input(key='nomemodelo',size =(10,1))],
-  [sg.Button('Criar',size=(10,1),button_color='green'), sg.Button('Voltar',size=(10,1),button_color='red') ]
-  ]
-  return sg.Window('Criar Modelo Face',layout11,finalize=True)
-
-def janela_inserirmodelosface():
-  sg.theme('DarkGrey12')
-  layout12= [
-  [sg.Text('Selecione o Modelo', size=(40, 1), justification='center', font=("Helvetica", 13),
-  relief=sg.RELIEF_RIDGE, k='-TEXT HEADING-', enable_events=True)],
-  [sg.Input(key='caminho_modelo'), sg.FileBrowse()],
-  [sg.Button('Enviar',size=(20,1),button_color='green'), sg.Button('Voltar',size=(20,1),button_color='red') ]
-  ]
-  return sg.Window('Inserir Modelo Face',layout12,finalize=True)
-
-def janela_confirmaexclusao(dados):
-  sg.theme('DarkGrey12')
-  layout6= [
-  [sg.Text('Foram encontrados os seguintes registros do cliente no drive', size=50,justification='center',font=("Helvetica"))],
-  [sg.Column([[sg.Listbox(values=dados, size=(55, 5),auto_size_text=True)]], justification='center', element_justification='center')],
-  [sg.Text('Deseja exlcuir esses registros e enviar o backup novo ?',size=50,justification='center',font=("Helvetica"))],
-  [sg.Button('Sim',button_color='green',size=(33,1)), sg.Button('Nao',button_color='red',size=(33,1)) ]
-  ]
-  return sg.Window('Exclusão', layout6,finalize=True)  
-jConexao,jOperacao,jProntos,jInserir,jExtrair,JBackup,Jumexame,Jmodelos,Jcriarmodelos,jInserirmodelos,Jinserirface,Jcriarface,Jconfirmadrive = janela_Conectar(),None,None,None,None,None,None,None,None,None,None,None,None
+jConexao,jOperacao,jProntos,jInserir,jExtrair,JBackup,Jumexame,Jmodelos,Jcriarmodelos,jInserirmodelos,Jinserirface,Jcriarface = temp.janela_Operacao(),None,None,None,None,None,None,None,None,None,None,None
 
 #Inicio das operações nas telas da interface
 while True:
@@ -268,7 +133,7 @@ while True:
               porta = valores['porta']
               db.getConection(host,user, senha, porta)
               jConexao.hide()
-              jOperacao=janela_Operacao()
+              jOperacao=temp.janela_Operacao()
           except Exception as e:
               sg.popup('Dados Invalidos')
               window.FindElement('user').Update('')
@@ -279,22 +144,22 @@ while True:
           break
       if eventos == "Modelos Prontos":
           jOperacao.hide()
-          jProntos=janela_Prontos() 
+          jProntos=temp.janela_Prontos() 
       if eventos == "Inserir Planilha":
           jOperacao.hide()
-          jInserir=janela_inserir()
+          jInserir=temp.janela_inserir()
       if eventos == "Extrair Config":
           jOperacao.hide()
-          jExtrair=janela_extrair() 
+          jExtrair=temp.janela_extrair() 
       if eventos =='Backup':
           jOperacao.hide()
-          JBackup=janela_backup()
+          JBackup=temp.janela_backup()
       if eventos == 'Copiar um Exame':
           jOperacao.hide()
-          Jumexame = janela_umexame()
+          Jumexame = temp.janela_umexame()
       if eventos == 'Modelos':
           jOperacao.hide()
-          Jmodelos = janela_modelos()
+          Jmodelos = temp.janela_modelos()
   if window == jInserir:
       if eventos == sg.WIN_CLOSED:
           break
@@ -307,7 +172,7 @@ while True:
               sg.popup("Dados gravados com Sucesso !!!")
           except ERROR as e:
               sg.popup("Erro ao gravar dados")
-              print(e)
+    
   if window == jProntos:
       if eventos == sg.WIN_CLOSED:
           break
@@ -320,14 +185,14 @@ while True:
               sg.popup("Gravado com sucesso !!!")
           except ERROR as e:
               sg.popup("Erro ao Gravar")
-              print(e)
+    
       if eventos == "Enviar" and valores['escolhascript'] == "GAS":
           try:
               insert_gav(host,user,senha,porta,valores['numeroPlanilha'])
               sg.popup("Gravado com sucesso !!!")
           except ERROR as e:
               sg.popup("Erro ao Gravar")
-              print(e)
+    
   if window == jExtrair:
       if eventos == sg.WIN_CLOSED:
           break
@@ -344,16 +209,8 @@ while True:
           jOperacao.un_hide()
           JBackup.hide()
       if eventos == "Gerar Backup":
-        name,cliente =db.backup(host,user,senha,porta,valores['cliente'])
-        exclusoes = db.get_file_id_by_initials(cliente)
-        if exclusoes is False:
-            db.upload_file_to_folder(name)
-            sg.popup("Backup Enviado ao Drive")
-        else:
-            lista_confirma = []
-            for i in exclusoes:
-              lista_confirma.append(i['name'])
-            Jconfirmadrive = janela_confirmaexclusao(lista_confirma)
+        file_path,token =db.backup(host,user,senha,porta,valores['cliente'])
+        db.manda_api(file_path,token)
   if window == Jumexame:
       if eventos == sg.WIN_CLOSED:
           break
@@ -366,7 +223,7 @@ while True:
               sg.popup("Exame Copiado com sucesso !!!")
           except ERROR as e:
               sg.popup("Erro ao Copiar !!!") 
-              print(e)
+    
   if window == Jmodelos:
     if eventos == sg.WIN_CLOSED:
       break
@@ -375,16 +232,16 @@ while True:
       jOperacao.un_hide()
     if eventos =="Criar Modelo Exam":
       Jmodelos.hide()
-      Jcriarmodelos = janela_criarmodelos()
+      Jcriarmodelos = temp.janela_criarmodelos()
     if eventos =="Inserir Modelo Exam":
       Jmodelos.hide()
-      jInserirmodelos = janela_inserirmodelos()
+      jInserirmodelos = temp.janela_inserirmodelos()
     if eventos == "Criar Modelo Face":
        Jmodelos.hide()
-       Jcriarface = janela_criarmodelosface()
+       Jcriarface = temp.janela_criarmodelosface()
     if eventos == "Inserir Modelo Face":
        Jmodelos.hide()
-       Jinserirface = janela_inserirmodelosface()
+       Jinserirface = temp.janela_inserirmodelosface()
   if window == Jcriarmodelos:
     if eventos == sg.WIN_CLOSED:
       break
@@ -421,17 +278,4 @@ while True:
     if eventos == "Enviar":
       inserir_modeloface(host,user,senha,porta,valores['caminho_modelo'])
       sg.popup("Interface inserida com sucesso !!!")
-  if window == Jconfirmadrive:
-    if eventos == sg.WIN_CLOSED:
-      break
-    if eventos == "Nao":
-       db.upload_file_to_folder(name)
-       Jconfirmadrive.hide()
-       sg.popup("Backup Enviado")
-    if eventos == "Sim":
-      for i in exclusoes:
-        db.exclui_drive(i['id'])
-      db.upload_file_to_folder(name)
-      Jconfirmadrive.hide()
-      sg.popup("Backup Enviado")  
                    
