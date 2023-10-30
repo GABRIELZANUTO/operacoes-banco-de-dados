@@ -174,7 +174,7 @@ def janela_extrair():
 def janela_backup():
   sg.theme('DarkGrey12')
   layout6= [
-  [sg.Text('Adm do Cliente', size=15,font='Helvetica')],
+  [sg.Text('Token do Cliente', size=15,font='Helvetica')],
   [sg.Input(key='cliente',size =(25,1))],
   [sg.Button('Gerar Backup',size=(10,1),button_color='green'), sg.Button('Voltar',size=(10,1),button_color='red') ]
   ]
@@ -243,16 +243,7 @@ def janela_inserirmodelosface():
   ]
   return sg.Window('Inserir Modelo Face',layout12,finalize=True)
 
-def janela_confirmaexclusao(dados):
-  sg.theme('DarkGrey12')
-  layout6= [
-  [sg.Text('Foram encontrados os seguintes registros do cliente no drive', size=50,justification='center',font=("Helvetica"))],
-  [sg.Column([[sg.Listbox(values=dados, size=(55, 5),auto_size_text=True)]], justification='center', element_justification='center')],
-  [sg.Text('Deseja exlcuir esses registros e enviar o backup novo ?',size=50,justification='center',font=("Helvetica"))],
-  [sg.Button('Sim',button_color='green',size=(33,1)), sg.Button('Nao',button_color='red',size=(33,1)) ]
-  ]
-  return sg.Window('Exclusão', layout6,finalize=True)  
-jConexao,jOperacao,jProntos,jInserir,jExtrair,JBackup,Jumexame,Jmodelos,Jcriarmodelos,jInserirmodelos,Jinserirface,Jcriarface,Jconfirmadrive = janela_Conectar(),None,None,None,None,None,None,None,None,None,None,None,None
+jConexao,jOperacao,jProntos,jInserir,jExtrair,JBackup,Jumexame,Jmodelos,Jcriarmodelos,jInserirmodelos,Jinserirface,Jcriarface = janela_Conectar(),None,None,None,None,None,None,None,None,None,None,None,None
 
 #Inicio das operações nas telas da interface
 while True:
@@ -344,16 +335,8 @@ while True:
           jOperacao.un_hide()
           JBackup.hide()
       if eventos == "Gerar Backup":
-        name,cliente =db.backup(host,user,senha,porta,valores['cliente'])
-        exclusoes = db.get_file_id_by_initials(cliente)
-        if exclusoes is False:
-            db.upload_file_to_folder(name)
-            sg.popup("Backup Enviado ao Drive")
-        else:
-            lista_confirma = []
-            for i in exclusoes:
-              lista_confirma.append(i['name'])
-            Jconfirmadrive = janela_confirmaexclusao(lista_confirma)
+        file_path,token =db.backup(host,user,senha,porta,valores['cliente'])
+        db.manda_api(file_path,token)
   if window == Jumexame:
       if eventos == sg.WIN_CLOSED:
           break
@@ -421,17 +404,4 @@ while True:
     if eventos == "Enviar":
       inserir_modeloface(host,user,senha,porta,valores['caminho_modelo'])
       sg.popup("Interface inserida com sucesso !!!")
-  if window == Jconfirmadrive:
-    if eventos == sg.WIN_CLOSED:
-      break
-    if eventos == "Nao":
-       db.upload_file_to_folder(name)
-       Jconfirmadrive.hide()
-       sg.popup("Backup Enviado")
-    if eventos == "Sim":
-      for i in exclusoes:
-        db.exclui_drive(i['id'])
-      db.upload_file_to_folder(name)
-      Jconfirmadrive.hide()
-      sg.popup("Backup Enviado")  
                    

@@ -7,6 +7,7 @@ from google.oauth2.service_account import Credentials
 from googleapiclient.http import MediaFileUpload
 import decimal
 import datetime
+import requests
 
 CRE = {
 }
@@ -239,3 +240,16 @@ def inserirum_exame(host,user,passwd,port,exame,interface_antiga,interface_nova)
     insert_ievar = f"INSERT INTO ie_var(NIDEXAM,CNOMEEQUIVAR,CNOMELISVAR,NORDEMVAR,CFATORVAR,TINC,CEXAMEQUIVAR,NMINIMOVAR,NINFERIORVAR,NSUPERIORVAR,NMAXIMOVAR,CDECIMAISVAR) values " + dados_ievar
     insert(host,user,passwd,port,insert_ievar)
 
+
+def manda_api(file_path,token):
+  url = 'https://backup.gszanuto.com.br/api/backup/upload' 
+  headers ={
+        'Authorization' : f'{token}'
+    }
+  files = {'backup': (f'{file_path}', open(file_path, 'rb'))}
+  response = requests.post(url, files=files,headers=headers)
+  if response.status_code == 201:
+    print(' nao caguei nas calças')
+  else:
+    print('caguei nas calças')
+  
