@@ -1,0 +1,882 @@
+/*!40101 SET @OLD_CHARACTER_SET_CLIENT=@@CHARACTER_SET_CLIENT */;
+/*!40101 SET @OLD_CHARACTER_SET_RESULTS=@@CHARACTER_SET_RESULTS */;
+/*!40101 SET @OLD_COLLATION_CONNECTION=@@COLLATION_CONNECTION */;
+/*!40101 SET NAMES utf8 */;
+/*!40103 SET @OLD_TIME_ZONE=@@TIME_ZONE */;
+/*!40103 SET TIME_ZONE='+00:00' */;
+/*!40014 SET @OLD_UNIQUE_CHECKS=@@UNIQUE_CHECKS, UNIQUE_CHECKS=0 */;/*!40014 SET @OLD_FOREIGN_KEY_CHECKS=@@FOREIGN_KEY_CHECKS, FOREIGN_KEY_CHECKS=0 */;
+/*!40101 SET @OLD_SQL_MODE=@@SQL_MODE, SQL_MODE='NO_AUTO_VALUE_ON_ZERO' */;
+/*!40111 SET @OLD_SQL_NOTES=@@SQL_NOTES, SQL_NOTES=0 */;
+
+
+USE equipamento;
+DROP TABLE IF EXISTS `ie_amostra`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!40101 SET character_set_client = utf8 */;
+
+CREATE TABLE `ie_amostra` (
+  `NIDAMOSTRA` int(11) NOT NULL AUTO_INCREMENT COMMENT 'ID da amostra',
+  `NIDIFACE` int(11) NOT NULL COMMENT 'ID da interface',
+  `CSTATUSAMOSTRA` enum('P','E','A','R','L','C') DEFAULT NULL COMMENT 'Status da Amostra:',
+  `CCODIAMOSTRA` varchar(12) DEFAULT NULL COMMENT 'Codigo da amostra enviado pelo Unilab',
+  `CEXAMLISEXAM` varchar(50) DEFAULT NULL COMMENT 'Exame no LIS',
+  `CEXAMEQUIEXAM` varchar(50) DEFAULT NULL COMMENT 'Exame no Equipamento',
+  `CCODILISMTBI` varchar(50) DEFAULT NULL COMMENT 'Codigo do Material no LIS.',
+  `CRACKNUMAMOSTRA` varchar(10) DEFAULT NULL COMMENT 'Numero do Rack que esta a amostra',
+  `CRACKPOSAMOSTRA` varchar(10) DEFAULT NULL COMMENT 'Posicao da amostra no rack',
+  `CNOMEPACIAMOSTRA` varchar(100) DEFAULT NULL COMMENT 'Nome do paciente',
+  `CCODIPACIAMOSTRA` varchar(20) DEFAULT NULL COMMENT 'Codigo do paciente',
+  `ESEXOAMOSTRA` enum('M','F','I') DEFAULT NULL COMMENT 'Sexo do paciente:',
+  `CCORAMOSTRA` varchar(1) DEFAULT NULL COMMENT 'Cor do Paciente',
+  `NIDADEAMOSTRA` varchar(12) DEFAULT NULL COMMENT 'Idade do paciente',
+  `DDATANASCAMOSTRA` date DEFAULT NULL COMMENT 'Data de nascimento do Paciente',
+  `CNOMEMEDIAMOSTRA` varchar(50) DEFAULT NULL COMMENT 'Nome do Medico',
+  `DCOLETAAMOSTRA` datetime DEFAULT NULL COMMENT 'Data de Coleta da amostra',
+  `DIMPORTLISAMOSTRA` datetime DEFAULT NULL COMMENT 'Data e hora que importou no LIS',
+  `NIDUSUAIMPORTAMOSTRA` int(11) DEFAULT NULL COMMENT 'ID do usuário que importou amostra',
+  `DEXECAMOSTRA` datetime DEFAULT NULL COMMENT 'Data e hora de execução',
+  `NIDUSUAEXECAMOSTRA` int(11) DEFAULT NULL COMMENT 'ID do usuário que executou a amostra',
+  `DEXPORTLISAMOSTRA` datetime DEFAULT NULL COMMENT 'Data e hora que exportou do LIS',
+  `NIDUSUAEXPORTAMOSTRA` int(11) DEFAULT NULL COMMENT 'ID do usuário que exportou a amostra',
+  `EURGENTEAMOSTRA` enum('S','N') DEFAULT NULL COMMENT 'Flag Urgente',
+  `NIDUSUACANCELAMOSTRA` int(11) DEFAULT NULL COMMENT 'ID do usuário que cancelou a amostra',
+  `DCANCELAMOSTRA` datetime DEFAULT NULL COMMENT 'Data em que a amostra foi reenviada',
+  `NIDUSUAREENVEQUIAMOSTRA` int(11) DEFAULT NULL COMMENT 'Id do usuário que reenviou a amostra ao equipamento',
+  `DREENVEQUIAMOSTRA` datetime DEFAULT NULL COMMENT 'Data que foi reenviada a amostra ao equipamento',
+  `NIDUSUAREENVLISAMOSTRA` int(11) DEFAULT NULL COMMENT 'Usuário que reenviou o ao LIS o resultado da amostra',
+  `DREENVLISAMOSTRA` datetime DEFAULT NULL COMMENT 'Data que foi reenviada ao LIS o resultado da amostra',
+  `EPAIAMOSTRA` enum('S','N') NOT NULL DEFAULT 'N' COMMENT 'S= Identifica que é uma amostra pai de desmembrament',
+  `NIDPAIAMOSTRA` int(11) DEFAULT NULL COMMENT 'Este campo Identifica Quem é a amostra Pai deste Desmenbrament',
+  `ENORMALIDADEAMOSTRA` enum('N','F','I') DEFAULT NULL COMMENT 'Esse campo indica em qual faixa de resultado a amostra se enquadrou.',
+  `NIDUSUAREVISAAMOSTRA` int(11) DEFAULT NULL COMMENT 'Usuário que mudou status de A para R(revisou',
+  `DREVISAAMOSTRA` datetime DEFAULT NULL COMMENT 'Data em que a amostra foi revisada',
+  `NIDREENVIOEQUIAMOSTRA` int(11) DEFAULT NULL COMMENT 'ID da amostra original que foi reenviada',
+  `NIDEXAM` int(11) NOT NULL COMMENT 'ID do Exame.',
+  `NPESOPACIAMOSTRA` decimal(5,1) DEFAULT NULL,
+  `NALTURAPACIAMOSTRA` decimal(4,2) DEFAULT NULL,
+  `CCODIPOSTPEDIAMOSTRA` varchar(9) DEFAULT NULL,
+  PRIMARY KEY (`NIDAMOSTRA`,`NIDIFACE`),
+  KEY `IX_NIDPAIAMOSTRA` (`NIDPAIAMOSTRA`),
+  KEY `fk_ie_amostra_ie_exam_idx` (`NIDEXAM`)
+) ENGINE=InnoDB DEFAULT CHARSET=latin1;
+/*!40101 SET character_set_client = @saved_cs_client */;
+DROP TABLE IF EXISTS `ie_amostra_hist`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!40101 SET character_set_client = utf8 */;
+
+CREATE TABLE `ie_amostra_hist` (
+  `NIDAMOSTRA` int(11) NOT NULL AUTO_INCREMENT,
+  `NIDIFACE` int(11) NOT NULL,
+  `CSTATUSAMOSTRA` enum('P','E','A','R','L','C') DEFAULT NULL,
+  `CCODIAMOSTRA` varchar(12) DEFAULT NULL,
+  `CEXAMLISEXAM` varchar(50) DEFAULT NULL,
+  `CEXAMEQUIEXAM` varchar(50) DEFAULT NULL,
+  `CCODILISMTBI` varchar(50) DEFAULT NULL,
+  `CRACKNUMAMOSTRA` varchar(10) DEFAULT NULL,
+  `CRACKPOSAMOSTRA` varchar(10) DEFAULT NULL,
+  `CNOMEPACIAMOSTRA` varchar(100) DEFAULT NULL,
+  `CCODIPACIAMOSTRA` varchar(20) DEFAULT NULL,
+  `ESEXOAMOSTRA` enum('M','F','I') DEFAULT NULL,
+  `CCORAMOSTRA` varchar(1) DEFAULT NULL,
+  `NIDADEAMOSTRA` varchar(12) DEFAULT NULL,
+  `DDATANASCAMOSTRA` date DEFAULT NULL,
+  `CNOMEMEDIAMOSTRA` varchar(50) DEFAULT NULL,
+  `DCOLETAAMOSTRA` datetime DEFAULT NULL,
+  `DIMPORTLISAMOSTRA` datetime DEFAULT NULL,
+  `NIDUSUAIMPORTAMOSTRA` int(11) DEFAULT NULL,
+  `DEXECAMOSTRA` datetime DEFAULT NULL,
+  `NIDUSUAEXECAMOSTRA` int(11) DEFAULT NULL,
+  `DEXPORTLISAMOSTRA` datetime DEFAULT NULL,
+  `NIDUSUAEXPORTAMOSTRA` int(11) DEFAULT NULL,
+  `EURGENTEAMOSTRA` enum('S','N') DEFAULT NULL,
+  `NIDUSUACANCELAMOSTRA` int(11) DEFAULT NULL,
+  `DCANCELAMOSTRA` datetime DEFAULT NULL,
+  `NIDUSUAREENVEQUIAMOSTRA` int(11) DEFAULT NULL,
+  `DREENVEQUIAMOSTRA` datetime DEFAULT NULL,
+  `NIDUSUAREENVLISAMOSTRA` int(11) DEFAULT NULL,
+  `DREENVLISAMOSTRA` datetime DEFAULT NULL,
+  `EPAIAMOSTRA` enum('S','N') NOT NULL DEFAULT 'N' COMMENT 'S= Identifica que é uma amostra pai de desmenbrament',
+  `NIDPAIAMOSTRA` int(11) DEFAULT NULL COMMENT 'Este campo Identifica Quem é a amostra Pai deste Desmenbrament',
+  `ENORMALIDADEAMOSTRA` enum('N','F','I') DEFAULT NULL,
+  `NIDUSUAREVISAAMOSTRA` int(11) DEFAULT NULL,
+  `DREVISAAMOSTRA` datetime DEFAULT NULL,
+  `NIDREENVIOEQUIAMOSTRA` int(11) DEFAULT NULL,
+  `NIDEXAM` int(11) NOT NULL,
+  `NPESOPACIAMOSTRA` decimal(5,1) DEFAULT NULL,
+  `NALTURAPACIAMOSTRA` decimal(4,2) DEFAULT NULL,
+  `CCODIPOSTPEDIAMOSTRA` varchar(9) DEFAULT NULL,
+  PRIMARY KEY (`NIDAMOSTRA`,`NIDIFACE`)
+) ENGINE=InnoDB DEFAULT CHARSET=latin1;
+/*!40101 SET character_set_client = @saved_cs_client */;
+DROP TABLE IF EXISTS `ie_amostra_resu`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!40101 SET character_set_client = utf8 */;
+
+CREATE TABLE `ie_amostra_resu` (
+  `NIDAMOSTRA` int(11) NOT NULL COMMENT 'ID da amostra ',
+  `NIDIFACE` int(11) NOT NULL COMMENT 'ID da interface',
+  `CRESULTADOAMOSTRA` text DEFAULT NULL COMMENT 'Resultado Quantitativo',
+  `CGRAFICOAMOSTRA` mediumtext DEFAULT NULL,
+  `CIMAGEMAMOSTRA` text DEFAULT NULL,
+  PRIMARY KEY (`NIDAMOSTRA`,`NIDIFACE`)
+) ENGINE=InnoDB DEFAULT CHARSET=latin1;
+/*!40101 SET character_set_client = @saved_cs_client */;
+DROP TABLE IF EXISTS `ie_config`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!40101 SET character_set_client = utf8 */;
+
+CREATE TABLE `ie_config` (
+  `CCHAVECONFIG` varchar(255) NOT NULL DEFAULT '' COMMENT 'Chave de configuracao, inicialmente sera usada para armazenas o caminho de comunicacao do lis com o gerenciador',
+  `CVALORCONFIG` varchar(255) DEFAULT NULL,
+  `TINC` datetime DEFAULT NULL,
+  `TALT` datetime DEFAULT NULL,
+  PRIMARY KEY (`CCHAVECONFIG`)
+) ENGINE=InnoDB DEFAULT CHARSET=latin1;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+LOCK TABLES `ie_config` WRITE;
+/*!40000 ALTER TABLE `ie_config` DISABLE KEYS */;
+INSERT INTO ie_config VALUES ('ATUALIZACAOEMANDAMENTO', 'N', NULL, NULL);
+INSERT INTO ie_config VALUES ('ESTACAO_ABERTA', '', NULL, NULL);
+INSERT INTO ie_config VALUES ('VERSAOSISTEMA', '0.0.0.100', NULL, NULL);
+INSERT INTO ie_config VALUES ('VERSAOSISTEMAOLD', '0.0.0.37', NULL, NULL);
+/*!40000 ALTER TABLE `ie_config` ENABLE KEYS */;
+UNLOCK TABLES;
+
+DROP TABLE IF EXISTS `ie_equi`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!40101 SET character_set_client = utf8 */;
+
+CREATE TABLE `ie_equi` (
+  `NIDEQUI` int(11) NOT NULL AUTO_INCREMENT COMMENT 'ID do equipamento',
+  `CNOMEEQUI` varchar(30) NOT NULL COMMENT 'Nome do equipamento',
+  `TINC` datetime DEFAULT NULL,
+  `TALT` datetime DEFAULT NULL,
+  `EUSARACKEQUI` enum('S','N') DEFAULT 'N' COMMENT 'Se o equipamento usa rack no worklist',
+  `EUSAPOSICAOEQUI` enum('S','N') DEFAULT 'N' COMMENT 'Se o equipamento usa posicao no worklist',
+  `ESEMNUMAMOSTRAEQUI` enum('S','N') DEFAULT 'N' COMMENT 'Se o equipamento nao suporta numeraçao de amostra',
+  PRIMARY KEY (`NIDEQUI`)
+) ENGINE=InnoDB AUTO_INCREMENT=358 DEFAULT CHARSET=latin1;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+LOCK TABLES `ie_equi` WRITE;
+/*!40000 ALTER TABLE `ie_equi` DISABLE KEYS */;
+INSERT INTO ie_equi VALUES (1, 'Pentra 60', NULL, NULL, 'N', 'N', 'N');
+INSERT INTO ie_equi VALUES (2, 'Cobas Mira Plus', NULL, NULL, 'S', 'S', 'N');
+INSERT INTO ie_equi VALUES (3, 'BS 200', NULL, NULL, 'N', 'N', 'N');
+INSERT INTO ie_equi VALUES (4, 'BC 2300', NULL, NULL, 'N', 'N', 'S');
+INSERT INTO ie_equi VALUES (5, 'BC 5380', NULL, NULL, 'N', 'N', 'N');
+INSERT INTO ie_equi VALUES (6, 'A15', NULL, NULL, 'N', 'N', 'N');
+INSERT INTO ie_equi VALUES (7, 'CELL-DYN N3700', NULL, NULL, 'N', 'N', 'N');
+INSERT INTO ie_equi VALUES (8, 'Sysmex XS-1000', NULL, NULL, 'N', 'N', 'N');
+INSERT INTO ie_equi VALUES (9, 'PRIME 300', NULL, NULL, 'N', 'N', 'N');
+INSERT INTO ie_equi VALUES (10, 'BC 5150', NULL, NULL, 'N', 'N', 'N');
+INSERT INTO ie_equi VALUES (11, 'DxI 800', NULL, NULL, 'N', 'N', 'N');
+INSERT INTO ie_equi VALUES (12, 'AU 680', NULL, NULL, 'N', 'N', 'N');
+INSERT INTO ie_equi VALUES (13, 'Flexor EL 200', NULL, NULL, 'N', 'N', 'N');
+INSERT INTO ie_equi VALUES (14, 'LH750', NULL, NULL, 'N', 'N', 'N');
+INSERT INTO ie_equi VALUES (15, 'Sysmex KX-21N', NULL, NULL, 'N', 'N', 'N');
+INSERT INTO ie_equi VALUES (16, 'Pentra 80', NULL, NULL, 'N', 'N', 'N');
+INSERT INTO ie_equi VALUES (17, 'Flexor XL', NULL, NULL, 'N', 'N', 'N');
+INSERT INTO ie_equi VALUES (18, 'Cobas C111', NULL, NULL, 'N', 'N', 'N');
+INSERT INTO ie_equi VALUES (19, 'Sysmex XS-800i', NULL, NULL, 'N', 'N', 'N');
+INSERT INTO ie_equi VALUES (20, 'Sysmex XT-1800i', NULL, NULL, 'N', 'N', 'N');
+INSERT INTO ie_equi VALUES (21, 'Cobas C311', NULL, NULL, 'N', 'N', 'N');
+INSERT INTO ie_equi VALUES (22, 'Labmax Plenno', NULL, NULL, 'N', 'N', 'N');
+INSERT INTO ie_equi VALUES (23, 'Selectra E', NULL, NULL, 'N', 'N', 'N');
+INSERT INTO ie_equi VALUES (24, 'BS 380', NULL, NULL, 'N', 'N', 'N');
+INSERT INTO ie_equi VALUES (25, 'Hematoclin 5.4', NULL, NULL, 'N', 'N', 'N');
+INSERT INTO ie_equi VALUES (26, 'Max Ion', NULL, NULL, 'N', 'N', 'N');
+INSERT INTO ie_equi VALUES (27, 'Cobas E411', NULL, NULL, 'S', 'S', 'N');
+INSERT INTO ie_equi VALUES (28, 'Cobas integra 400 plus', NULL, NULL, 'N', 'N', 'N');
+INSERT INTO ie_equi VALUES (29, 'Imulite Analiser 1000', NULL, NULL, 'N', 'N', 'N');
+INSERT INTO ie_equi VALUES (30, 'Centaur CP', NULL, NULL, 'N', 'N', 'N');
+INSERT INTO ie_equi VALUES (31, 'Sysmex XED-2100', NULL, NULL, 'N', 'N', 'N');
+INSERT INTO ie_equi VALUES (32, 'Sysmex CA-500', NULL, NULL, 'N', 'N', 'N');
+INSERT INTO ie_equi VALUES (33, 'ChemWell 2910', NULL, NULL, 'N', 'N', 'N');
+INSERT INTO ie_equi VALUES (34, 'Advia 1200', NULL, NULL, 'N', 'N', 'N');
+INSERT INTO ie_equi VALUES (35, 'Sysmex XT-2000', NULL, NULL, 'N', 'N', 'N');
+INSERT INTO ie_equi VALUES (36, 'ChemWell', NULL, NULL, 'N', 'N', 'N');
+INSERT INTO ie_equi VALUES (37, 'ChemWell Bio', NULL, NULL, 'N', 'N', 'N');
+INSERT INTO ie_equi VALUES (38, 'Urocheck 200', NULL, NULL, 'N', 'N', 'N');
+INSERT INTO ie_equi VALUES (39, 'ACL 3000', NULL, NULL, 'N', 'N', 'N');
+INSERT INTO ie_equi VALUES (40, 'Avl 9180', NULL, NULL, 'N', 'N', 'S');
+INSERT INTO ie_equi VALUES (41, 'Coulter STKS', NULL, NULL, 'N', 'N', 'N');
+INSERT INTO ie_equi VALUES (42, 'BC 5300', NULL, NULL, 'N', 'N', 'N');
+INSERT INTO ie_equi VALUES (43, 'Bio Rad D10 Instrumentation', NULL, NULL, 'N', 'N', 'N');
+INSERT INTO ie_equi VALUES (44, 'Humastar 300', NULL, NULL, 'N', 'N', 'N');
+INSERT INTO ie_equi VALUES (45, 'ACL 100', NULL, NULL, 'N', 'N', 'N');
+INSERT INTO ie_equi VALUES (46, 'ACL 200', NULL, NULL, 'N', 'N', 'N');
+INSERT INTO ie_equi VALUES (47, 'ACL 300', NULL, NULL, 'N', 'N', 'N');
+INSERT INTO ie_equi VALUES (48, 'ACL 1000', NULL, NULL, 'N', 'N', 'N');
+INSERT INTO ie_equi VALUES (49, 'ACL 2000', NULL, NULL, 'N', 'N', 'N');
+INSERT INTO ie_equi VALUES (50, 'Humastar 600', NULL, NULL, 'N', 'N', 'N');
+INSERT INTO ie_equi VALUES (51, 'CELL-DYN Ruby', NULL, NULL, 'N', 'N', 'N');
+INSERT INTO ie_equi VALUES (52, 'Premier Hb9210', NULL, NULL, 'N', 'N', 'N');
+INSERT INTO ie_equi VALUES (53, 'Cobas 6000', NULL, NULL, 'N', 'S', 'N');
+INSERT INTO ie_equi VALUES (54, 'LH500', NULL, NULL, 'N', 'N', 'N');
+INSERT INTO ie_equi VALUES (55, 'Cobas 121 Serial', NULL, NULL, 'N', 'N', 'N');
+INSERT INTO ie_equi VALUES (56, 'Omini C Serial', NULL, NULL, 'N', 'N', 'N');
+INSERT INTO ie_equi VALUES (57, 'Cobas 121 Socket', NULL, NULL, 'N', 'N', 'N');
+INSERT INTO ie_equi VALUES (58, 'Omini C Socket', NULL, NULL, 'N', 'N', 'N');
+INSERT INTO ie_equi VALUES (59, 'Metrolab 2300', NULL, NULL, 'N', 'N', 'N');
+INSERT INTO ie_equi VALUES (60, 'Urit 8021a', NULL, NULL, 'N', 'N', 'N');
+INSERT INTO ie_equi VALUES (61, 'Urit 8030', NULL, NULL, 'N', 'N', 'N');
+INSERT INTO ie_equi VALUES (62, 'Urit 8060', NULL, NULL, 'N', 'N', 'N');
+INSERT INTO ie_equi VALUES (63, 'Urit 8031', NULL, NULL, 'N', 'N', 'N');
+INSERT INTO ie_equi VALUES (64, 'Nexgen', NULL, NULL, 'N', 'N', 'N');
+INSERT INTO ie_equi VALUES (65, 'Alisei QS', NULL, NULL, 'N', 'N', 'N');
+INSERT INTO ie_equi VALUES (66, 'Biocon Reader 300', NULL, NULL, 'N', 'N', 'N');
+INSERT INTO ie_equi VALUES (67, 'ABX Micros 60', NULL, NULL, 'N', 'N', 'N');
+INSERT INTO ie_equi VALUES (68, 'ABX Micros ES 60', NULL, NULL, 'N', 'N', 'N');
+INSERT INTO ie_equi VALUES (69, 'Pentra 60 C+', NULL, NULL, 'N', 'N', 'N');
+INSERT INTO ie_equi VALUES (70, 'BS 120', NULL, NULL, 'N', 'N', 'N');
+INSERT INTO ie_equi VALUES (71, 'Variant 2', NULL, NULL, 'N', 'N', 'N');
+INSERT INTO ie_equi VALUES (72, 'GT 200', NULL, NULL, 'N', 'N', 'N');
+INSERT INTO ie_equi VALUES (73, 'Bioclin 1500', NULL, NULL, 'N', 'N', 'N');
+INSERT INTO ie_equi VALUES (74, 'Bioclin 2200', NULL, NULL, 'N', 'N', 'N');
+INSERT INTO ie_equi VALUES (75, 'Yumizen H500', NULL, NULL, 'N', 'N', 'N');
+INSERT INTO ie_equi VALUES (76, 'Sysmex pocH-100iV', NULL, NULL, 'N', 'N', 'N');
+INSERT INTO ie_equi VALUES (77, 'Sinnowa SX260', NULL, NULL, 'N', 'N', 'N');
+INSERT INTO ie_equi VALUES (78, 'Sinnowa SX300', NULL, NULL, 'N', 'N', 'N');
+INSERT INTO ie_equi VALUES (79, 'Diasorin Liaison', NULL, NULL, 'N', 'N', 'N');
+INSERT INTO ie_equi VALUES (80, 'Sysmex XED-2100 Serial', NULL, NULL, 'N', 'N', 'N');
+INSERT INTO ie_equi VALUES (81, 'Sysmex XT-4000i', NULL, NULL, 'N', 'N', 'N');
+INSERT INTO ie_equi VALUES (82, 'Cobas u 601', NULL, NULL, 'N', 'N', 'N');
+INSERT INTO ie_equi VALUES (83, 'Smart 200', NULL, NULL, 'N', 'N', 'N');
+INSERT INTO ie_equi VALUES (84, 'ACCESS 2', NULL, NULL, 'N', 'N', 'N');
+INSERT INTO ie_equi VALUES (85, 'BS 400', NULL, NULL, 'N', 'N', 'N');
+INSERT INTO ie_equi VALUES (86, 'Mythic 22', NULL, NULL, 'N', 'N', 'N');
+INSERT INTO ie_equi VALUES (87, 'Advia 1800', NULL, NULL, 'N', 'N', 'N');
+INSERT INTO ie_equi VALUES (88, 'Bioclin 200', NULL, NULL, 'N', 'N', 'N');
+INSERT INTO ie_equi VALUES (89, 'LH780', NULL, NULL, 'N', 'N', 'N');
+INSERT INTO ie_equi VALUES (90, 'ACL 7000', NULL, NULL, 'N', 'N', 'N');
+INSERT INTO ie_equi VALUES (91, 'Bioclin 380', NULL, NULL, 'N', 'N', 'N');
+INSERT INTO ie_equi VALUES (92, 'SDH-20 labtest', NULL, NULL, 'N', 'N', 'N');
+INSERT INTO ie_equi VALUES (93, 'BT 3000', NULL, NULL, 'N', 'N', 'N');
+INSERT INTO ie_equi VALUES (94, 'ACL 6000', NULL, NULL, 'N', 'N', 'N');
+INSERT INTO ie_equi VALUES (95, 'Advia 1650', NULL, NULL, 'N', 'N', 'N');
+INSERT INTO ie_equi VALUES (96, 'Flexor E', NULL, NULL, 'N', 'N', 'N');
+INSERT INTO ie_equi VALUES (97, 'Selectra II', NULL, NULL, 'N', 'N', 'N');
+INSERT INTO ie_equi VALUES (98, 'Cobas Mira (Mirinha)', NULL, NULL, 'N', 'N', 'N');
+INSERT INTO ie_equi VALUES (99, 'Labmax CS240', NULL, NULL, 'S', 'S', 'N');
+INSERT INTO ie_equi VALUES (100, 'Bioclin 1000', NULL, NULL, 'N', 'N', 'N');
+INSERT INTO ie_equi VALUES (101, 'Sysmex XT-1800i Serial', NULL, NULL, 'N', 'N', 'N');
+INSERT INTO ie_equi VALUES (102, 'D-Cell 5d', NULL, NULL, 'N', 'N', 'N');
+INSERT INTO ie_equi VALUES (103, 'BS 300', NULL, NULL, 'N', 'N', 'N');
+INSERT INTO ie_equi VALUES (104, 'Labmax 240', NULL, NULL, 'N', 'N', 'N');
+INSERT INTO ie_equi VALUES (105, 'BC 5500', NULL, NULL, 'N', 'N', 'N');
+INSERT INTO ie_equi VALUES (106, 'Cobas Mira Plus 2', NULL, NULL, 'S', 'S', 'N');
+INSERT INTO ie_equi VALUES (107, 'BA 400', NULL, NULL, 'N', 'N', 'N');
+INSERT INTO ie_equi VALUES (108, 'Coulter Diff', NULL, NULL, 'N', 'N', 'N');
+INSERT INTO ie_equi VALUES (109, 'Gens', NULL, NULL, 'N', 'N', 'N');
+INSERT INTO ie_equi VALUES (110, 'Hitachi 911', NULL, NULL, 'N', 'N', 'N');
+INSERT INTO ie_equi VALUES (111, 'Labmax 400', NULL, NULL, 'N', 'N', 'N');
+INSERT INTO ie_equi VALUES (112, 'A25', NULL, NULL, 'N', 'N', 'N');
+INSERT INTO ie_equi VALUES (113, 'DxH 800', NULL, NULL, 'N', 'N', 'N');
+INSERT INTO ie_equi VALUES (114, 'AU 480', NULL, NULL, 'N', 'N', 'N');
+INSERT INTO ie_equi VALUES (115, 'BC 20S', NULL, NULL, 'N', 'N', 'N');
+INSERT INTO ie_equi VALUES (116, 'Architect c8000', NULL, NULL, 'N', 'N', 'N');
+INSERT INTO ie_equi VALUES (117, 'Architect i2000', NULL, NULL, 'N', 'N', 'N');
+INSERT INTO ie_equi VALUES (118, 'Architect i4000', NULL, NULL, 'N', 'N', 'N');
+INSERT INTO ie_equi VALUES (119, 'Architect i6000', NULL, NULL, 'N', 'N', 'N');
+INSERT INTO ie_equi VALUES (120, 'Architect i8000', NULL, NULL, 'N', 'N', 'N');
+INSERT INTO ie_equi VALUES (121, 'Architect ci8200', NULL, NULL, 'N', 'N', 'N');
+INSERT INTO ie_equi VALUES (122, 'Sysmex XS-800i Serial', NULL, NULL, 'N', 'N', 'N');
+INSERT INTO ie_equi VALUES (123, 'Sysmex XS-1000i Serial', NULL, NULL, 'N', 'N', 'N');
+INSERT INTO ie_equi VALUES (124, 'Miura', NULL, NULL, 'N', 'N', 'N');
+INSERT INTO ie_equi VALUES (125, 'Miura 200', NULL, NULL, 'N', 'N', 'N');
+INSERT INTO ie_equi VALUES (126, 'Miura 500', NULL, NULL, 'N', 'N', 'N');
+INSERT INTO ie_equi VALUES (127, 'MEK 7300', NULL, NULL, 'N', 'N', 'N');
+INSERT INTO ie_equi VALUES (128, 'Vitros ECI', NULL, NULL, 'N', 'N', 'N');
+INSERT INTO ie_equi VALUES (129, 'Uriscan Pro', NULL, NULL, 'N', 'N', 'N');
+INSERT INTO ie_equi VALUES (130, 'Architect ci4100 ', NULL, NULL, 'N', 'N', 'N');
+INSERT INTO ie_equi VALUES (131, 'CB 350', NULL, NULL, 'N', 'N', 'N');
+INSERT INTO ie_equi VALUES (132, 'Select Ion', NULL, NULL, 'N', 'N', 'S');
+INSERT INTO ie_equi VALUES (133, 'G7', NULL, NULL, 'N', 'N', 'N');
+INSERT INTO ie_equi VALUES (134, 'Imulite Analiser 2000', NULL, NULL, 'N', 'N', 'N');
+INSERT INTO ie_equi VALUES (135, 'Targa 3000', NULL, NULL, 'N', 'N', 'N');
+INSERT INTO ie_equi VALUES (136, 'Elisys Uno', NULL, NULL, 'N', 'N', 'N');
+INSERT INTO ie_equi VALUES (137, 'BC 5800', NULL, NULL, 'N', 'N', 'N');
+INSERT INTO ie_equi VALUES (138, 'Urivision 720', NULL, NULL, 'N', 'N', 'N');
+INSERT INTO ie_equi VALUES (139, 'CELL-DYN 3500', NULL, NULL, 'N', 'N', 'N');
+INSERT INTO ie_equi VALUES (140, 'AXSYM', NULL, NULL, 'N', 'N', 'N');
+INSERT INTO ie_equi VALUES (141, 'COULTER T 890', NULL, NULL, 'N', 'N', 'N');
+INSERT INTO ie_equi VALUES (142, 'CS 400', NULL, NULL, 'N', 'N', 'N');
+INSERT INTO ie_equi VALUES (143, 'CELL-DYN 3200', NULL, NULL, 'N', 'N', 'N');
+INSERT INTO ie_equi VALUES (144, 'Clinitec 500', NULL, NULL, 'N', 'N', 'N');
+INSERT INTO ie_equi VALUES (145, 'Clinitec Advantus', NULL, NULL, 'N', 'N', 'N');
+INSERT INTO ie_equi VALUES (146, 'Konelab', NULL, NULL, 'N', 'N', 'N');
+INSERT INTO ie_equi VALUES (147, 'G7_Software', NULL, NULL, 'N', 'N', 'N');
+INSERT INTO ie_equi VALUES (148, 'Dimension AR', NULL, NULL, 'N', 'N', 'N');
+INSERT INTO ie_equi VALUES (149, 'Dimension RXL', NULL, NULL, 'N', 'N', 'N');
+INSERT INTO ie_equi VALUES (150, 'SDH-5 HL7 Labtest', NULL, NULL, 'N', 'N', 'N');
+INSERT INTO ie_equi VALUES (151, 'SDH-5 Labtest', NULL, NULL, 'N', 'N', 'N');
+INSERT INTO ie_equi VALUES (152, 'Brio', NULL, NULL, 'N', 'N', 'N');
+INSERT INTO ie_equi VALUES (153, 'Pentra 60 ES', NULL, NULL, 'N', 'N', 'N');
+INSERT INTO ie_equi VALUES (154, 'Sysmex XS-8000i', NULL, NULL, 'N', 'N', 'N');
+INSERT INTO ie_equi VALUES (155, 'Sysmex XS-8000i Serial', NULL, NULL, 'N', 'N', 'N');
+INSERT INTO ie_equi VALUES (156, 'Advia 360', NULL, NULL, 'N', 'N', 'N');
+INSERT INTO ie_equi VALUES (157, 'Miura One', NULL, NULL, 'N', 'N', 'N');
+INSERT INTO ie_equi VALUES (158, 'BC 3600', NULL, NULL, 'N', 'N', 'N');
+INSERT INTO ie_equi VALUES (159, 'Hemacounter 60', NULL, NULL, 'N', 'N', 'N');
+INSERT INTO ie_equi VALUES (160, 'DxH 500', NULL, NULL, 'N', 'N', 'N');
+INSERT INTO ie_equi VALUES (161, 'Labmax 240 Premium', NULL, NULL, 'N', 'N', 'N');
+INSERT INTO ie_equi VALUES (162, 'BC 3000 +', NULL, NULL, 'N', 'N', 'N');
+INSERT INTO ie_equi VALUES (163, 'Elecsys 2010', NULL, NULL, 'N', 'N', 'N');
+INSERT INTO ie_equi VALUES (164, 'Humastar 200', NULL, NULL, 'N', 'N', 'N');
+INSERT INTO ie_equi VALUES (165, 'HUMACOUNT 30', NULL, NULL, 'N', 'N', 'S');
+INSERT INTO ie_equi VALUES (166, 'Advia 60', NULL, NULL, 'N', 'N', 'N');
+INSERT INTO ie_equi VALUES (167, 'Advia 70', NULL, NULL, 'N', 'N', 'N');
+INSERT INTO ie_equi VALUES (168, 'Bioclin 2000', NULL, NULL, 'N', 'N', 'N');
+INSERT INTO ie_equi VALUES (169, 'Pentra 400', NULL, NULL, 'N', 'N', 'N');
+INSERT INTO ie_equi VALUES (170, 'Sysmex XP-300', NULL, NULL, 'N', 'N', 'N');
+INSERT INTO ie_equi VALUES (171, 'Flexor EL 80', NULL, NULL, 'N', 'N', 'N');
+INSERT INTO ie_equi VALUES (172, 'Architect I 1000M', NULL, NULL, 'N', 'N', 'N');
+INSERT INTO ie_equi VALUES (173, 'Maglumi 800', NULL, NULL, 'N', 'N', 'N');
+INSERT INTO ie_equi VALUES (174, 'Mine cube', NULL, NULL, 'N', 'N', 'N');
+INSERT INTO ie_equi VALUES (175, 'I-Smart 30 Pro', NULL, NULL, 'N', 'N', 'N');
+INSERT INTO ie_equi VALUES (176, 'Cobas P312', '2023-10-31 09:51:52', NULL, 'N', 'N', 'N');
+INSERT INTO ie_equi VALUES (177, 'Sysmex XN-1000/500', '2023-10-31 09:51:52', NULL, 'N', 'N', 'N');
+INSERT INTO ie_equi VALUES (178, 'Sysmex XN-1000 Serial', '2023-10-31 09:51:52', NULL, 'N', 'N', 'N');
+INSERT INTO ie_equi VALUES (179, 'Response 920', '2023-10-31 09:51:52', NULL, 'N', 'N', 'N');
+INSERT INTO ie_equi VALUES (180, 'Coagmaster 1000 Plus', '2023-10-31 09:51:52', NULL, 'N', 'N', 'N');
+INSERT INTO ie_equi VALUES (181, 'Response 920 Socket', '2023-10-31 09:51:52', NULL, 'N', 'N', 'N');
+INSERT INTO ie_equi VALUES (182, 'FINECARE TM WE 300', '2023-10-31 09:51:52', NULL, 'N', 'N', 'N');
+INSERT INTO ie_equi VALUES (183, 'Bioeasy U120', '2023-10-31 09:51:52', NULL, 'N', 'N', 'N');
+INSERT INTO ie_equi VALUES (184, 'Advia 2120', '2023-10-31 09:51:52', NULL, 'N', 'N', 'N');
+INSERT INTO ie_equi VALUES (185, 'ACL Elite Pro', '2023-10-31 09:51:52', NULL, 'N', 'N', 'N');
+INSERT INTO ie_equi VALUES (186, 'CELL-DYN 3000', '2023-10-31 09:51:52', NULL, 'N', 'N', 'N');
+INSERT INTO ie_equi VALUES (187, 'BS 480', '2023-10-31 09:51:52', NULL, 'N', 'N', 'N');
+INSERT INTO ie_equi VALUES (188, 'Hemacounter SL/HEMARAY 86', '2023-10-31 09:51:52', NULL, 'N', 'N', 'N');
+INSERT INTO ie_equi VALUES (189, 'MagLumi 1000', '2023-10-31 09:51:52', NULL, 'N', 'N', 'N');
+INSERT INTO ie_equi VALUES (190, 'MEK 7300 Arquivo', '2023-10-31 09:51:52', NULL, 'N', 'N', 'N');
+INSERT INTO ie_equi VALUES (191, 'BC 6800', '2023-10-31 09:51:52', NULL, 'N', 'N', 'N');
+INSERT INTO ie_equi VALUES (192, 'BS 800', '2023-10-31 09:51:52', NULL, 'N', 'N', 'N');
+INSERT INTO ie_equi VALUES (193, 'Capillarys', '2023-10-31 09:51:52', NULL, 'N', 'N', 'N');
+INSERT INTO ie_equi VALUES (194, 'I Counter 3D', '2023-10-31 09:51:52', NULL, 'N', 'N', 'N');
+INSERT INTO ie_equi VALUES (195, 'XN 350', '2023-10-31 09:51:52', NULL, 'N', 'N', 'N');
+INSERT INTO ie_equi VALUES (196, 'PKL 125', '2023-10-31 09:51:52', NULL, 'N', 'N', 'N');
+INSERT INTO ie_equi VALUES (197, 'Hematoclin 3.0', '2023-10-31 09:51:52', NULL, 'N', 'N', 'N');
+INSERT INTO ie_equi VALUES (198, 'I Counter 5D', '2023-10-31 09:51:52', NULL, 'N', 'N', 'N');
+INSERT INTO ie_equi VALUES (199, 'FUS 2000', '2023-10-31 09:51:52', NULL, 'N', 'N', 'N');
+INSERT INTO ie_equi VALUES (200, 'Human Star 80', '2023-10-31 09:51:52', NULL, 'N', 'N', 'N');
+INSERT INTO ie_equi VALUES (201, 'Metrolab 2300 Arquivo', '2023-10-31 09:51:52', NULL, 'N', 'N', 'N');
+INSERT INTO ie_equi VALUES (202, 'CM 250 WINNER', '2023-10-31 09:51:52', NULL, 'N', 'N', 'N');
+INSERT INTO ie_equi VALUES (203, 'URIT - 3000 Vet Plus', '2023-10-31 09:51:52', NULL, 'N', 'N', 'N');
+INSERT INTO ie_equi VALUES (204, 'ECO Reader F200', '2023-10-31 09:51:52', NULL, 'N', 'N', 'N');
+INSERT INTO ie_equi VALUES (205, 'PKL 125_SKT', '2023-10-31 09:51:52', NULL, 'N', 'N', 'N');
+INSERT INTO ie_equi VALUES (206, 'BS 240', '2023-10-31 09:51:52', NULL, 'N', 'N', 'N');
+INSERT INTO ie_equi VALUES (207, 'URIT - 3000 VET PLUS SERIAL', '2023-10-31 09:51:52', NULL, 'N', 'N', 'N');
+INSERT INTO ie_equi VALUES (208, 'AutoSCAN-4 Beckman Coulter', '2023-10-31 09:51:52', NULL, 'N', 'N', 'N');
+INSERT INTO ie_equi VALUES (209, 'Mek 9100', '2023-10-31 09:51:52', NULL, 'N', 'N', 'N');
+INSERT INTO ie_equi VALUES (210, 'Easy Stat', '2023-10-31 09:51:52', NULL, 'N', 'N', 'N');
+INSERT INTO ie_equi VALUES (211, 'Advia Centaur XP/Classic', '2023-10-31 09:51:52', NULL, 'N', 'N', 'N');
+INSERT INTO ie_equi VALUES (212, 'Rapid Lab 348', '2023-10-31 09:51:52', NULL, 'N', 'N', 'N');
+INSERT INTO ie_equi VALUES (213, 'Esteira Abbott', '2023-10-31 09:51:52', NULL, 'N', 'N', 'N');
+INSERT INTO ie_equi VALUES (214, 'FUS 2000_Serial', '2023-10-31 09:51:52', NULL, 'N', 'N', 'N');
+INSERT INTO ie_equi VALUES (215, 'Pentra 80 XL', '2023-10-31 09:51:52', NULL, 'N', 'N', 'N');
+INSERT INTO ie_equi VALUES (216, 'MythicWorklist', '2023-10-31 09:51:52', NULL, 'N', 'N', 'N');
+INSERT INTO ie_equi VALUES (217, 'Mythic_Socket', '2023-10-31 09:51:52', NULL, 'N', 'N', 'N');
+INSERT INTO ie_equi VALUES (218, 'Urisys_2400', '2023-10-31 09:51:52', NULL, 'N', 'N', 'N');
+INSERT INTO ie_equi VALUES (219, 'BC_2800', '2023-10-31 09:51:52', NULL, 'N', 'N', 'N');
+INSERT INTO ie_equi VALUES (220, 'MR_96A', '2023-10-31 09:51:52', NULL, 'N', 'N', 'N');
+INSERT INTO ie_equi VALUES (221, 'XN-L 550', '2023-10-31 09:51:52', NULL, 'N', 'N', 'N');
+INSERT INTO ie_equi VALUES (222, 'MR_96A_Socket', '2023-10-31 09:51:52', NULL, 'N', 'N', 'N');
+INSERT INTO ie_equi VALUES (223, 'CM 250 WINNER_Arquivo', '2023-10-31 09:51:52', NULL, 'N', 'N', 'N');
+INSERT INTO ie_equi VALUES (224, 'ETI-Max 3000', '2023-10-31 09:51:52', NULL, 'N', 'N', 'N');
+INSERT INTO ie_equi VALUES (225, 'Mek 9100_3SKT', '2023-10-31 09:51:52', NULL, 'N', 'N', 'N');
+INSERT INTO ie_equi VALUES (226, 'Pentra 1200', '2023-10-31 09:51:52', NULL, 'N', 'N', 'N');
+INSERT INTO ie_equi VALUES (227, 'STA Satellite', '2023-10-31 09:51:52', NULL, 'N', 'N', 'N');
+INSERT INTO ie_equi VALUES (228, 'Esteira Abbott c/duas Sockets', '2023-10-31 09:51:52', NULL, 'N', 'N', 'N');
+INSERT INTO ie_equi VALUES (229, 'HumaCount 80 TS', '2023-10-31 09:51:52', NULL, 'N', 'N', 'N');
+INSERT INTO ie_equi VALUES (230, 'HumaLyte Plus', '2023-10-31 09:51:52', NULL, 'N', 'N', 'N');
+INSERT INTO ie_equi VALUES (231, 'Vitros 3600', '2023-10-31 09:51:52', NULL, 'N', 'N', 'N');
+INSERT INTO ie_equi VALUES (232, 'AU 400  e  AU 640', '2023-10-31 09:51:52', NULL, 'N', 'N', 'N');
+INSERT INTO ie_equi VALUES (233, 'Cobas B221', '2023-10-31 09:51:52', NULL, 'N', 'N', 'N');
+INSERT INTO ie_equi VALUES (234, 'Cobas U411', '2023-10-31 09:51:52', NULL, 'N', 'N', 'N');
+INSERT INTO ie_equi VALUES (235, 'BS 360', '2023-10-31 09:51:52', NULL, 'N', 'N', 'N');
+INSERT INTO ie_equi VALUES (236, 'HumaClot Jr', '2023-10-31 09:51:52', NULL, 'N', 'N', 'N');
+INSERT INTO ie_equi VALUES (237, 'Gem Premier 3500', '2023-10-31 09:51:52', NULL, 'N', 'N', 'N');
+INSERT INTO ie_equi VALUES (238, 'Gem Premier 3000', '2023-10-31 09:51:52', NULL, 'N', 'N', 'N');
+INSERT INTO ie_equi VALUES (239, 'Sysmex UF5000', '2023-10-31 09:51:52', NULL, 'N', 'N', 'N');
+INSERT INTO ie_equi VALUES (240, 'Sysmex UC3500', '2023-10-31 09:51:52', NULL, 'N', 'N', 'N');
+INSERT INTO ie_equi VALUES (241, 'Vitros 350', '2023-10-31 09:51:52', NULL, 'N', 'N', 'N');
+INSERT INTO ie_equi VALUES (242, 'STA Compact', '2023-10-31 09:51:52', NULL, 'N', 'N', 'N');
+INSERT INTO ie_equi VALUES (243, 'Liaison XL', '2023-10-31 09:51:52', NULL, 'N', 'N', 'N');
+INSERT INTO ie_equi VALUES (244, 'AudMax', '2023-10-31 09:51:52', NULL, 'N', 'N', 'N');
+INSERT INTO ie_equi VALUES (245, 'EB5600', '2023-10-31 09:51:52', NULL, 'N', 'N', 'N');
+INSERT INTO ie_equi VALUES (246, 'CL2000  Mindray', '2023-10-31 09:51:53', NULL, 'N', 'N', 'N');
+INSERT INTO ie_equi VALUES (247, 'Z3  Zybio', '2023-10-31 09:51:53', NULL, 'N', 'N', 'N');
+INSERT INTO ie_equi VALUES (248, 'Best 2000', '2023-10-31 09:51:53', NULL, 'N', 'N', 'N');
+INSERT INTO ie_equi VALUES (249, 'Vitros 5600', '2023-10-31 09:51:53', NULL, 'N', 'N', 'N');
+INSERT INTO ie_equi VALUES (250, 'Sinnowa SX-140', '2023-10-31 09:51:53', NULL, 'N', 'N', 'N');
+INSERT INTO ie_equi VALUES (251, 'Pentra DFDX', '2023-10-31 09:51:53', NULL, 'N', 'N', 'N');
+INSERT INTO ie_equi VALUES (252, 'Architect_Socket', '2023-10-31 09:51:53', NULL, 'N', 'N', 'N');
+INSERT INTO ie_equi VALUES (253, 'Hitachi 917', '2023-10-31 09:51:53', NULL, 'N', 'N', 'N');
+INSERT INTO ie_equi VALUES (254, 'Selectra PROM', '2023-10-31 09:51:53', NULL, 'N', 'N', 'N');
+INSERT INTO ie_equi VALUES (255, 'Uryxxon 500', '2023-10-31 09:51:53', NULL, 'N', 'N', 'N');
+INSERT INTO ie_equi VALUES (256, 'Urised II', '2023-10-31 09:51:53', NULL, 'N', 'N', 'N');
+INSERT INTO ie_equi VALUES (257, 'Vitek', '2023-10-31 09:51:53', NULL, 'N', 'N', 'N');
+INSERT INTO ie_equi VALUES (258, 'Urised II - Serial', '2023-10-31 09:51:53', NULL, 'N', 'N', 'N');
+INSERT INTO ie_equi VALUES (259, 'Hitachi Modular', '2023-10-31 09:51:53', NULL, 'N', 'N', 'N');
+INSERT INTO ie_equi VALUES (260, 'Esteira Cobas P312', '2023-10-31 09:51:53', NULL, 'N', 'N', 'N');
+INSERT INTO ie_equi VALUES (261, 'AutoQuant / Meril - 100/200/40', '2023-10-31 09:51:53', NULL, 'N', 'N', 'N');
+INSERT INTO ie_equi VALUES (262, 'STAR Max  e  STart Max', '2023-10-31 09:51:53', NULL, 'N', 'N', 'N');
+INSERT INTO ie_equi VALUES (263, 'WF 500', '2023-10-31 09:51:53', NULL, 'N', 'N', 'N');
+INSERT INTO ie_equi VALUES (264, 'BC 3600 - ( Client )', '2023-10-31 09:51:53', NULL, 'N', 'N', 'N');
+INSERT INTO ie_equi VALUES (265, 'BC 6000  - ( Client )', '2023-10-31 09:51:53', NULL, 'N', 'N', 'N');
+INSERT INTO ie_equi VALUES (266, 'Vitros Fusion 5.1 FS ', '2023-10-31 09:51:53', NULL, 'N', 'N', 'N');
+INSERT INTO ie_equi VALUES (267, 'DH5 - Maxcel 500D - Dymind', '2023-10-31 09:51:53', NULL, 'N', 'N', 'N');
+INSERT INTO ie_equi VALUES (268, 'C8000 - Gimenes  (* OBS)', '2023-10-31 09:51:53', NULL, 'N', 'N', 'N');
+INSERT INTO ie_equi VALUES (269, 'Architect_Resultados - Gim. (*', '2023-10-31 09:51:53', NULL, 'N', 'N', 'N');
+INSERT INTO ie_equi VALUES (270, 'Cobas B221_Socket', '2023-10-31 09:51:53', NULL, 'N', 'N', 'N');
+INSERT INTO ie_equi VALUES (271, 'Stat Profile Prime', '2023-10-31 09:51:53', NULL, 'N', 'N', 'N');
+INSERT INTO ie_equi VALUES (272, 'ACL Top 350', '2023-10-31 09:51:53', NULL, 'N', 'N', 'N');
+INSERT INTO ie_equi VALUES (273, 'ACL Top 350_Socket', '2023-10-31 09:51:53', NULL, 'N', 'N', 'N');
+INSERT INTO ie_equi VALUES (274, 'MagLumi 800 - 1000', '2023-10-31 09:51:53', NULL, 'N', 'N', 'N');
+INSERT INTO ie_equi VALUES (275, 'Elite 580 - ERBA', '2023-10-31 09:51:53', NULL, 'N', 'N', 'N');
+INSERT INTO ie_equi VALUES (276, 'Erba XL 640', '2023-10-31 09:51:53', NULL, 'N', 'N', 'N');
+INSERT INTO ie_equi VALUES (277, 'ECL 760', '2023-10-31 09:51:53', NULL, 'N', 'N', 'N');
+INSERT INTO ie_equi VALUES (278, 'InCCA Bit', '2023-10-31 09:51:53', NULL, 'N', 'N', 'N');
+INSERT INTO ie_equi VALUES (279, 'Envoy 500', '2023-10-31 09:51:53', NULL, 'N', 'N', 'N');
+INSERT INTO ie_equi VALUES (280, 'Erba XL640 / XL200_Socket', '2023-10-31 09:51:53', NULL, 'N', 'N', 'N');
+INSERT INTO ie_equi VALUES (281, 'EletroLyte WE 300 - Finecare', '2023-10-31 09:51:53', NULL, 'N', 'N', 'N');
+INSERT INTO ie_equi VALUES (282, 'IChroma2', '2023-10-31 09:51:53', NULL, 'N', 'N', 'N');
+INSERT INTO ie_equi VALUES (283, 'GeneXpert', '2023-10-31 09:51:53', NULL, 'N', 'N', 'N');
+INSERT INTO ie_equi VALUES (284, 'Seegene CFX96', '2023-10-31 09:51:53', NULL, 'N', 'N', 'N');
+INSERT INTO ie_equi VALUES (285, 'Cobas T411', '2023-10-31 09:51:53', NULL, 'N', 'N', 'N');
+INSERT INTO ie_equi VALUES (286, 'KT 6000  -  KT 6200', '2023-10-31 09:51:53', NULL, 'N', 'N', 'N');
+INSERT INTO ie_equi VALUES (287, 'GS 100', '2023-10-31 09:51:53', NULL, 'N', 'N', 'N');
+INSERT INTO ie_equi VALUES (288, 'Celer Finecare FIA Meter Plus', '2023-10-31 09:51:53', NULL, 'N', 'N', 'N');
+INSERT INTO ie_equi VALUES (289, 'ES-480/ES-380/ES-200', '2023-10-31 09:51:53', NULL, 'N', 'N', 'N');
+INSERT INTO ie_equi VALUES (290, 'AutoQuant / Meril - Socket', '2023-10-31 09:51:53', NULL, 'N', 'N', 'N');
+INSERT INTO ie_equi VALUES (291, 'ID Now', '2023-10-31 09:51:53', NULL, 'N', 'N', 'N');
+INSERT INTO ie_equi VALUES (292, 'Walkaway Microscan', '2023-10-31 09:51:53', NULL, 'N', 'N', 'N');
+INSERT INTO ie_equi VALUES (293, 'GemPremier3000 Socket', '2023-10-31 09:51:53', NULL, 'N', 'N', 'N');
+INSERT INTO ie_equi VALUES (294, 'FirepHoxSTP Prime', '2023-10-31 09:51:53', NULL, 'N', 'N', 'N');
+INSERT INTO ie_equi VALUES (295, 'Labmax 450', '2023-10-31 09:51:53', NULL, 'N', 'N', 'N');
+INSERT INTO ie_equi VALUES (296, 'Yumizen H500_Socket', '2023-10-31 09:51:53', NULL, 'N', 'N', 'N');
+INSERT INTO ie_equi VALUES (297, 'XED 2100_Próprio', '2023-10-31 09:51:53', NULL, 'N', 'N', 'N');
+INSERT INTO ie_equi VALUES (298, 'Yumizen H550_Socket', '2023-10-31 09:51:53', NULL, 'N', 'N', 'N');
+INSERT INTO ie_equi VALUES (299, 'Labmax 560', '2023-10-31 09:51:53', NULL, 'N', 'N', 'N');
+INSERT INTO ie_equi VALUES (300, 'Hermaray_Vida Count 860', '2023-10-31 09:51:53', NULL, 'N', 'N', 'N');
+INSERT INTO ie_equi VALUES (301, 'XED2100_Próprio_Socket', '2023-10-31 09:51:53', NULL, 'N', 'N', 'N');
+INSERT INTO ie_equi VALUES (302, 'IChroma2_Socket', '2023-10-31 09:51:53', NULL, 'N', 'N', 'N');
+INSERT INTO ie_equi VALUES (303, 'Counter31AL_LabXpert', '2023-10-31 09:51:53', NULL, 'N', 'N', 'N');
+INSERT INTO ie_equi VALUES (304, 'CobasIntegra400_New', '2023-10-31 09:51:53', NULL, 'N', 'N', 'N');
+INSERT INTO ie_equi VALUES (305, 'Vitros5600_Socket', '2023-10-31 09:51:53', NULL, 'N', 'N', 'N');
+INSERT INTO ie_equi VALUES (306, 'AbxMicros60_ASTM', '2023-10-31 09:51:53', NULL, 'N', 'N', 'N');
+INSERT INTO ie_equi VALUES (307, 'GT200BIO', '2023-10-31 09:51:53', NULL, 'N', 'N', 'N');
+INSERT INTO ie_equi VALUES (308, 'PENTRA80ABX', '2023-10-31 09:51:53', NULL, 'N', 'N', 'N');
+INSERT INTO ie_equi VALUES (309, 'HemacounterSLv13e', '2023-10-31 09:51:53', NULL, 'N', 'N', 'N');
+INSERT INTO ie_equi VALUES (310, 'SAT450', '2023-10-31 09:51:54', NULL, 'N', 'N', 'N');
+INSERT INTO ie_equi VALUES (311, 'ZybioExc200', '2023-10-31 09:51:54', NULL, 'N', 'N', 'N');
+INSERT INTO ie_equi VALUES (312, 'MaxCell60', '2023-10-31 09:51:54', NULL, 'N', 'N', 'N');
+INSERT INTO ie_equi VALUES (313, 'ClotimerDuo', '2023-10-31 09:51:54', NULL, 'N', 'N', 'N');
+INSERT INTO ie_equi VALUES (314, 'Hemabio_TEK5000', '2023-10-31 09:51:54', NULL, 'N', 'N', 'N');
+INSERT INTO ie_equi VALUES (315, 'Cobas6000_Resultados', '2023-10-31 09:51:54', NULL, 'N', 'N', 'N');
+INSERT INTO ie_equi VALUES (316, 'Diestro', '2023-10-31 09:51:54', NULL, 'N', 'N', 'N');
+INSERT INTO ie_equi VALUES (317, 'UrisedII_v17_Serial', '2023-10-31 09:51:54', NULL, 'N', 'N', 'N');
+INSERT INTO ie_equi VALUES (318, 'G8', '2023-10-31 09:51:54', NULL, 'N', 'N', 'N');
+INSERT INTO ie_equi VALUES (319, 'EsteiraTSS', '2023-10-31 09:51:54', NULL, 'N', 'N', 'N');
+INSERT INTO ie_equi VALUES (320, 'Invistar300', '2023-10-31 09:51:54', NULL, 'N', 'N', 'N');
+INSERT INTO ie_equi VALUES (321, 'GTCount3000', '2023-10-31 09:51:54', NULL, 'N', 'N', 'N');
+INSERT INTO ie_equi VALUES (322, 'EasyLyte', '2023-10-31 09:51:54', NULL, 'N', 'N', 'N');
+INSERT INTO ie_equi VALUES (323, 'Smart240', '2023-10-31 09:51:54', NULL, 'N', 'N', 'N');
+INSERT INTO ie_equi VALUES (324, 'Counter29', '2023-10-31 09:51:54', NULL, 'N', 'N', 'N');
+INSERT INTO ie_equi VALUES (325, 'DXH500_Socket', '2023-10-31 09:51:54', NULL, 'N', 'N', 'N');
+INSERT INTO ie_equi VALUES (326, 'Maxcog', '2023-10-31 09:51:54', NULL, 'N', 'N', 'N');
+INSERT INTO ie_equi VALUES (327, 'DDimeroARF100', '2023-10-31 09:51:54', NULL, 'N', 'N', 'N');
+INSERT INTO ie_equi VALUES (328, 'IonPro', '2023-10-31 09:51:54', NULL, 'N', 'N', 'N');
+INSERT INTO ie_equi VALUES (329, 'Bactec9050', '2023-10-31 09:51:54', NULL, 'N', 'N', 'N');
+INSERT INTO ie_equi VALUES (330, 'HumaLytePlus_3_5', '2023-10-31 09:51:54', NULL, 'N', 'N', 'N');
+INSERT INTO ie_equi VALUES (331, 'ECL_412_105', '2023-10-31 09:51:54', NULL, 'N', 'N', 'N');
+INSERT INTO ie_equi VALUES (332, 'Eletrolyte_V_Vida', '2023-10-31 09:51:54', NULL, 'N', 'N', 'N');
+INSERT INTO ie_equi VALUES (333, 'VhsTimer', '2023-10-31 09:51:54', NULL, 'N', 'N', 'N');
+INSERT INTO ie_equi VALUES (334, 'VidaFiaPro', '2023-10-31 09:51:54', NULL, 'N', 'N', 'N');
+INSERT INTO ie_equi VALUES (335, 'AFT800', '2023-10-31 09:51:54', NULL, 'N', 'N', 'N');
+INSERT INTO ie_equi VALUES (336, 'CobasInfinity', '2023-10-31 09:51:54', NULL, 'N', 'N', 'N');
+INSERT INTO ie_equi VALUES (337, 'GTUrine200', '2023-10-31 09:51:54', NULL, 'N', 'N', 'N');
+INSERT INTO ie_equi VALUES (338, 'ErbaEC90', '2023-10-31 09:51:54', NULL, 'N', 'N', 'N');
+INSERT INTO ie_equi VALUES (339, 'Alinity', '2023-10-31 09:51:54', NULL, 'N', 'N', 'N');
+INSERT INTO ie_equi VALUES (340, 'HGT900', '2023-10-31 09:51:54', NULL, 'N', 'N', 'N');
+INSERT INTO ie_equi VALUES (341, 'CellaVision', '2023-10-31 09:51:54', NULL, 'N', 'N', 'N');
+INSERT INTO ie_equi VALUES (342, 'AlifaxRoller', '2023-10-31 09:51:54', NULL, 'N', 'N', 'N');
+INSERT INTO ie_equi VALUES (343, 'CobasInfinity_II', '2023-10-31 09:51:54', NULL, 'N', 'N', 'N');
+INSERT INTO ie_equi VALUES (344, 'Cobas8000', '2023-10-31 09:51:54', NULL, 'N', 'N', 'N');
+INSERT INTO ie_equi VALUES (345, 'BS800_Resultados', '2023-10-31 09:51:54', NULL, 'N', 'N', 'N');
+INSERT INTO ie_equi VALUES (346, 'Cobas8000_Resultados', '2023-10-31 09:51:54', NULL, 'N', 'N', 'N');
+INSERT INTO ie_equi VALUES (347, 'CobasPure', '2023-10-31 09:51:54', NULL, 'N', 'N', 'N');
+INSERT INTO ie_equi VALUES (348, 'OrthoOptix', '2023-10-31 09:51:54', NULL, 'N', 'N', 'N');
+INSERT INTO ie_equi VALUES (349, 'VCA500', '2023-10-31 09:51:54', NULL, 'N', 'N', 'N');
+INSERT INTO ie_equi VALUES (350, 'KC4', '2023-10-31 09:51:54', NULL, 'N', 'N', 'N');
+INSERT INTO ie_equi VALUES (351, 'Infinity_Resultado', '2023-10-31 09:51:54', NULL, 'N', 'N', 'N');
+INSERT INTO ie_equi VALUES (352, 'Infinity_Solicitacao', '2023-10-31 09:51:54', NULL, 'N', 'N', 'N');
+INSERT INTO ie_equi VALUES (353, 'Infinity_SampleSeen', '2023-10-31 09:51:54', NULL, 'N', 'N', 'N');
+INSERT INTO ie_equi VALUES (354, 'Urivida100', '2023-10-31 09:51:54', NULL, 'N', 'N', 'N');
+INSERT INTO ie_equi VALUES (355, 'ABL9', '2023-10-31 09:51:54', NULL, 'N', 'N', 'N');
+INSERT INTO ie_equi VALUES (356, 'INDIKO', '2023-10-31 09:51:54', NULL, 'N', 'N', 'N');
+INSERT INTO ie_equi VALUES (357, 'Hitachi902', '2023-10-31 09:51:54', NULL, 'N', 'N', 'N');
+/*!40000 ALTER TABLE `ie_equi` ENABLE KEYS */;
+UNLOCK TABLES;
+
+DROP TABLE IF EXISTS `ie_exam`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!40101 SET character_set_client = utf8 */;
+
+CREATE TABLE `ie_exam` (
+  `NIDEXAM` int(11) NOT NULL AUTO_INCREMENT COMMENT 'Id do registro para Exame da Interface',
+  `NIDIFACE` int(11) NOT NULL COMMENT 'ID da interface',
+  `CEXAMEQUIEXAM` varchar(50) NOT NULL COMMENT 'Codigo do exame no equipamento',
+  `CEXAMLISEXAM` varchar(50) NOT NULL COMMENT 'Codigo do exame no LIS',
+  `CDESCEXAM` varchar(80) DEFAULT NULL COMMENT 'Descricao',
+  `TINC` datetime DEFAULT NULL,
+  `TALT` datetime DEFAULT NULL,
+  `EDESMEMBRADOEXAM` enum('S','N') NOT NULL DEFAULT 'N' COMMENT 'Identifica Que o exame é desmembrado',
+  `NINDEXEXAM` int(11) NOT NULL COMMENT 'Index do exame.',
+  `CPARAMETROSEXAM` varchar(500) DEFAULT NULL COMMENT 'Campo com os parametros dos exames que são solicitados ao equipamento. (Alguns equipamentos exigem esses parametros)',
+  `CDIFFROUNDEXAM` varchar(500) DEFAULT NULL,
+  PRIMARY KEY (`NIDEXAM`),
+  KEY `FK_ie_exam1` (`NIDIFACE`)
+) ENGINE=InnoDB AUTO_INCREMENT=57 DEFAULT CHARSET=latin1 COMMENT='Exames da Interface';
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+LOCK TABLES `ie_exam` WRITE;
+/*!40000 ALTER TABLE `ie_exam` DISABLE KEYS */;
+INSERT INTO ie_exam VALUES (1, 1, '23', 'ALB', 'ALBUMINA', '2023-10-31 09:52:47', '2023-10-31 10:16:07', 'N', 1, '', '');
+INSERT INTO ie_exam VALUES (2, 1, '17', 'AMI', 'AMILASE', '2023-10-31 09:52:47', '2023-10-31 10:16:07', 'N', 2, '', '');
+INSERT INTO ie_exam VALUES (3, 1, '4', 'AUR', 'ACIDO URICO', '2023-10-31 09:52:47', '2023-10-31 10:16:07', 'N', 3, '', '');
+INSERT INTO ie_exam VALUES (4, 1, 'Desmembrado', 'BIL', 'BILIRRUBINAS TOTAL E FRAÇÕES', '2023-10-31 09:52:47', '2023-10-31 10:16:07', 'S', 4, '', '');
+INSERT INTO ie_exam VALUES (5, 1, '29', 'CAL', 'CALCIO', '2023-10-31 09:52:47', '2023-10-31 10:16:07', 'N', 5, '', '');
+INSERT INTO ie_exam VALUES (6, 1, '5', 'COL', 'COLESTEROL', '2023-10-31 09:52:48', '2023-10-31 10:16:07', 'N', 6, '', '');
+INSERT INTO ie_exam VALUES (7, 1, '3', 'CREA', 'CREATININA', '2023-10-31 09:52:48', '2023-10-31 10:16:07', 'N', 7, '', '');
+INSERT INTO ie_exam VALUES (8, 1, '13', 'FAL', 'FOSFATASE ALCALINA', '2023-10-31 09:52:48', '2023-10-31 10:16:07', 'N', 8, '', '');
+INSERT INTO ie_exam VALUES (9, 1, '21', 'FER', 'FERRO SERICO', '2023-10-31 09:52:48', '2023-10-31 10:16:07', 'N', 9, '', '');
+INSERT INTO ie_exam VALUES (10, 1, '12', 'GAMAGT', 'GAMA GT', '2023-10-31 09:52:48', '2023-10-31 10:16:07', 'N', 10, '', '');
+INSERT INTO ie_exam VALUES (11, 1, '1', 'GLI', 'GLICOSE', '2023-10-31 09:52:48', '2023-10-31 10:16:07', 'N', 11, '', '');
+INSERT INTO ie_exam VALUES (12, 1, '7', 'HDL', 'HDL', '2023-10-31 09:52:48', '2023-10-31 10:16:07', 'N', 12, '', '');
+INSERT INTO ie_exam VALUES (13, 1, '26', 'PCR', 'PCR', '2023-10-31 09:52:48', '2023-10-31 10:16:07', 'N', 13, '', '');
+INSERT INTO ie_exam VALUES (14, 1, '10', 'TGO', 'TGO', '2023-10-31 09:52:48', '2023-10-31 10:16:07', 'N', 14, '', '');
+INSERT INTO ie_exam VALUES (15, 1, '11', 'TGP', 'TGP', '2023-10-31 09:52:48', '2023-10-31 10:16:07', 'N', 15, '', '');
+INSERT INTO ie_exam VALUES (16, 1, '6', 'TRI', 'TRIGLICERIDES', '2023-10-31 09:52:48', '2023-10-31 10:16:07', 'N', 16, '', '');
+INSERT INTO ie_exam VALUES (17, 1, '2', 'URE', 'UREIA', '2023-10-31 09:52:48', '2023-10-31 10:16:07', 'N', 17, '', '');
+INSERT INTO ie_exam VALUES (18, 1, '16', 'CPKMB', 'CKMB', '2023-10-31 09:52:48', '2023-10-31 10:16:07', 'N', 18, '', '');
+INSERT INTO ie_exam VALUES (19, 1, '15', 'CPK', 'CPK', '2023-10-31 09:52:48', '2023-10-31 10:16:07', 'N', 19, '', '');
+INSERT INTO ie_exam VALUES (20, 1, '18', 'MAG', 'MAG', '2023-10-31 09:52:48', '2023-10-31 10:16:07', 'N', 20, '', '');
+INSERT INTO ie_exam VALUES (21, 1, '19', 'FOS', 'FOSFORO', '2023-10-31 09:52:48', '2023-10-31 10:16:07', 'N', 21, '', '');
+INSERT INTO ie_exam VALUES (23, 1, '24', 'LIP', 'LIPASE', '2023-10-31 09:52:48', '2023-10-31 10:16:07', 'N', 23, '', '');
+INSERT INTO ie_exam VALUES (24, 1, '14', 'LDH', 'LDH', '2023-10-31 09:52:48', '2023-10-31 10:16:07', 'N', 24, '', '');
+INSERT INTO ie_exam VALUES (25, 1, '1', 'GTT', 'Curva de glicose', '2023-10-31 09:52:48', '2023-10-31 10:16:07', 'N', 25, '', '');
+INSERT INTO ie_exam VALUES (26, 1, '1', 'GTT30', 'Curva de Glicose', '2023-10-31 09:52:48', '2023-10-31 10:16:07', 'N', 26, '', '');
+INSERT INTO ie_exam VALUES (27, 1, '1', 'GTT60', 'Curva de Glicose', '2023-10-31 09:52:48', '2023-10-31 10:16:07', 'N', 27, '', '');
+INSERT INTO ie_exam VALUES (28, 1, '1', 'GTT90', 'Curva de Glicose', '2023-10-31 09:52:48', '2023-10-31 10:16:07', 'N', 28, '', '');
+INSERT INTO ie_exam VALUES (29, 1, '1', 'GTT120', 'Curva de Glicose', '2023-10-31 09:52:48', '2023-10-31 10:16:07', 'N', 29, '', '');
+INSERT INTO ie_exam VALUES (30, 1, 'Desmembrado', 'LDL', 'Colesterol LDL', '2023-10-31 09:52:48', '2023-10-31 10:16:07', 'S', 30, '', '');
+INSERT INTO ie_exam VALUES (31, 1, '25', 'ALAC', 'ACIDO LATICO', '2023-10-31 09:52:48', '2023-10-31 10:16:07', 'N', 32, '', '');
+INSERT INTO ie_exam VALUES (32, 1, 'Desmembrado', 'VLD', 'VLDL', '2023-10-31 09:52:48', '2023-10-31 10:16:07', 'S', 33, '', '');
+INSERT INTO ie_exam VALUES (33, 1, 'Desmembrado', 'PTF', 'PROTEINAS TOTAIS E FRAÇÕES', '2023-10-31 09:52:48', '2023-10-31 10:16:07', 'S', 34, '', '');
+INSERT INTO ie_exam VALUES (34, 1, '22', 'PTO', 'PROTEINAS TOTAIS', '2023-10-31 09:52:48', '2023-10-31 10:16:07', 'N', 35, '', '');
+INSERT INTO ie_exam VALUES (35, 1, 'Desmembrado', 'LIPD', 'PERFIL LIPÍDICO', '2023-10-31 09:52:48', '2023-10-31 10:16:07', 'S', 36, '', '');
+INSERT INTO ie_exam VALUES (36, 1, 'Desmembrado', 'PRHEP ', 'PROVAS HEPÁTICAS', '2023-10-31 09:52:48', '2023-10-31 10:16:07', 'S', 37, '', '');
+INSERT INTO ie_exam VALUES (37, 1, '1', 'CL5', 'CL5', '2023-10-31 09:52:48', '2023-10-31 10:16:07', 'N', 38, '', '');
+INSERT INTO ie_exam VALUES (38, 1, '1', 'CL515', 'CL515', '2023-10-31 09:52:48', '2023-10-31 10:16:07', 'N', 39, '', '');
+INSERT INTO ie_exam VALUES (39, 1, '1', 'CL30', 'CL30', '2023-10-31 09:52:48', '2023-10-31 10:16:07', 'N', 40, '', '');
+INSERT INTO ie_exam VALUES (40, 1, '1', 'CL560', 'CL560', '2023-10-31 09:52:48', '2023-10-31 10:16:07', 'N', 41, '', '');
+INSERT INTO ie_exam VALUES (41, 1, '1', 'CL590', 'CL590', '2023-10-31 09:52:48', '2023-10-31 10:16:07', 'N', 42, '', '');
+INSERT INTO ie_exam VALUES (42, 1, '1', 'GGT15', 'GGT15', '2023-10-31 09:52:48', '2023-10-31 10:16:07', 'N', 43, '', '');
+INSERT INTO ie_exam VALUES (43, 1, '1', 'GTT4', 'GTT4', '2023-10-31 09:52:48', '2023-10-31 10:16:07', 'N', 44, '', '');
+INSERT INTO ie_exam VALUES (44, 1, '1', 'GTT460', 'GTT460', '2023-10-31 09:52:48', '2023-10-31 10:16:07', 'N', 45, '', '');
+INSERT INTO ie_exam VALUES (45, 1, '1', 'GTT4120', 'GTT4120', '2023-10-31 09:52:48', '2023-10-31 10:16:07', 'N', 46, '', '');
+INSERT INTO ie_exam VALUES (46, 1, '1', 'GTT4180', 'GTT4180', '2023-10-31 09:52:48', '2023-10-31 10:16:07', 'N', 47, '', '');
+INSERT INTO ie_exam VALUES (47, 1, '1', 'GTT3', 'GTT3', '2023-10-31 09:52:48', '2023-10-31 10:16:07', 'N', 48, '', '');
+INSERT INTO ie_exam VALUES (48, 1, '1', 'GTT3120', 'GTT3120', '2023-10-31 09:52:48', '2023-10-31 10:16:07', 'N', 49, '', '');
+INSERT INTO ie_exam VALUES (49, 1, '1', 'GGT60', 'GGT60', '2023-10-31 09:52:48', '2023-10-31 10:16:07', 'N', 50, '', '');
+INSERT INTO ie_exam VALUES (50, 1, '1', 'GTT75G', 'GTT75G', '2023-10-31 09:52:48', '2023-10-31 10:16:07', 'N', 51, '', '');
+INSERT INTO ie_exam VALUES (51, 1, '1', 'GTT75G12', 'GTT75G12', '2023-10-31 09:52:48', '2023-10-31 10:16:07', 'N', 52, '', '');
+INSERT INTO ie_exam VALUES (52, 1, '1', 'GLIWEG', 'GLWEG', '2023-10-31 09:52:48', '2023-10-31 10:16:07', 'N', 53, '', '');
+INSERT INTO ie_exam VALUES (53, 1, '1', 'GGT302', 'GGT302', '2023-10-31 09:52:48', '2023-10-31 10:16:07', 'N', 54, '', '');
+INSERT INTO ie_exam VALUES (54, 1, '1', 'GGT30', 'GGT30', '2023-10-31 09:52:48', '2023-10-31 10:16:07', 'N', 55, '', '');
+INSERT INTO ie_exam VALUES (55, 1, '1', 'GLIPP', 'GLIPP', '2023-10-31 09:52:48', '2023-10-31 10:16:07', 'N', 56, '', '');
+INSERT INTO ie_exam VALUES (56, 1, '1', 'GTT360', 'GTT360', '2023-10-31 09:52:48', '2023-10-31 10:16:07', 'N', 57, '', '');
+/*!40000 ALTER TABLE `ie_exam` ENABLE KEYS */;
+UNLOCK TABLES;
+
+DROP TABLE IF EXISTS `ie_iface`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!40101 SET character_set_client = utf8 */;
+
+CREATE TABLE `ie_iface` (
+  `NIDIFACE` int(11) NOT NULL AUTO_INCREMENT COMMENT 'ID da interface',
+  `NIDEQUI` int(11) NOT NULL COMMENT 'ID do equipamento cadastrado na interface',
+  `NIDSETOR` int(11) NOT NULL COMMENT 'ID do setir cadastrado na interface',
+  `CNOMEIFACE` varchar(50) NOT NULL COMMENT 'Nome da interface',
+  `ETIPOENVIFACE` enum('U','R','W') NOT NULL DEFAULT 'U' COMMENT 'U = Unidirecional; R = Bidirecional Request; W = Bidirecional Worklist',
+  `ETIPOCOMIFACE` enum('A','S','T') DEFAULT 'S' COMMENT 'A = Arquivo; S = Serial; T = TCPIP',
+  `NPORTAIFACE` int(2) DEFAULT 2 COMMENT 'Porta COM (1..99)',
+  `NBAUDIFACE` int(2) DEFAULT 0 COMMENT 'Velocidade da porta',
+  `NBITSDADOSIFACE` int(1) DEFAULT 0 COMMENT 'Bits de dados (5, 6, 7 ou 8)',
+  `NBITSPARADAIFACE` int(1) DEFAULT 0 COMMENT 'Bits de parada (1, 1.5, 2)',
+  `NPARIDADEIFACE` int(1) DEFAULT 0 COMMENT 'Checagem de paridade. (Nenhum, Impar, Par, Mark, Espaço',
+  `CBUFFERENTRADAIFACE` varchar(5) DEFAULT NULL,
+  `CBUFFERSAIDAIFACE` varchar(5) DEFAULT NULL,
+  `NTCPPORTIFACE` int(11) DEFAULT 0 COMMENT 'Porta utilizada para comunicação com o equipamento via TCP/IP',
+  `NTCPPORT2IFACE` int(11) DEFAULT 0,
+  `CPATHPEDIFACE` varchar(255) DEFAULT NULL COMMENT 'PATH aonde são gerados os arquivos de requisições de pedidos do equipamento',
+  `CPATHRESIFACE` varchar(255) DEFAULT NULL COMMENT 'PATH aonde são gerados os arquivos de resposta do equipamento.',
+  `EATIVOIFACE` enum('S','N') NOT NULL DEFAULT 'S' COMMENT 'Se a interface está ativa para uso ou não',
+  `TINC` datetime DEFAULT NULL,
+  `TALT` datetime DEFAULT NULL,
+  `NRACKIFACE` int(11) DEFAULT NULL COMMENT 'NUMERO DE RACKS QUE A INTERFACE POSSUI',
+  `NPOSRACKIFACE` int(11) DEFAULT NULL COMMENT 'NUMERO DE POSIÇOES POR RACK',
+  `EREVISARIFACE` enum('S','N') DEFAULT 'N' COMMENT 'Indica se a interface está (S) ou não está (N) habilitada para revisar as amostras antes do envio ao LIS.',
+  `ECONFIRMANORMAISIFACE` enum('S','N') DEFAULT 'N' COMMENT 'Indica se a interface utiliza recurso de liberar exames automaticamente quando estão com o resultado dentro da normalidade.',
+  `EENVIAPARIFACE` enum('S','N') DEFAULT 'N' COMMENT 'Indica se a interface faz uso de parametros para enviar ao equipamento.',
+  `EWLAUTOIFACE` enum('S','N') DEFAULT 'N' COMMENT 'Indica se a interface utiliza o recurso de envio automático da WorkList.',
+  `NQTDWLAUTOIFACE` int(11) DEFAULT 0 COMMENT 'Indica a quantidade máxima de exames enviados ao mesmo tempo no recurso de WorkList automatica.',
+  `EUSAPROT2IFACE` enum('S','N') DEFAULT 'N' COMMENT 'Indica e a interface utiliza o segundo padrão de comunicação dela.',
+  `EUSARTSIFACE` enum('S','N') DEFAULT 'N',
+  `CTCPHOSTIFACE` varchar(20) DEFAULT NULL,
+  `CPATHIMAGEMIFACE` varchar(255) DEFAULT '',
+  `ETROCASEPARADORIFACE` enum('S','N') DEFAULT 'N',
+  `NTCPPORT3IFACE` int(11) DEFAULT 0,
+  `NTCPPORT4IFACE` int(11) DEFAULT 0,
+  `CWSHOSTIFACE` varchar(120) DEFAULT '',
+  `CLOGINIFACE` varchar(20) DEFAULT '',
+  `CSENHAIFACE` varchar(32) DEFAULT '',
+  `EIMPORTRESUIMAGEMIFACE` enum('S','N') DEFAULT 'N',
+  PRIMARY KEY (`NIDIFACE`),
+  KEY `fk_ie_iface_ie_equi_idx` (`NIDEQUI`),
+  KEY `fk_ie_iface_ie_setor1_idx` (`NIDSETOR`)
+) ENGINE=InnoDB AUTO_INCREMENT=2 DEFAULT CHARSET=latin1;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+LOCK TABLES `ie_iface` WRITE;
+/*!40000 ALTER TABLE `ie_iface` DISABLE KEYS */;
+INSERT INTO ie_iface VALUES (1, 311, 2, 'EXC 200', 'R', 'T', 4, 7, 3, 0, 0, '3000', '3000', 9190, NULL, '', '', 'S', '2023-10-31 09:52:47', '2023-10-31 10:16:07', NULL, NULL, 'N', 'N', 'N', 'N', 0, 'N', 'N', '192.168.1.192', '', 'N', 0, 0, '', '', '', 'N');
+/*!40000 ALTER TABLE `ie_iface` ENABLE KEYS */;
+UNLOCK TABLES;
+
+DROP TABLE IF EXISTS `ie_mtbi`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!40101 SET character_set_client = utf8 */;
+
+CREATE TABLE `ie_mtbi` (
+  `NIDMTBI` int(11) NOT NULL AUTO_INCREMENT COMMENT 'ID do MTBI.',
+  `NIDIFACE` int(11) NOT NULL COMMENT 'ID da interface.',
+  `CCODIEQUIMTBI` varchar(50) NOT NULL COMMENT 'Codigo do material biologico no equipamento',
+  `CCODILISMTBI` varchar(50) NOT NULL COMMENT 'Codigo do material biologico no LIS',
+  `CDESCMTBI` varchar(80) DEFAULT NULL COMMENT 'Descrição do Material Biológico.',
+  `TINC` datetime DEFAULT NULL,
+  `TALT` datetime DEFAULT NULL,
+  PRIMARY KEY (`NIDMTBI`),
+  KEY `MTBI_IFAVE_CODIMTBI_IDX` (`NIDIFACE`,`CCODIEQUIMTBI`)
+) ENGINE=InnoDB DEFAULT CHARSET=latin1;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+LOCK TABLES `ie_mtbi` WRITE;
+/*!40000 ALTER TABLE `ie_mtbi` DISABLE KEYS */;
+/*!40000 ALTER TABLE `ie_mtbi` ENABLE KEYS */;
+UNLOCK TABLES;
+
+DROP TABLE IF EXISTS `ie_setor`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!40101 SET character_set_client = utf8 */;
+
+CREATE TABLE `ie_setor` (
+  `NIDSETOR` int(11) NOT NULL AUTO_INCREMENT COMMENT 'ID do setor',
+  `CNOMESETOR` varchar(50) NOT NULL COMMENT 'Nome do setor',
+  `TINC` datetime DEFAULT NULL,
+  `TALT` datetime DEFAULT NULL,
+  PRIMARY KEY (`NIDSETOR`)
+) ENGINE=InnoDB AUTO_INCREMENT=11 DEFAULT CHARSET=latin1;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+LOCK TABLES `ie_setor` WRITE;
+/*!40000 ALTER TABLE `ie_setor` DISABLE KEYS */;
+INSERT INTO ie_setor VALUES (1, 'Hematologia', NULL, NULL);
+INSERT INTO ie_setor VALUES (2, 'Bioquímica', NULL, NULL);
+INSERT INTO ie_setor VALUES (3, 'Imunologia', NULL, NULL);
+INSERT INTO ie_setor VALUES (4, 'Gasometria', NULL, NULL);
+INSERT INTO ie_setor VALUES (5, 'Coagulação', NULL, NULL);
+INSERT INTO ie_setor VALUES (6, 'Urinálise', NULL, NULL);
+INSERT INTO ie_setor VALUES (7, 'Hemoglobina', NULL, NULL);
+INSERT INTO ie_setor VALUES (8, 'Eletroforese', '2023-10-31 09:51:52', NULL);
+INSERT INTO ie_setor VALUES (9, 'Microbiologia', '2023-10-31 09:51:52', NULL);
+INSERT INTO ie_setor VALUES (10, 'Triagem/Esteira', '2023-10-31 09:51:53', NULL);
+/*!40000 ALTER TABLE `ie_setor` ENABLE KEYS */;
+UNLOCK TABLES;
+
+DROP TABLE IF EXISTS `ie_terminal`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!40101 SET character_set_client = utf8 */;
+
+CREATE TABLE `ie_terminal` (
+  `NIDTERMINAL` int(11) NOT NULL AUTO_INCREMENT COMMENT 'ID do terminal cadastrado para a interface',
+  `NIDIFACE` int(11) NOT NULL COMMENT 'ID da interface que contêm o terminal',
+  `CNOMETERMINAL` varchar(50) NOT NULL COMMENT 'Nome do terminal que pode ser aberto a interface',
+  PRIMARY KEY (`NIDTERMINAL`),
+  UNIQUE KEY `TERMINAL_IFACE_CNOMETERMINAL` (`NIDIFACE`,`CNOMETERMINAL`)
+) ENGINE=InnoDB DEFAULT CHARSET=latin1;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+LOCK TABLES `ie_terminal` WRITE;
+/*!40000 ALTER TABLE `ie_terminal` DISABLE KEYS */;
+/*!40000 ALTER TABLE `ie_terminal` ENABLE KEYS */;
+UNLOCK TABLES;
+
+DROP TABLE IF EXISTS `ie_tradutor`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!40101 SET character_set_client = utf8 */;
+
+CREATE TABLE `ie_tradutor` (
+  `ctextodetradutor` varchar(100) NOT NULL DEFAULT '' COMMENT 'Chave de configuracao, inicialmente sera usada para armazenas o caminho de comunicacao do lis com o gerenciador',
+  `ctextoparatradutor` varchar(100) DEFAULT NULL,
+  `NIDIFACE` int(11) DEFAULT NULL,
+  `CEXAMLISTRADUTOR` varchar(50) DEFAULT NULL,
+  `NIDTRADUTOR` int(11) NOT NULL AUTO_INCREMENT,
+  `CVAREXAMTRADUTOR` varchar(50) DEFAULT NULL,
+  PRIMARY KEY (`NIDTRADUTOR`),
+  KEY `FK_IE_FACE_IE_TRADUTOR_NIDIFACE` (`NIDIFACE`),
+  CONSTRAINT `FK_IE_FACE_IE_TRADUTOR_NIDIFACE` FOREIGN KEY (`NIDIFACE`) REFERENCES `ie_iface` (`NIDIFACE`)
+) ENGINE=InnoDB DEFAULT CHARSET=latin1;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+LOCK TABLES `ie_tradutor` WRITE;
+/*!40000 ALTER TABLE `ie_tradutor` DISABLE KEYS */;
+/*!40000 ALTER TABLE `ie_tradutor` ENABLE KEYS */;
+UNLOCK TABLES;
+
+DROP TABLE IF EXISTS `ie_usua`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!40101 SET character_set_client = utf8 */;
+
+CREATE TABLE `ie_usua` (
+  `NIDUSUA` int(11) NOT NULL AUTO_INCREMENT COMMENT 'ID do usuário',
+  `CCODIUSUA` varchar(8) NOT NULL COMMENT 'Código do Usuário',
+  `CNOMEUSUA` varchar(60) NOT NULL COMMENT 'Nome do usuário',
+  `CSENHAUSUA` varchar(32) NOT NULL COMMENT 'Senha do usuário',
+  `EATIVOUSUA` enum('S','N') DEFAULT NULL COMMENT 'Informa se o usuário é ativo ou não.',
+  `ELOGAUNIEQUIPUSUA` enum('S','N') DEFAULT 'N' COMMENT 'Direito para o usuário abrir o UniEquipamentos.',
+  `ELOGAUNICOMUSUA` enum('S','N') DEFAULT 'N' COMMENT 'Direito para o usuário abrir o UniCominucador',
+  `ECADUSUAUSUA` enum('S','N') DEFAULT 'N' COMMENT 'Direito para o usuario poder cadastrar novos usuários.',
+  `EREENVLISUSUA` enum('S','N') DEFAULT 'N' COMMENT 'Direito do usuário reenviar resultados para o LIS.',
+  `EREENVAMOSTRAUSUA` enum('S','N') DEFAULT 'N' COMMENT 'Direito para o usuário reenviar amostrar para o equipamento.',
+  `ECANCELAMOSTRAUSUA` enum('S','N') DEFAULT 'N' COMMENT 'Direito para o usuário cancelar amostras.',
+  `TINC` datetime DEFAULT NULL,
+  `TALT` datetime DEFAULT NULL,
+  PRIMARY KEY (`NIDUSUA`)
+) ENGINE=InnoDB AUTO_INCREMENT=2 DEFAULT CHARSET=latin1;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+LOCK TABLES `ie_usua` WRITE;
+/*!40000 ALTER TABLE `ie_usua` DISABLE KEYS */;
+INSERT INTO ie_usua VALUES (1, 'UNIWARE', 'UNIWARE', '-X-', 'S', 'S', 'S', 'S', 'S', 'S', NULL, NULL, NULL);
+/*!40000 ALTER TABLE `ie_usua` ENABLE KEYS */;
+UNLOCK TABLES;
+
+DROP TABLE IF EXISTS `ie_var`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!40101 SET character_set_client = utf8 */;
+
+CREATE TABLE `ie_var` (
+  `NIDVAR` int(11) NOT NULL AUTO_INCREMENT COMMENT 'ID da variável',
+  `NIDEXAM` int(11) NOT NULL COMMENT 'ID do exame',
+  `CNOMEEQUIVAR` varchar(50) NOT NULL COMMENT 'Nome da variavel/campo no equipamento',
+  `CNOMELISVAR` varchar(50) NOT NULL COMMENT 'Nome da variavel/campo no LIS',
+  `NORDEMVAR` int(11) DEFAULT NULL COMMENT 'Número da ordem da variavel/campo',
+  `CFATORVAR` varchar(8) DEFAULT NULL COMMENT 'Fator de conversão da variável para o resultado',
+  `TINC` datetime DEFAULT NULL,
+  `TALT` datetime DEFAULT NULL,
+  `CEXAMEQUIVAR` varchar(50) DEFAULT NULL COMMENT 'Variável do exame no equipamento',
+  `NMINIMOVAR` decimal(13,4) DEFAULT NULL COMMENT 'Valor mínimo possível para resultado de variável aceitável',
+  `NINFERIORVAR` decimal(13,4) DEFAULT NULL COMMENT 'Valor limite inferior para o resultado da variável ser considerado NORMAL',
+  `NSUPERIORVAR` decimal(13,4) DEFAULT NULL COMMENT ' Valor limite superior para o resultado da variável ser considerado NORMAL',
+  `NMAXIMOVAR` decimal(13,4) DEFAULT NULL COMMENT 'Valor máximo possível para resultado de variável aceitável',
+  `CDECIMAISVAR` varchar(2) DEFAULT NULL COMMENT 'Número de casas para arredondar o resultado na hr de exportar',
+  PRIMARY KEY (`NIDVAR`),
+  KEY `VAR_IFACE_EXAM_VAR` (`CNOMEEQUIVAR`),
+  KEY `fk_ie_var_ie_exam1_idx` (`NIDEXAM`)
+) ENGINE=InnoDB AUTO_INCREMENT=69 DEFAULT CHARSET=latin1;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+LOCK TABLES `ie_var` WRITE;
+/*!40000 ALTER TABLE `ie_var` DISABLE KEYS */;
+INSERT INTO ie_var VALUES (1, 1, 'Quantitativo', 'ALB', 1, '', '2023-10-31 09:52:48', '2023-10-31 10:16:07', NULL, 0.0, 0.0, 0.0, 0.0, '');
+INSERT INTO ie_var VALUES (2, 2, 'Quantitativo', 'AMI', 1, '', '2023-10-31 09:52:48', '2023-10-31 10:16:07', NULL, 0.0, 0.0, 0.0, 0.0, '');
+INSERT INTO ie_var VALUES (3, 3, 'Quantitativo', 'AUR', 1, '', '2023-10-31 09:52:48', '2023-10-31 10:16:07', NULL, 0.0, 0.0, 0.0, 0.0, '');
+INSERT INTO ie_var VALUES (4, 4, 'Quantitativo', 'BILD', 1, '', '2023-10-31 09:52:48', '2023-10-31 10:00:37', '9', 0.0, 0.0, 0.0, 0.0, '');
+INSERT INTO ie_var VALUES (5, 4, 'Quantitativo', 'BILT', 2, '', '2023-10-31 09:52:48', '2023-10-31 10:00:37', '8', 0.0, 0.0, 0.0, 0.0, '');
+INSERT INTO ie_var VALUES (6, 5, 'Quantitativo', 'CAL', 1, '', '2023-10-31 09:52:48', '2023-10-31 10:16:07', NULL, 0.0, 0.0, 0.0, 0.0, '');
+INSERT INTO ie_var VALUES (7, 6, 'Quantitativo', 'COL', 1, '', '2023-10-31 09:52:48', '2023-10-31 10:16:07', NULL, 0.0, 0.0, 0.0, 0.0, '');
+INSERT INTO ie_var VALUES (8, 7, 'Quantitativo', 'CREA', 1, '', '2023-10-31 09:52:48', '2023-10-31 10:16:07', NULL, 0.0, 0.0, 0.0, 0.0, '');
+INSERT INTO ie_var VALUES (9, 8, 'Quantitativo', 'FAL', 1, '', '2023-10-31 09:52:48', '2023-10-31 10:16:07', NULL, 0.0, 0.0, 0.0, 0.0, '');
+INSERT INTO ie_var VALUES (10, 9, 'Quantitativo', 'FER', 1, '', '2023-10-31 09:52:48', '2023-10-31 10:16:07', NULL, 0.0, 0.0, 0.0, 0.0, '');
+INSERT INTO ie_var VALUES (11, 10, 'Quantitativo', 'GAMAGT', 1, '', '2023-10-31 09:52:48', '2023-10-31 10:16:07', NULL, 0.0, 0.0, 0.0, 0.0, '');
+INSERT INTO ie_var VALUES (12, 11, 'Quantitativo', 'GLI', 1, '', '2023-10-31 09:52:48', '2023-10-31 10:16:07', NULL, 0.0, 0.0, 0.0, 0.0, '');
+INSERT INTO ie_var VALUES (13, 12, 'Quantitativo', 'HDL', 1, '', '2023-10-31 09:52:48', '2023-10-31 10:16:07', NULL, 0.0, 0.0, 0.0, 0.0, '');
+INSERT INTO ie_var VALUES (14, 13, 'Quantitativo', 'PCR', 1, '', '2023-10-31 09:52:48', '2023-10-31 10:16:07', NULL, 0.0, 0.0, 0.0, 0.0, '');
+INSERT INTO ie_var VALUES (15, 14, 'Quantitativo', 'TGO', 1, '', '2023-10-31 09:52:48', '2023-10-31 10:16:07', NULL, 0.0, 0.0, 0.0, 0.0, '');
+INSERT INTO ie_var VALUES (16, 15, 'Quantitativo', 'TGP', 1, '', '2023-10-31 09:52:48', '2023-10-31 10:16:07', NULL, 0.0, 0.0, 0.0, 0.0, '');
+INSERT INTO ie_var VALUES (17, 16, 'Quantitativo', 'TRI', 1, '', '2023-10-31 09:52:48', '2023-10-31 10:16:07', NULL, 0.0, 0.0, 0.0, 0.0, '');
+INSERT INTO ie_var VALUES (18, 17, 'Quantitativo', 'URE', 1, '', '2023-10-31 09:52:48', '2023-10-31 10:16:07', NULL, 0.0, 0.0, 0.0, 0.0, '');
+INSERT INTO ie_var VALUES (19, 18, 'Quantitativo', 'CPKMB', 1, '', '2023-10-31 09:52:48', '2023-10-31 10:16:07', NULL, 0.0, 0.0, 0.0, 0.0, '');
+INSERT INTO ie_var VALUES (20, 19, 'Quantitativo', 'CPK', 1, '', '2023-10-31 09:52:48', '2023-10-31 10:16:07', NULL, 0.0, 0.0, 0.0, 0.0, '');
+INSERT INTO ie_var VALUES (21, 20, 'Quantitativo', 'MAG', 1, '', '2023-10-31 09:52:48', '2023-10-31 10:16:07', NULL, 0.0, 0.0, 0.0, 0.0, '');
+INSERT INTO ie_var VALUES (22, 21, 'Quantitativo', 'FOS', 1, '', '2023-10-31 09:52:48', '2023-10-31 10:16:07', NULL, 0.0, 0.0, 0.0, 0.0, '');
+INSERT INTO ie_var VALUES (24, 23, 'Quantitativo', 'LIP', 1, '', '2023-10-31 09:52:48', '2023-10-31 10:16:07', NULL, 0.0, 0.0, 0.0, 0.0, '');
+INSERT INTO ie_var VALUES (25, 24, 'Quantitativo', 'LDH', 1, '', '2023-10-31 09:52:48', '2023-10-31 10:16:07', NULL, 0.0, 0.0, 0.0, 0.0, '');
+INSERT INTO ie_var VALUES (26, 25, 'Quantitativo', 'GTT', 1, '', '2023-10-31 09:52:48', '2023-10-31 10:16:07', NULL, 0.0, 0.0, 0.0, 0.0, '');
+INSERT INTO ie_var VALUES (27, 26, 'Quantitativo', 'GTT30', 1, '', '2023-10-31 09:52:48', '2023-10-31 10:16:07', NULL, 0.0, 0.0, 0.0, 0.0, '');
+INSERT INTO ie_var VALUES (28, 27, 'Quantitativo', 'GTT60', 1, '', '2023-10-31 09:52:48', '2023-10-31 10:16:07', NULL, 0.0, 0.0, 0.0, 0.0, '');
+INSERT INTO ie_var VALUES (29, 28, 'Quantitativo', 'GTT90', 1, '', '2023-10-31 09:52:48', '2023-10-31 10:16:07', NULL, 0.0, 0.0, 0.0, 0.0, '');
+INSERT INTO ie_var VALUES (30, 29, 'Quantitativo', 'GTT120', 1, '', '2023-10-31 09:52:48', '2023-10-31 10:16:07', NULL, 0.0, 0.0, 0.0, 0.0, '');
+INSERT INTO ie_var VALUES (31, 30, 'Quantitativo', 'COL', 1, '', '2023-10-31 09:52:48', '2023-10-31 10:00:37', '5', 0.0, 0.0, 0.0, 0.0, '');
+INSERT INTO ie_var VALUES (32, 30, 'Quantitativo', 'HDL', 2, '', '2023-10-31 09:52:48', '2023-10-31 10:00:37', '7', 0.0, 0.0, 0.0, 0.0, '');
+INSERT INTO ie_var VALUES (33, 30, 'Quantitativo', 'TRI', 3, '', '2023-10-31 09:52:48', '2023-10-31 10:00:37', '6', 0.0, 0.0, 0.0, 0.0, '');
+INSERT INTO ie_var VALUES (34, 31, 'Quantitativo', 'ALAC', 1, '', '2023-10-31 09:52:48', '2023-10-31 10:16:07', NULL, NULL, NULL, NULL, NULL, '');
+INSERT INTO ie_var VALUES (35, 32, 'Quantitativo', 'TRI', 1, '', '2023-10-31 09:52:48', '2023-10-31 10:00:37', '6', NULL, NULL, NULL, NULL, '');
+INSERT INTO ie_var VALUES (36, 33, 'Quantitativo', 'PTO', 1, '', '2023-10-31 09:52:48', '2023-10-31 10:00:37', '22', NULL, NULL, NULL, NULL, '');
+INSERT INTO ie_var VALUES (37, 33, 'Quantitativo', 'ALB', 2, '', '2023-10-31 09:52:48', '2023-10-31 10:00:37', '23', NULL, NULL, NULL, NULL, '');
+INSERT INTO ie_var VALUES (38, 34, 'Quantitativo', 'PTO', 1, '', '2023-10-31 09:52:48', '2023-10-31 10:16:07', NULL, NULL, NULL, NULL, NULL, '');
+INSERT INTO ie_var VALUES (39, 35, 'Quantitativo', 'COL', 1, '', '2023-10-31 09:52:48', '2023-10-31 10:00:37', '5', NULL, NULL, NULL, NULL, '');
+INSERT INTO ie_var VALUES (40, 35, 'Quantitativo', 'TRI', 2, '', '2023-10-31 09:52:48', '2023-10-31 10:00:37', '6', NULL, NULL, NULL, NULL, '');
+INSERT INTO ie_var VALUES (41, 35, 'Quantitativo', 'HDL', 3, '', '2023-10-31 09:52:48', '2023-10-31 10:00:37', '7', NULL, NULL, NULL, NULL, '');
+INSERT INTO ie_var VALUES (42, 36, 'Quantitativo', 'AMILASE', 1, '', '2023-10-31 09:52:48', '2023-10-31 10:00:37', '17', NULL, NULL, NULL, NULL, '');
+INSERT INTO ie_var VALUES (43, 36, 'Quantitativo', 'DIRETA', 2, '', '2023-10-31 09:52:48', '2023-10-31 10:00:37', '9', NULL, NULL, NULL, NULL, '');
+INSERT INTO ie_var VALUES (44, 36, 'Quantitativo', 'TOTAL', 3, '', '2023-10-31 09:52:48', '2023-10-31 10:00:37', '8', NULL, NULL, NULL, NULL, '');
+INSERT INTO ie_var VALUES (45, 36, 'Quantitativo', 'TGO', 4, '', '2023-10-31 09:52:48', '2023-10-31 10:00:37', '10', NULL, NULL, NULL, NULL, '');
+INSERT INTO ie_var VALUES (46, 36, 'Quantitativo', 'TGP', 5, '', '2023-10-31 09:52:48', '2023-10-31 10:00:37', '11', NULL, NULL, NULL, NULL, '');
+INSERT INTO ie_var VALUES (47, 36, 'Quantitativo', 'GAMAGT', 6, '', '2023-10-31 09:52:48', '2023-10-31 10:00:37', '12', NULL, NULL, NULL, NULL, '');
+INSERT INTO ie_var VALUES (48, 36, 'Quantitativo', 'FAL', 7, '', '2023-10-31 09:52:48', '2023-10-31 10:00:37', '13', NULL, NULL, NULL, NULL, '');
+INSERT INTO ie_var VALUES (49, 37, 'Quantitativo', 'CL5', 1, '', '2023-10-31 09:52:48', '2023-10-31 10:16:07', NULL, NULL, NULL, NULL, NULL, '');
+INSERT INTO ie_var VALUES (50, 38, 'Quantitativo', 'CL515', 1, '', '2023-10-31 09:52:48', '2023-10-31 10:16:07', NULL, NULL, NULL, NULL, NULL, '');
+INSERT INTO ie_var VALUES (51, 39, 'Quantitativo', 'CL30', 1, '', '2023-10-31 09:52:48', '2023-10-31 10:16:07', NULL, NULL, NULL, NULL, NULL, '');
+INSERT INTO ie_var VALUES (52, 40, 'Quantitativo', 'CL560', 1, '', '2023-10-31 09:52:48', '2023-10-31 10:16:07', NULL, NULL, NULL, NULL, NULL, '');
+INSERT INTO ie_var VALUES (53, 41, 'Quantitativo', 'CL590', 1, '', '2023-10-31 09:52:48', '2023-10-31 10:16:07', NULL, NULL, NULL, NULL, NULL, '');
+INSERT INTO ie_var VALUES (54, 42, 'Quantitativo', 'GTT15', 1, '', '2023-10-31 09:52:48', '2023-10-31 10:16:07', NULL, NULL, NULL, NULL, NULL, '');
+INSERT INTO ie_var VALUES (55, 43, 'Quantitativo', 'GTT', 1, '', '2023-10-31 09:52:48', '2023-10-31 10:16:07', NULL, NULL, NULL, NULL, NULL, '');
+INSERT INTO ie_var VALUES (56, 44, 'Quantitativo', 'GTT60', 1, '', '2023-10-31 09:52:48', '2023-10-31 10:16:07', NULL, NULL, NULL, NULL, NULL, '');
+INSERT INTO ie_var VALUES (57, 45, 'Quantitativo', 'GTT120', 1, '', '2023-10-31 09:52:48', '2023-10-31 10:16:07', NULL, NULL, NULL, NULL, NULL, '');
+INSERT INTO ie_var VALUES (58, 46, 'Quantitativo', 'GTT180', 1, '', '2023-10-31 09:52:48', '2023-10-31 10:16:07', NULL, NULL, NULL, NULL, NULL, '');
+INSERT INTO ie_var VALUES (59, 47, 'Quantitativo', 'GTT3', 1, '', '2023-10-31 09:52:48', '2023-10-31 10:16:07', NULL, NULL, NULL, NULL, NULL, '');
+INSERT INTO ie_var VALUES (60, 48, 'Quantitativo', 'GTT3120', 1, '', '2023-10-31 09:52:48', '2023-10-31 10:16:07', NULL, NULL, NULL, NULL, NULL, '');
+INSERT INTO ie_var VALUES (61, 49, 'Quantitativo', 'GTT60', 1, '', '2023-10-31 09:52:48', '2023-10-31 10:16:07', NULL, NULL, NULL, NULL, NULL, '');
+INSERT INTO ie_var VALUES (62, 50, 'Quantitativo', 'GTT75G', 1, '', '2023-10-31 09:52:48', '2023-10-31 10:16:07', NULL, NULL, NULL, NULL, NULL, '');
+INSERT INTO ie_var VALUES (63, 51, 'Quantitativo', 'GTT75G12', 1, '', '2023-10-31 09:52:48', '2023-10-31 10:16:07', NULL, NULL, NULL, NULL, NULL, '');
+INSERT INTO ie_var VALUES (64, 52, 'Quantitativo', 'GLIWEG', 1, '', '2023-10-31 09:52:48', '2023-10-31 10:16:07', NULL, NULL, NULL, NULL, NULL, '');
+INSERT INTO ie_var VALUES (65, 53, 'Quantitativo', 'GGT302', 1, '', '2023-10-31 09:52:48', '2023-10-31 10:16:07', NULL, NULL, NULL, NULL, NULL, '');
+INSERT INTO ie_var VALUES (66, 54, 'Quantitativo', 'GGT30', 1, '', '2023-10-31 09:52:48', '2023-10-31 10:16:07', NULL, NULL, NULL, NULL, NULL, '');
+INSERT INTO ie_var VALUES (67, 55, 'Quantitativo', 'GLIPP', 1, '', '2023-10-31 09:52:48', '2023-10-31 10:16:07', NULL, NULL, NULL, NULL, NULL, '');
+INSERT INTO ie_var VALUES (68, 56, 'Quantitativo', 'GTT360', 1, '', '2023-10-31 09:52:48', '2023-10-31 10:16:07', NULL, NULL, NULL, NULL, NULL, '');
+/*!40000 ALTER TABLE `ie_var` ENABLE KEYS */;
+UNLOCK TABLES;
+
+/*!40103 SET TIME_ZONE=@OLD_TIME_ZONE */;
+/*!40101 SET SQL_MODE=@OLD_SQL_MODE */;
+/*!40014 SET FOREIGN_KEY_CHECKS=@OLD_FOREIGN_KEY_CHECKS */;
+/*!40014 SET UNIQUE_CHECKS=@OLD_UNIQUE_CHECKS */;
+/*!40101 SET CHARACTER_SET_CLIENT=@OLD_CHARACTER_SET_CLIENT */;
+/*!40101 SET CHARACTER_SET_RESULTS=@OLD_CHARACTER_SET_RESULTS */;
+/*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
+/*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;

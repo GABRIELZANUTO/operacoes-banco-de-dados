@@ -117,7 +117,13 @@ def inserir_modeloface(host,user,passwd,port,caminho_modelo):
       db.insert(host,user,passwd,port,insert_ievar)
     contador=contador+1
 
-jConexao,jOperacao,jProntos,jInserir,jExtrair,JBackup,Jumexame,Jmodelos,Jcriarmodelos,jInserirmodelos,Jinserirface,Jcriarface = temp.janela_Operacao(),None,None,None,None,None,None,None,None,None,None,None
+def trocar_codexame(host='',user='',passwd='',port=''):
+   comando = f"SELECT NIDAMOSTRA FROM ie_amostra WHERE CEXAMLISEXAM = 'CHDL' and CEXAMEQUIEXAM = 'HDL-LABT' "
+   result = db.select_database(host,user,passwd,port,comando,modo='MORE')
+   print(result)
+   
+
+jReenviarExames,jOperacao,jProntos,jInserir,jExtrair,JBackup,Jumexame,Jmodelos,Jcriarmodelos,jInserirmodelos,Jinserirface,Jcriarface,jConexao = temp.janela_reenviarexames(),None,None,None,None,None,None,None,None,None,None,None,None
 
 #Inicio das operações nas telas da interface
 while True:
@@ -160,6 +166,9 @@ while True:
       if eventos == 'Modelos':
           jOperacao.hide()
           Jmodelos = temp.janela_modelos()
+      if eventos == 'Reenviar Exames':
+          jOperacao.hide()
+          jReenviarExames = temp.janela_reenviarexames()    
   if window == jInserir:
       if eventos == sg.WIN_CLOSED:
           break
@@ -209,8 +218,12 @@ while True:
           jOperacao.un_hide()
           JBackup.hide()
       if eventos == "Gerar Backup":
-        file_path,token =db.backup(host,user,senha,porta,valores['cliente'])
-        db.manda_api(file_path,token)
+        file_path =db.backup(host,user,senha,porta,valores['adm_backup'],valores['unidade_backup'],valores['cliente'])
+        result =db.manda_api(file_path,str(valores['cliente']))
+        if result == True:
+           sg.popup('Backup Enviado com sucesso')
+        else:
+           sg.popup('Erro ao mandar backup')
   if window == Jumexame:
       if eventos == sg.WIN_CLOSED:
           break
@@ -278,4 +291,13 @@ while True:
     if eventos == "Enviar":
       inserir_modeloface(host,user,senha,porta,valores['caminho_modelo'])
       sg.popup("Interface inserida com sucesso !!!")
+  if window == jReenviarExames:
+      if eventos == sg.WIN_CLOSED:
+        break
+      if eventos == "Voltar":
+           jReenviarExames.hide()
+           jOperacao.un_hide()
+      if eventos == "Trocar":
+         trocar_codexame()
+      
                    

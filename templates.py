@@ -58,6 +58,10 @@ def janela_extrair():
 def janela_backup():
   sg.theme('DarkGrey12')
   layout6= [
+  [sg.Text('Adm do Cliente', size=15,font='Helvetica')],
+  [sg.Input(key='adm_backup',size =(25,1))],
+  [sg.Text('Unidade do Cliente', size=15,font='Helvetica')],
+  [sg.Input(key='unidade_backup',size =(25,1))],
   [sg.Text('Token do Cliente', size=15,font='Helvetica')],
   [sg.Input(key='cliente',size =(25,1))],
   [sg.Button('Gerar Backup',size=(10,1),button_color='green'), sg.Button('Voltar',size=(10,1),button_color='red') ]
@@ -126,3 +130,15 @@ def janela_inserirmodelosface():
   [sg.Button('Enviar',size=(20,1),button_color='green'), sg.Button('Voltar',size=(20,1),button_color='red') ]
   ]
   return sg.Window('Inserir Modelo Face',layout12,finalize=True)
+
+def janela_reenviarexames():
+  sg.theme('DarkGrey12')
+  layout13=[
+    [sg.Text('Trocar e reenviar exames pendentes', size=(40, 1), justification='center', font=("Helvetica", 13),
+    relief=sg.RELIEF_RIDGE, k='-TEXT HEADING-', enable_events=True)],
+    [sg.Text('Mnemonico do exame', size=20,font='Helvetica'),sg.Input(key='mnemonico',size =(10,1))],
+    [sg.Text('Código Antigo', size=20,font='Helvetica'),sg.Input(key='codAntigo',size =(10,1))],
+    [sg.Text('Código Novo', size=20,font='Helvetica'),sg.Input(key='codNovo',size =(10,1))],
+    [sg.Button('Trocar',size=(20,1),button_color='green'), sg.Button('Voltar',size=(20,1),button_color='red') ]
+  ]
+  return sg.Window('Reenviar exames',layout13,finalize=True)

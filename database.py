@@ -145,12 +145,12 @@ def insert_modelpronto(host,user,passwd,port,nidiface,conteudo_ieexam,conteudo_i
     comando_ievar = "insert into ie_var(NIDEXAM,CNOMEEQUIVAR,CNOMELISVAR,NORDEMVAR,CFATORVAR,TINC) values"+dados
     insert(host,user,passwd,port,comando_ievar)
 #Função para montar o arquivo .ulb de backup
-def backup(host,user,senha,porta,cliente):
+def backup(host,user,senha,porta,adm,unidade,cliente):
   conn = getConection(host,user,senha,porta)
   cursor = conn.cursor()
   data_atual = datetime.datetime.now().strftime("%Y%m%d")
   cliente = str(cliente)
-  nome_arquivo = cliente+"_"+data_atual
+  nome_arquivo = adm+"_"+unidade+"_"+data_atual
   try:
     cursor.execute("SHOW TABLES")
     retorno = cursor.fetchall()
@@ -210,7 +210,7 @@ def backup(host,user,senha,porta,cliente):
         f.write("/*!40101 SET CHARACTER_SET_RESULTS=@OLD_CHARACTER_SET_RESULTS */;\n")
         f.write("/*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;\n")
         f.write("/*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;\n") 
-    return name,cliente
+    return name
   except ERROR as erro:
     print("Falha: {}".format(erro))
   finally:
@@ -249,7 +249,6 @@ def manda_api(file_path,token):
   files = {'backup': (f'{file_path}', open(file_path, 'rb'))}
   response = requests.post(url, files=files,headers=headers)
   if response.status_code == 201:
-    print(' nao caguei nas calças')
+     return True
   else:
-    print('caguei nas calças')
-  
+    return False
