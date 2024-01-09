@@ -215,7 +215,7 @@ def janela_Operacao():
   [sg.Text('Escolha uma opção', size=(29, 1), justification='center', font=("Helvetica", 13),
   relief=sg.RELIEF_RIDGE, k='-TEXT HEADING-', enable_events=True)],
   [sg.Button('Modelos Prontos',size=(15,1)),
-    sg.Button('Inserir Planilha',size=(15,1))],
+    sg.Button('Inserir Planilha Gimenez',size=(15,1))],
   [sg.Button('Extrair Config',size=(15,1)),
     sg.Button('Backup',size=(15,1))],
   [sg.Button('Copiar um Exame',size=(15,1)),
@@ -231,7 +231,7 @@ def janela_inserir():
   [sg.Input(key='caminho_planilha'), sg.FileBrowse()],
   [sg.Button('Enviar',button_color='green'), sg.Button('Voltar',button_color='red') ],
   ]
-  return sg.Window('Inserir planilha', layout2,finalize=True)
+  return sg.Window('Inserir Planilha Gimenez', layout2,finalize=True)
 
 def janela_extrair():
   sg.theme('DarkGrey12')
@@ -365,7 +365,7 @@ while True:
       if eventos == "Modelos Prontos":
           jOperacao.hide()
           jProntos=janela_Prontos() 
-      if eventos == "Inserir Planilha":
+      if eventos == "Inserir Planilha Gimenez":
           jOperacao.hide()
           jInserir=janela_inserir()
       if eventos == "Extrair Config":
