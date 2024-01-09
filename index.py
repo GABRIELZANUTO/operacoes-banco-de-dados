@@ -1,7 +1,6 @@
 import pandas as pd
 from PySimpleGUI import PySimpleGUI as sg
 import database as db
-from distutils.log import ERROR
 from classes import *
 import pickle
 
@@ -9,8 +8,9 @@ ie_exam = c_ie_exam()
 ie_var = c_ie_var()
 ie_iface = c_ie_face()
 # -----------------------------------------------------------------------------BackEnd--------------------------------------------------------------------------------------------------
-def inserir_planilha(host,user,passwd,port,nidiface):
-    dataframe = pd.read_excel("Exames.xls")
+def inserir_planilha(host,user,passwd,port,nidiface,planilha):
+    print(planilha)
+    dataframe = pd.read_excel(planilha)
     lista = dataframe.values.tolist()
     db.insert_planilha(host,user,passwd,port,nidiface,lista)
 
@@ -116,6 +116,74 @@ def inserir_modeloface(host,user,passwd,port,caminho_modelo):
       db.insert(host,user,passwd,port,insert_ievar)
     contador=contador+1
 
+# função de troca de código de exame no equipamento 
+    
+
+def trocaCodigoExame(interface,mnemonico,codAntigo,codNovo,credentials):
+    conn = db.getConection(host=credentials['host'],senha=credentials['senha'],user=credentials['user'],porta=credentials['porta'])
+    cur = conn.cursor()
+
+    def verificaDesmembrado():
+        qComand = f"SELECT CEXAMEQUIEXAM,NIDEXAM from ie_exam WHERE CEXAMLISEXAM = '{mnemonico}' AND NIDIFACE = {interface} "
+        cur.execute(qComand)
+        retornoDesmembrado = cur.fetchone()
+        if retornoDesmembrado[0] == 'Desmembrado':
+            return True , retornoDesmembrado
+        else:
+            return False , retornoDesmembrado
+    
+    def trocaDesmembrado(nidexam):
+        print(nidexam)
+        qComand = f"SELECT NIDVAR from ie_var WHERE CEXAMEQUIVAR = '{codAntigo}' and NIDEXAM = {nidexam} "
+        cur.execute(qComand)
+        retorno = cur.fetchone()
+        if retorno is None:
+            raise  ValueError('Não foi encontrado, verifique os dados')
+        else:
+            qUpdate = f"UPDATE ie_var SET CEXAMEQUIVAR = '{codNovo}' WHERE NIDVAR = {retorno[0]} "
+            cur.execute(qUpdate)
+            conn.commit()
+    
+    def trocaAmostras():
+        qComand = f"SELECT CCODIAMOSTRA,CEXAMEQUIEXAM,CEXAMLISEXAM FROM ie_amostra WHERE CEXAMEQUIEXAM = '{codAntigo}' AND CEXAMLISEXAM = '{mnemonico}' AND NIDIFACE={interface};"
+        uComand = f"UPDATE ie_amostra SET CEXAMEQUIEXAM = '{codNovo}' WHERE CEXAMEQUIEXAM = '{codAntigo}' AND CEXAMLISEXAM = '{mnemonico}' AND NIDIFACE={interface}"
+        cur.execute(qComand)
+        retorno = cur.fetchall()
+        if len(retorno) <= 0:
+            raise ValueError('Não existe nenhuma amostra na interface com esse código')
+        else:
+            print(retorno)
+            cur.execute(uComand)
+            conn.commit()
+    
+    def trocaExame():
+        qComand = f"SELECT NIDEXAM FROM ie_exam WHERE CEXAMLISEXAM = '{mnemonico}' AND CEXAMEQUIEXAM = '{codAntigo}' AND NIDIFACE = {interface}"
+        cur.execute(qComand)
+        retorno = cur.fetchone()
+        print(retorno)
+        if retorno is None:
+            raise ValueError('Não foi encontrado, verifique os dados')
+        else:
+            qUpdate = f"UPDATE ie_exam SET CEXAMEQUIEXAM = '{codNovo}' WHERE NIDEXAM = {retorno[0]} "
+            cur.execute(qUpdate)
+            conn.commit()
+
+    valida,retornoDesmem = verificaDesmembrado()
+    if valida is True:
+        try:
+          trocaDesmembrado(retornoDesmem[1])
+          trocaAmostras()
+          cur.close()
+        except ValueError as e:
+           sg.popup_error(e)
+    else:
+        try:
+          trocaExame()
+          trocaAmostras()
+          cur.close()
+        except ValueError as e:
+           sg.popup_error(e)
+
 # -----------------------------------------------------------------------------FrontEnd--------------------------------------------------------------------------------------------------
 def janela_Conectar():
   sg.theme('DarkGrey12')
@@ -151,7 +219,8 @@ def janela_Operacao():
   [sg.Button('Extrair Config',size=(15,1)),
     sg.Button('Backup',size=(15,1))],
   [sg.Button('Copiar um Exame',size=(15,1)),
-    sg.Button('Modelos',size=(15,1))]  
+    sg.Button('Modelos',size=(15,1))],
+  [sg.Button('Trocar Cod Exam',size=(15,1))]
   ]
   return sg.Window('Decisão', layout1,finalize=True)
 
@@ -159,7 +228,8 @@ def janela_inserir():
   sg.theme('DarkGrey12')
   layout2= [
   [sg.Text('Id inter.', size=8),sg.Input(key='numeroPlanilha',size =(20,1))],
-  [sg.Button('Enviar',button_color='green'), sg.Button('Voltar',button_color='red') ]
+  [sg.Input(key='caminho_planilha'), sg.FileBrowse()],
+  [sg.Button('Enviar',button_color='green'), sg.Button('Voltar',button_color='red') ],
   ]
   return sg.Window('Inserir planilha', layout2,finalize=True)
 
@@ -201,6 +271,7 @@ def janela_modelos():
     sg.Button('Inserir Modelo Face',size=(15,1))],
   [sg.Button('Voltar',size=(32,1),button_color='red') ]
   ]
+  
   return sg.Window('Menu Modelos', layout8,finalize=True)
 
 def janela_criarmodelos():
@@ -252,7 +323,21 @@ def janela_confirmaexclusao(dados):
   [sg.Button('Sim',button_color='green',size=(33,1)), sg.Button('Nao',button_color='red',size=(33,1)) ]
   ]
   return sg.Window('Exclusão', layout6,finalize=True)  
-jConexao,jOperacao,jProntos,jInserir,jExtrair,JBackup,Jumexame,Jmodelos,Jcriarmodelos,jInserirmodelos,Jinserirface,Jcriarface,Jconfirmadrive = janela_Conectar(),None,None,None,None,None,None,None,None,None,None,None,None
+
+def janela_trocaCodExame():
+  sg.theme('DarkGrey12')
+  layout13= [
+  [sg.Text('Digito as informações', size=(40, 1), justification='center', font=("Helvetica", 13),
+  relief=sg.RELIEF_RIDGE, k='-TEXT HEADING-', enable_events=True)],
+  [sg.Text('ID da interface', size=20,font='Helvetica'),sg.Input(key='idFaceTroca',size =(10,1))],
+  [sg.Text('Mnemônico do Exame', size=20,font='Helvetica'),sg.Input(key='mnemonicoTroca',size =(10,1))],
+  [sg.Text('Código do exame atual', size=20,font='Helvetica'),sg.Input(key='codAntigo',size =(10,1))],
+  [sg.Text('Código do exame novo', size=20,font='Helvetica'),sg.Input(key='codNovo',size =(10,1))],
+  [sg.Button('Trocar',size=(10,1),button_color='green'), sg.Button('Voltar',size=(10,1),button_color='red') ]
+  ]
+  return sg.Window('Criar Modelo Face',layout13,finalize=True)
+
+jConexao,jOperacao,jProntos,jInserir,jExtrair,JBackup,Jumexame,Jmodelos,Jcriarmodelos,jInserirmodelos,Jinserirface,Jcriarface,Jconfirmadrive,jTroca = janela_Conectar(),None,None,None,None,None,None,None,None,None,None,None,None,None
 
 #Inicio das operações nas telas da interface
 while True:
@@ -295,6 +380,9 @@ while True:
       if eventos == 'Modelos':
           jOperacao.hide()
           Jmodelos = janela_modelos()
+      if eventos == "Trocar Cod Exam":
+         jOperacao.hide()
+         jTroca = janela_trocaCodExame()
   if window == jInserir:
       if eventos == sg.WIN_CLOSED:
           break
@@ -303,9 +391,9 @@ while True:
           jInserir.hide()
       if eventos == 'Enviar':
           try:
-              inserir_planilha(host,user,senha,porta,valores['numeroPlanilha'])
+              inserir_planilha(host,user,senha,porta,valores['numeroPlanilha'],valores['caminho_planilha'])
               sg.popup("Dados gravados com Sucesso !!!")
-          except ERROR as e:
+          except Exception as e:
               sg.popup("Erro ao gravar dados")
               print(e)
   if window == jProntos:
@@ -318,14 +406,14 @@ while True:
           try:
               insert_hem(host,user,senha,porta,valores['numeroPlanilha'])
               sg.popup("Gravado com sucesso !!!")
-          except ERROR as e:
+          except Exception as e:
               sg.popup("Erro ao Gravar")
               print(e)
       if eventos == "Enviar" and valores['escolhascript'] == "GAS":
           try:
               insert_gav(host,user,senha,porta,valores['numeroPlanilha'])
               sg.popup("Gravado com sucesso !!!")
-          except ERROR as e:
+          except Exception as e:
               sg.popup("Erro ao Gravar")
               print(e)
   if window == jExtrair:
@@ -364,7 +452,7 @@ while True:
           try:
               db.inserirum_exame(host,user,senha,porta,valores['mnemonico'],valores['interfaceoriginal'],valores['interfacedestino'])
               sg.popup("Exame Copiado com sucesso !!!")
-          except ERROR as e:
+          except Exception as e:
               sg.popup("Erro ao Copiar !!!") 
               print(e)
   if window == Jmodelos:
@@ -433,5 +521,14 @@ while True:
         db.exclui_drive(i['id'])
       db.upload_file_to_folder(name)
       Jconfirmadrive.hide()
-      sg.popup("Backup Enviado")  
+      sg.popup("Backup Enviado")
+  if window == jTroca:
+    if eventos == sg.WIN_CLOSED:
+      break
+    if eventos == "Voltar":
+      jTroca.hide()
+      jOperacao.un_hide()
+       
+
+      
                    

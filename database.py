@@ -1,7 +1,6 @@
 import mysql.connector
 from classes import *
 import os
-from distutils.log import ERROR
 from googleapiclient.discovery import build
 from google.oauth2.service_account import Credentials
 from googleapiclient.http import MediaFileUpload
@@ -105,7 +104,7 @@ def insert(host,user,passwd,port,comando):
      cur = conn.cursor()
      cur.execute(comando)
      conn.commit()
-  except ERROR as e:
+  except Exception as e:
      conn.rollback()
      print(e)
   finally:
@@ -124,7 +123,7 @@ def insert_planilha(host,user,passwd,port,nidiface,conteudo):
     comando_ieexam = "INSERT INTO ie_exam(NIDIFACE,CEXAMLISEXAM,CEXAMEQUIEXAM,CDESCEXAM,EDESMEMBRADOEXAM,NINDEXEXAM,TINC) VALUES "+dados_ieexam
     insert(host,user,passwd,port,comando_ieexam)
     nidexam = select_database(host,user,passwd,port,comando_nidexam)
-    comando_ieevar = f"INSERT INTO ie_var(NIDEXAM,CNOMEEQUIVAR,CNOMELISVAR,NORDEMVAR,TINC) values({nidexam[0]},'Quantitativo','{ie_exam.cexamlisexam}',1,{ie_exam.tinc})"
+    comando_ieevar = f"INSERT INTO ie_var(NIDEXAM,CNOMEEQUIVAR,CNOMELISVAR,NORDEMVAR,TINC) values({nidexam[0]},'Quantitativo','{ie_exam.cexamlisexam}_INF',1,{ie_exam.tinc})"
     insert(host,user,passwd,port,comando_ieevar)
     nindexexam=nindexexam+1
 #Função de inserir scripts prontos que estão no código, como HEM e GASOV
@@ -210,7 +209,7 @@ def backup(host,user,senha,porta,cliente):
         f.write("/*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;\n")
         f.write("/*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;\n") 
     return name,cliente
-  except ERROR as erro:
+  except Exception as erro:
     print("Falha: {}".format(erro))
   finally:
     if (conn.is_connected()):
