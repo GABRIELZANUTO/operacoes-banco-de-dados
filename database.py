@@ -111,7 +111,7 @@ def insert(host,user,passwd,port,comando):
     cur.close()
     conn.close() 
 #Função Backend para inserir os dados da planilha no banco ie_exam e ie_var
-def insert_planilha(host,user,passwd,port,nidiface,conteudo): 
+def insert_planilha(host,user,passwd,port,nidiface,conteudo,posfixo): 
   comando_nindexexam = f"SELECT MAX(NINDEXEXAM) FROM ie_exam WHERE NIDIFACE={nidiface}"
   nindexexam = select_database(host,user,passwd,port,comando_nindexexam)
   if nindexexam[0] is None:
@@ -123,9 +123,13 @@ def insert_planilha(host,user,passwd,port,nidiface,conteudo):
     comando_ieexam = "INSERT INTO ie_exam(NIDIFACE,CEXAMLISEXAM,CEXAMEQUIEXAM,CDESCEXAM,EDESMEMBRADOEXAM,NINDEXEXAM,TINC) VALUES "+dados_ieexam
     insert(host,user,passwd,port,comando_ieexam)
     nidexam = select_database(host,user,passwd,port,comando_nidexam)
-    comando_ieevar = f"INSERT INTO ie_var(NIDEXAM,CNOMEEQUIVAR,CNOMELISVAR,NORDEMVAR,TINC) values({nidexam[0]},'Quantitativo','{ie_exam.cexamlisexam}_INF',1,{ie_exam.tinc})"
+    if posfixo == None:
+      comando_ieevar = f"INSERT INTO ie_var(NIDEXAM,CNOMEEQUIVAR,CNOMELISVAR,NORDEMVAR,TINC) values({nidexam[0]},'Quantitativo','{ie_exam.cexamlisexam}',1,{ie_exam.tinc})"
+    else:
+       comando_ieevar = f"INSERT INTO ie_var(NIDEXAM,CNOMEEQUIVAR,CNOMELISVAR,NORDEMVAR,TINC) values({nidexam[0]},'Quantitativo','{ie_exam.cexamlisexam+posfixo}',1,{ie_exam.tinc})"
     insert(host,user,passwd,port,comando_ieevar)
     nindexexam=nindexexam+1
+       
 #Função de inserir scripts prontos que estão no código, como HEM e GASOV
 def insert_modelpronto(host,user,passwd,port,nidiface,conteudo_ieexam,conteudo_ievar):
   comando_nidexexam = f"SELECT MAX(NINDEXEXAM) FROM ie_exam WHERE NIDIFACE ={nidiface}"

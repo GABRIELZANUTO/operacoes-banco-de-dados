@@ -8,11 +8,14 @@ ie_exam = c_ie_exam()
 ie_var = c_ie_var()
 ie_iface = c_ie_face()
 # -----------------------------------------------------------------------------BackEnd--------------------------------------------------------------------------------------------------
-def inserir_planilha(host,user,passwd,port,nidiface,planilha):
-    print(planilha)
+def inserir_planilha(host,user,passwd,port,nidiface,planilha,posfixo=None):
+
     dataframe = pd.read_excel(planilha)
     lista = dataframe.values.tolist()
-    db.insert_planilha(host,user,passwd,port,nidiface,lista)
+    db.insert_planilha(host,user,passwd,port,nidiface,lista,posfixo)
+  
+       
+    
 
 def insert_hem(host,user,passwd,port,nidiface):
     hem_ieexam = ('HEM', 'HEM', 'HEM', 'N', 'SEGMENTADOS|BLASTOS|PROMIELOCITOS|MIELOCITOS|METAMIELOCITOS|BASTONETES|EOSINOFILOS|BASOFILOS|LINFOCITOS|MONOCITOS')
@@ -215,7 +218,7 @@ def janela_Operacao():
   [sg.Text('Escolha uma opção', size=(29, 1), justification='center', font=("Helvetica", 13),
   relief=sg.RELIEF_RIDGE, k='-TEXT HEADING-', enable_events=True)],
   [sg.Button('Modelos Prontos',size=(15,1)),
-    sg.Button('Inserir Planilha Gimenez',size=(15,1))],
+    sg.Button('Inserir Planilha',size=(15,1))],
   [sg.Button('Extrair Config',size=(15,1)),
     sg.Button('Backup',size=(15,1))],
   [sg.Button('Copiar um Exame',size=(15,1)),
@@ -230,8 +233,10 @@ def janela_inserir():
   [sg.Text('Id inter.', size=8),sg.Input(key='numeroPlanilha',size =(20,1))],
   [sg.Input(key='caminho_planilha'), sg.FileBrowse()],
   [sg.Button('Enviar',button_color='green'), sg.Button('Voltar',button_color='red') ],
+  [sg.Checkbox('Incluir pós-fixo no final da variavel do LIS?',key='POSFIXO',enable_events=True,tooltip='Adicionar um valor no final de todos as variaveis do lis como por Exemplo: GLI_INF')],
+  [sg.Text('Digite o pós-fixo',key='POSFIXOLABEL',visible=False),(sg.Input(key='POSFIXOINPUT',size=(20, 1),visible=False))]
   ]
-  return sg.Window('Inserir Planilha Gimenez', layout2,finalize=True)
+  return sg.Window('Inserir Planilha', layout2,finalize=True)
 
 def janela_extrair():
   sg.theme('DarkGrey12')
@@ -365,7 +370,7 @@ while True:
       if eventos == "Modelos Prontos":
           jOperacao.hide()
           jProntos=janela_Prontos() 
-      if eventos == "Inserir Planilha Gimenez":
+      if eventos == "Inserir Planilha":
           jOperacao.hide()
           jInserir=janela_inserir()
       if eventos == "Extrair Config":
@@ -391,11 +396,21 @@ while True:
           jInserir.hide()
       if eventos == 'Enviar':
           try:
-              inserir_planilha(host,user,senha,porta,valores['numeroPlanilha'],valores['caminho_planilha'])
+              if valores['POSFIXOINPUT'] == '':
+                inserir_planilha(host,user,senha,porta,valores['numeroPlanilha'],valores['caminho_planilha'])
+              else:
+                 inserir_planilha(host,user,senha,porta,valores['numeroPlanilha'],valores['caminho_planilha'],valores['POSFIXOINPUT'])
               sg.popup("Dados gravados com Sucesso !!!")
           except Exception as e:
               sg.popup("Erro ao gravar dados")
               print(e)
+      if valores['POSFIXO'] == True:
+        jInserir['POSFIXOLABEL'].update(visible=True)
+        jInserir['POSFIXOINPUT'].update(visible=True)
+      if valores['POSFIXO'] == False:
+        jInserir['POSFIXOLABEL'].update(visible=False)
+        jInserir['POSFIXOINPUT'].update('',visible=False)
+      
   if window == jProntos:
       if eventos == sg.WIN_CLOSED:
           break
