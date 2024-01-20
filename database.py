@@ -242,3 +242,24 @@ def inserirum_exame(host,user,passwd,port,exame,interface_antiga,interface_nova)
     insert_ievar = f"INSERT INTO ie_var(NIDEXAM,CNOMEEQUIVAR,CNOMELISVAR,NORDEMVAR,CFATORVAR,TINC,CEXAMEQUIVAR,NMINIMOVAR,NINFERIORVAR,NSUPERIORVAR,NMAXIMOVAR,CDECIMAISVAR) values " + dados_ievar
     insert(host,user,passwd,port,insert_ievar)
 
+def trocaCodExame(host,user,passwd,port,interface,codAntigo,codNovo,mnemonico,trocaAmostraP):
+  selectExam = f"SELECT NIDEXAM,CEXAMEQUIEXAM FROM ie_exam WHERE NIDIFACE={interface} AND CEXAMLISEXAM ='{mnemonico}'"
+  retorno_exam = select_database(host,user,passwd,port,selectExam)
+  if retorno_exam:
+    nidexam = retorno_exam[0]
+    if retorno_exam[1] == 'Desmembrado':
+      selectDesmembrado = f'SELECT NIDVAR from ie_var WHERE NIDEXAM = {nidexam} AND CEXAMEQUIVAR = "{codAntigo}" '
+      nidvar = select_database(host,user,passwd,port,selectDesmembrado)
+      updateDesmem = f'UPDATE ie_var SET CEXAMEQUIVAR = "{codNovo}" WHERE NIDVAR = {nidvar[0]} '
+      insert(host,user,passwd,port,updateDesmem)
+    else:
+      updateExam = f"UPDATE ie_exam SET CEXAMEQUIEXAM = '{codNovo}' WHERE NIDEXAM={nidexam} "
+      insert(host,user,passwd,port,updateExam)
+    if trocaAmostraP:
+      updateAmostras = f'UPDATE ie_amostra SET CEXAMEQUIEXAM = "{codNovo}" WHERE NIDIFACE={interface} AND CEXAMLISEXAM="{mnemonico}" and CEXAMEQUIEXAM = "{codAntigo}"'
+      insert(host,user,passwd,port,updateAmostras)
+  else:
+     raise ValueError('Não foi econtrado nenhum exame com esses dados!!!')
+
+
+

@@ -332,13 +332,14 @@ def janela_confirmaexclusao(dados):
 def janela_trocaCodExame():
   sg.theme('DarkGrey12')
   layout13= [
-  [sg.Text('Digito as informações', size=(40, 1), justification='center', font=("Helvetica", 13),
+  [sg.Text('Digite as informações', size=(50, 1), justification='center', font=("Helvetica", 13),
   relief=sg.RELIEF_RIDGE, k='-TEXT HEADING-', enable_events=True)],
-  [sg.Text('ID da interface', size=20,font='Helvetica'),sg.Input(key='idFaceTroca',size =(10,1))],
-  [sg.Text('Mnemônico do Exame', size=20,font='Helvetica'),sg.Input(key='mnemonicoTroca',size =(10,1))],
-  [sg.Text('Código do exame atual', size=20,font='Helvetica'),sg.Input(key='codAntigo',size =(10,1))],
-  [sg.Text('Código do exame novo', size=20,font='Helvetica'),sg.Input(key='codNovo',size =(10,1))],
-  [sg.Button('Trocar',size=(10,1),button_color='green'), sg.Button('Voltar',size=(10,1),button_color='red') ]
+  [sg.Text('ID da interface', size=20,font='Helvetica'),sg.Input(key='idFaceTroca',size =(25,1))],
+  [sg.Text('Mnemônico do Exame', size=20,font='Helvetica'),sg.Input(key='mnemonicoTroca',size =(25,1))],
+  [sg.Text('Código do exame atual', size=20,font='Helvetica'),sg.Input(key='codAntigo',size =(25,1))],
+  [sg.Text('Código do exame novo', size=20,font='Helvetica'),sg.Input(key='codNovo',size =(25,1))],
+  [sg.Checkbox('Trocar código de Amostras Pendentes?',key='trocaAmostraP',default=False,tooltip='Essa função troca todas as amostras pendentes para o novo código de Exame')],
+  [sg.Button('Trocar',size=(25,1),button_color='green'), sg.Button('Voltar',size=(25,1),button_color='red') ]
   ]
   return sg.Window('Criar Modelo Face',layout13,finalize=True)
 
@@ -543,6 +544,13 @@ while True:
     if eventos == "Voltar":
       jTroca.hide()
       jOperacao.un_hide()
+    if eventos == 'Trocar':
+      try:
+        db.trocaCodExame(host,user,senha,porta,valores['idFaceTroca'],valores['codAntigo'],valores['codNovo'],valores['mnemonicoTroca'],valores['trocaAmostraP'])
+        sg.popup('Troca relizada com sucesso !!')
+      except ValueError as e:
+         sg.popup_error(e)
+      
        
 
       
