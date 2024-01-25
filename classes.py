@@ -1,5 +1,9 @@
 import decimal
 import datetime
+import requests
+import pandas as pd
+from traducoes import INTERFACEOPTION
+import database as db
 #Funções de validação de dados, como o pyhton não aceita todos os tipos de dados, temos que tratar se não da erro no Insert depois
 def validacao_numero(valor):
     if valor is None:
@@ -221,3 +225,218 @@ class c_ie_face():
 
 
 
+
+
+
+class HandlerApi():
+    URL = "https://backup.gszanuto.com.br//equipamentos/pesquisa"
+
+    def get_tokens(self):
+        url_tokens = 'https://backup.gszanuto.com.br//token/'
+        data ={
+            "username":"z",
+            "password":"z",
+            'unit_id':''
+        }
+
+        headers = {
+        "Content-Type": "application/json"
+        }   
+
+        try:
+            response = requests.post(url_tokens, json=data,headers=headers)
+        except Exception as e:
+            print(('Erro ao conectar com credenciais',f'{e}'))
+        if response.status_code == 200:
+            token_data = response.json()
+            self.acessToken = token_data.get("access")
+            self.refreshToken = token_data.get("refresh")
+            self.HEADER = { 
+                'Authorization': f'Bearer {self.acessToken}',
+                'Content-Type': 'application/json',
+        
+            }
+            if self.acessToken == None or self.refreshToken == None:
+                raise ValueError('Não conseguiu pegar credenciais, verifique usuário, senha e token !!')
+        else:
+            raise ValueError('Não conseguiu pegar credenciais, verifique usuário, senha e token !!')     
+        
+    def post(self,data):
+        try:
+            response = requests.post(self.URL, headers=self.HEADER, json=data)
+            response.raise_for_status()
+            if response.status_code == 201:
+                print('salvou')
+            else:
+                print('nao salvou')
+        except requests.exceptions.RequestException as e:
+            print(f'Erro na requisição: {e}')
+    
+    def get(self,data):
+        try:
+            response = requests.get(self.URL, headers=self.HEADER, json=data)
+            if response.status_code == 200:
+                json = response.json()
+                return json
+            elif response.status_code == 400:
+                raise ValueError('Não achei esse equipamento')
+            else:
+                raise ValueError(f'Erro na requisisção {response.status_code}')
+        except requests.exceptions.RequestException as e:
+            raise ValueError(f'Erro na requisisção {e}')
+  
+class HandlerPlanilha(HandlerApi):
+    def __init__(self):
+        self.NOMEINTERFACE = None
+        self.INTERFACE = None
+        self.SETOR = None
+        self.COMUNICACAO = None
+        self.TIPO = None
+        self.LISTAEXAMES = None
+        self.POSFIXO = None
+        self.HOST = None
+        self.USER = None
+        self.SENHA = None
+        self.PORTA = None
+
+
+    def traduzir(self,palavra):
+        return INTERFACEOPTION.get(palavra,palavra)
+    def valida_comunicacao(self):
+        if self.DADOSINTERFACE['comunicacao'] == 'B' and self.DADOSINTERFACE['tipo'] == 'R':
+            self.DADOSINTERFACE['comunicacao'] = 'R'
+        elif self.DADOSINTERFACE['comunicacao'] == 'B' and self.DADOSINTERFACE['tipo'] == 'W':
+            self.DADOSINTERFACE['comunicacao'] = 'W'
+        else:
+            self.DADOSINTERFACE['comunicacao'] = 'U'
+    def filtra_setor(self,value):
+        if value =='Hematologia':
+            return 'HEM'
+        elif value =='Bioquímica':
+            return 'BIO'
+        elif value =='Gasometria':
+            return 'GAS'
+        elif value =='Imunologia':
+            return 'IMU'
+        elif value =='Coagulação':
+            return 'COA ' 
+        elif value =='Bioquímica':
+            return 'BIO'
+        elif value =='Urinálise':
+            return 'URI'
+        elif value =='Hemoglobina':
+            return 'HMO'
+        elif value =='Eletrosferase':
+            return 'ELE '
+        elif value =='Microbiologia':
+            return 'MIC'
+        elif value =='Triagem/Esteira':
+            return 'TRI '
+        elif value =='Imuno/Sorologia':
+            return 'IMS'
+        elif value =='Imuno/Bioquim.':
+            return 'IMB'
+        else:
+            return 'TOD'
+                              
+    def filtra_tipo(self,value):
+        if value == 'Request':
+            return 'R'
+        elif value == 'Worklist':
+            return 'W'
+        elif value == '----':
+            return '-'
+        else:
+            return '-'
+
+    def filtra_comunicacao(self,value):
+        if value == 'Bi':
+            return 'B'
+        elif value == 'Uni':
+            return 'U'
+        elif value == 'Bi/Uni':
+            return 'B'
+        elif value == '--':
+            return 'B'
+        else:
+            return 'B'
+
+    def filtra_conexao(self,value):
+        if value == 'Socket':
+            return 'SO'
+        elif value == 'Serial':
+            return 'SE'
+        elif value == 'Arquivo':
+            return 'AB'
+        elif value == '--':
+            return 'SO'
+        elif value =='Arquivo/banco':
+            return 'AB'
+        else:
+            return 'SO'
+
+    def filtra_desenvolvido(self,value):
+        if value == 'S':
+            return 1
+        else:
+            return 0
+            
+    def filtra_protocolo(self,value):
+        if value == 'HL7' :
+            return 'H'
+        elif value == 'ASTM':
+            return 'A'
+        else:
+            return 'P'    
+
+    def filtra_planilha(self,lista):
+        lista_filtrada = []
+        separados_por_ultimo_elemento = {}
+        for  value in lista:
+            if not (pd.isna(value[0]) or pd.isna(value[2]) or pd.isna(value[4]) or value[3] == 'N'):
+                lista_filtrada.append(value)
+        
+        for sublist in  lista_filtrada:
+            ultimo_elemento = sublist[-1]
+            if ultimo_elemento not in separados_por_ultimo_elemento:
+                separados_por_ultimo_elemento[ultimo_elemento] = [sublist]
+            else:
+                separados_por_ultimo_elemento[ultimo_elemento].append(sublist)
+        return separados_por_ultimo_elemento
+        
+    def filtraPlanilhaExam(self,lista):
+        for value in lista:
+            self.ID = value[0]
+            self.NOME = value[1]
+            self.SETOR = self.filtra_setor(value[2])
+            self.COMUNICACAO= self.filtra_comunicacao(value[3])
+            self.TIPO = self.filtra_tipo(value[4])
+            self.CONEXAO = self.filtra_conexao(value[5])
+            self.PROTOCOLO = self.filtra_protocolo(value[6])
+            self.DENSENVOLVIDO = self.filtra_desenvolvido(value[7])
+           
+    def ler_planilha(self,path):
+        dataframe = pd.read_excel(path,skiprows=3)
+        self.LISTAEXAMES = dataframe.values.tolist()
+        self.LISTAEXAMES = self.filtra_planilha(self.LISTAEXAMES)
+        self.criaInterface()
+       
+    def criaInterface(self):
+        for chave, value in self.LISTAEXAMES.items():
+            chave = chave.strip()
+            try:
+                data = {
+                    'nome':F'{chave}'
+                }
+                self.DADOSINTERFACE = self.get(data)
+                self.valida_comunicacao()
+                self.DADOSINTERFACE['setor'] = self.traduzir(self.DADOSINTERFACE['setor'])
+                self.DADOSINTERFACE['conexao'] = self.traduzir(self.DADOSINTERFACE['conexao'])
+                comand_iface = f" INSERT INTO ie_iface (NIDEQUI,NIDSETOR,CNOMEIFACE,ETIPOENVIFACE,ETIPOCOMIFACE,NPORTAIFACE,NBAUDIFACE,NBITSDADOSIFACE,NBITSPARADAIFACE,NPARIDADEIFACE,CBUFFERENTRADAIFACE,CBUFFERSAIDAIFACE,EATIVOIFACE,TINC,EREVISARIFACE,ECONFIRMANORMAISIFACE,EENVIAPARIFACE,EWLAUTOIFACE,NQTDWLAUTOIFACE,EUSAPROT2IFACE,EUSARTSIFACE,ETROCASEPARADORIFACE,EIMPORTRESUIMAGEMIFACE,NTCPPORTIFACE,NTCPPORT2IFACE,NTCPPORT3IFACE,NTCPPORT4IFACE) values ({self.DADOSINTERFACE['id']},{self.DADOSINTERFACE['setor']},'{self.DADOSINTERFACE['nome']}','{self.DADOSINTERFACE['comunicacao']}','{self.DADOSINTERFACE['conexao']}',2,7,3,0,0,'3000','3000','S',now(),'N','N','N','N',0,'N','N','N','N',NULL,NULL,NULL,NULL) "
+                db.insert(host=self.HOST,user=self.USER,port=self.PORTA,passwd=self.SENHA,comando=comand_iface)
+                nidiface = db.select_database(host=self.HOST,user=self.USER,port=self.PORTA,passwd=self.SENHA,comando='SELECT MAX(NIDIFACE) FROM IE_IFACE ')
+                nidiface = nidiface[0]
+            except Exception or ValueError as e:
+                print(e)
+            db.insert_planilha(host=self.HOST,user=self.USER,passwd=self.SENHA,port=self.PORTA,nidiface=nidiface,conteudo=value,posfixo=self.POSFIXO)
+        

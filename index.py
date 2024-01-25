@@ -8,11 +8,24 @@ ie_exam = c_ie_exam()
 ie_var = c_ie_var()
 ie_iface = c_ie_face()
 # -----------------------------------------------------------------------------BackEnd--------------------------------------------------------------------------------------------------
-def inserir_planilha(host,user,passwd,port,nidiface,planilha,posfixo=None):
+def inserirTodaPlanilha(host,user,passwd,port,planilha,posfixo=None):
+
+    objeto = HandlerPlanilha()
+    objeto.HOST = host
+    objeto.USER = user
+    objeto.SENHA = passwd
+    objeto.PORTA = port
+    objeto.get_tokens()
+    if posfixo != None:
+      objeto.POSFIXO = posfixo
+    objeto.ler_planilha(planilha)
+
+def inserirPlanilhaExistente(host,user,passwd,port,nidiface,planilha,posfixo=None):
 
     dataframe = pd.read_excel(planilha)
     lista = dataframe.values.tolist()
     db.insert_planilha(host,user,passwd,port,nidiface,lista,posfixo)
+    
   
        
     
@@ -232,7 +245,7 @@ def janela_inserir():
   layout2= [
   [sg.Text('Id inter.', size=8),sg.Input(key='numeroPlanilha',size =(20,1))],
   [sg.Input(key='caminho_planilha'), sg.FileBrowse()],
-  [sg.Button('Enviar',button_color='green'), sg.Button('Voltar',button_color='red') ],
+  [sg.Button('Voltar',button_color='red',size=(22,1)), sg.Button('Enviar',button_color='green',size=(22,1)) ],
   [sg.Checkbox('Incluir pós-fixo no final da variavel do LIS?',key='POSFIXO',enable_events=True,tooltip='Adicionar um valor no final de todos as variaveis do lis como por Exemplo: GLI_INF')],
   [sg.Text('Digite o pós-fixo',key='POSFIXOLABEL',visible=False),(sg.Input(key='POSFIXOINPUT',size=(20, 1),visible=False))]
   ]
@@ -341,9 +354,33 @@ def janela_trocaCodExame():
   [sg.Checkbox('Trocar código de Amostras Pendentes?',key='trocaAmostraP',default=False,tooltip='Essa função troca todas as amostras pendentes para o novo código de Exame')],
   [sg.Button('Trocar',size=(25,1),button_color='green'), sg.Button('Voltar',size=(25,1),button_color='red') ]
   ]
-  return sg.Window('Criar Modelo Face',layout13,finalize=True)
+  return sg.Window('Troca Código do Exame',layout13,finalize=True)
 
-jConexao,jOperacao,jProntos,jInserir,jExtrair,JBackup,Jumexame,Jmodelos,Jcriarmodelos,jInserirmodelos,Jinserirface,Jcriarface,Jconfirmadrive,jTroca = janela_Conectar(),None,None,None,None,None,None,None,None,None,None,None,None,None
+def janela_decideInserir():
+  sg.theme('DarkGrey12')
+  layout8= [
+  [sg.Text('Escolhe uma opção', size=(30, 1), justification='center', font=("Helvetica", 13),
+  relief=sg.RELIEF_RIDGE, k='-TEXT HEADING-', enable_events=True)],
+  [sg.Button('Inserir toda Planilha',size=(15,2)),
+    sg.Button('Inserir em interface Existente',size=(15,2))],
+  [sg.Button('Voltar',size=(32,1),button_color='red')]
+  ]
+  
+  return sg.Window('Decisão Inserir', layout8,finalize=True)
+
+def janela_inseriTudo():
+  sg.theme('DarkGrey12')
+  layout2= [
+  [sg.Text('Selecione a planilha', size=(42, 1), justification='center', font=("Helvetica", 13),
+  relief=sg.RELIEF_RIDGE, k='-TEXT HEADING-', enable_events=True)],
+  [sg.Input(key='caminho_planilha'), sg.FileBrowse()],
+  [sg.Button('Voltar',button_color='red',size=(22,1)), sg.Button('Enviar',button_color='green',size=(22,1)) ],
+  [sg.Checkbox('Incluir pós-fixo no final da variavel do LIS?',key='POSFIXOTUDO',enable_events=True,tooltip='Adicionar um valor no final de todos as variaveis do lis como por Exemplo: GLI_INF')],
+  [sg.Text('Digite o pós-fixo',key='POSFIXOLABELTUDO',visible=False),(sg.Input(key='POSFIXOINPUTTUDO',size=(20, 1),visible=False))]
+  ]
+  return sg.Window('Inserir Toda Planilha', layout2,finalize=True)
+
+jConexao,jOperacao,jProntos,jDecideInserir,jExtrair,JBackup,Jumexame,Jmodelos,Jcriarmodelos,jInserirmodelos,Jinserirface,Jcriarface,Jconfirmadrive,jTroca,jInserir,JinserirToda = janela_Conectar(),None,None,None,None,None,None,None,None,None,None,None,None,None,None,None
 
 #Inicio das operações nas telas da interface
 while True:
@@ -373,7 +410,7 @@ while True:
           jProntos=janela_Prontos() 
       if eventos == "Inserir Planilha":
           jOperacao.hide()
-          jInserir=janela_inserir()
+          jDecideInserir=janela_decideInserir()
       if eventos == "Extrair Config":
           jOperacao.hide()
           jExtrair=janela_extrair() 
@@ -389,29 +426,18 @@ while True:
       if eventos == "Trocar Cod Exam":
          jOperacao.hide()
          jTroca = janela_trocaCodExame()
-  if window == jInserir:
+  if window == jDecideInserir:
       if eventos == sg.WIN_CLOSED:
           break
       if eventos == 'Voltar':
           jOperacao.un_hide()
-          jInserir.hide()
-      if eventos == 'Enviar':
-          try:
-              if valores['POSFIXOINPUT'] == '':
-                inserir_planilha(host,user,senha,porta,valores['numeroPlanilha'],valores['caminho_planilha'])
-              else:
-                 inserir_planilha(host,user,senha,porta,valores['numeroPlanilha'],valores['caminho_planilha'],valores['POSFIXOINPUT'])
-              sg.popup("Dados gravados com Sucesso !!!")
-          except Exception as e:
-              sg.popup("Erro ao gravar dados")
-              print(e)
-      if valores['POSFIXO'] == True:
-        jInserir['POSFIXOLABEL'].update(visible=True)
-        jInserir['POSFIXOINPUT'].update(visible=True)
-      if valores['POSFIXO'] == False:
-        jInserir['POSFIXOLABEL'].update(visible=False)
-        jInserir['POSFIXOINPUT'].update('',visible=False)
-      
+          jDecideInserir.hide()
+      if eventos == 'Inserir em interface Existente':
+         jDecideInserir.hide()
+         jInserir = janela_inserir()
+      if eventos == 'Inserir toda Planilha':
+        jDecideInserir.hide()
+        JinserirToda = janela_inseriTudo()
   if window == jProntos:
       if eventos == sg.WIN_CLOSED:
           break
@@ -550,6 +576,52 @@ while True:
         sg.popup('Troca relizada com sucesso !!')
       except ValueError as e:
          sg.popup_error(e)
+  if window == jInserir:
+    if eventos == sg.WIN_CLOSED:
+      break
+    if eventos == "Voltar":
+      jInserir.hide()
+      jDecideInserir.un_hide()
+    if eventos == 'Enviar':
+        try:
+          if valores['POSFIXOINPUT'] == '':
+            inserirPlanilhaExistente(host,user,senha,porta,valores['numeroPlanilha'],valores['caminho_planilha'])
+          else:
+              inserirPlanilhaExistente(host,user,senha,porta,valores['numeroPlanilha'],valores['caminho_planilha'],valores['POSFIXOINPUT'])
+          sg.popup("Dados gravados com Sucesso !!!")
+        except Exception as e:
+          sg.popup("Erro ao gravar dados")
+          print(e)
+    if valores['POSFIXO'] == True:
+      jInserir['POSFIXOLABEL'].update(visible=True)
+      jInserir['POSFIXOINPUT'].update(visible=True)
+    if valores['POSFIXO'] == False:
+      jInserir['POSFIXOLABEL'].update(visible=False)
+      jInserir['POSFIXOINPUT'].update('',visible=False)
+  if window == JinserirToda:
+    if eventos == sg.WIN_CLOSED:
+      break
+    if eventos == "Voltar":
+      JinserirToda.hide()
+      jDecideInserir.un_hide()
+    if eventos == 'Enviar':
+      try:
+        if valores['POSFIXOINPUT'] == '':
+          inserirTodaPlanilha(host,user,senha,porta,valores['caminho_planilha'])
+        else:
+            inserirTodaPlanilha(host,user,senha,porta,valores['caminho_planilha'],valores['POSFIXOINPUT'])
+        sg.popup("Dados gravados com Sucesso !!!")
+      except Exception as e:
+        sg.popup("Erro ao gravar dados")
+        print(e)
+    if valores['POSFIXOTUDO'] == True:
+      JinserirToda['POSFIXOLABELTUDO'].update(visible=True)
+      JinserirToda['POSFIXOINPUTTUDO'].update(visible=True)
+    if valores['POSFIXOTUDO'] == False:
+      JinserirToda['POSFIXOLABELTUDO'].update(visible=False)
+      JinserirToda['POSFIXOINPUTTUDO'].update('',visible=False)    
+    
+            
       
        
 
