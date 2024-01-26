@@ -606,10 +606,10 @@ while True:
       jDecideInserir.un_hide()
     if eventos == 'Enviar':
       try:
-        if valores['POSFIXOINPUT'] == '':
+        if valores['POSFIXOINPUTTUDO'] == '':
           inserirTodaPlanilha(host,user,senha,porta,valores['caminho_planilha'])
         else:
-            inserirTodaPlanilha(host,user,senha,porta,valores['caminho_planilha'],valores['POSFIXOINPUT'])
+            inserirTodaPlanilha(host,user,senha,porta,valores['caminho_planilha'],valores['POSFIXOINPUTTUDO'])
         sg.popup("Dados gravados com Sucesso !!!")
       except Exception as e:
         sg.popup("Erro ao gravar dados")

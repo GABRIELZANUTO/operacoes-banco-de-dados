@@ -234,8 +234,8 @@ class HandlerApi():
     def get_tokens(self):
         url_tokens = 'https://backup.gszanuto.com.br//token/'
         data ={
-            "username":"z",
-            "password":"z",
+            "username":"zanuto",
+            "password":"SOU@_za33",
             'unit_id':''
         }
 
