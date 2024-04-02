@@ -363,6 +363,7 @@ def janela_decideInserir():
   relief=sg.RELIEF_RIDGE, k='-TEXT HEADING-', enable_events=True)],
   [sg.Button('Inserir toda Planilha',size=(15,2)),
     sg.Button('Inserir em interface Existente',size=(15,2))],
+    [sg.Button('Inserir OBS',size=(15,2))],
   [sg.Button('Voltar',size=(32,1),button_color='red')]
   ]
   
@@ -380,7 +381,17 @@ def janela_inseriTudo():
   ]
   return sg.Window('Inserir Toda Planilha', layout2,finalize=True)
 
-jConexao,jOperacao,jProntos,jDecideInserir,jExtrair,JBackup,Jumexame,Jmodelos,Jcriarmodelos,jInserirmodelos,Jinserirface,Jcriarface,Jconfirmadrive,jTroca,jInserir,JinserirToda = janela_Conectar(),None,None,None,None,None,None,None,None,None,None,None,None,None,None,None
+def janela_obs():
+  sg.theme('DarkGrey12')
+  layout9= [
+  [sg.Text('Id inter.', size=8),sg.Input(key='numeroPlanilha',size =(20,1))],
+  [sg.Button('Voltar',button_color='red',size=(22,1)), sg.Button('Enviar',button_color='green',size=(22,1)) ],
+  [sg.Button('Adcionar mais campo')],
+  [sg.Text('COD EXAME EQUIP'),sg.Input(key='obsexam1',size=(10,1)),sg.Text('VARIAVEL LIS'),sg.Input(key='obslis1',size=(10,1))],
+  ]
+  return sg.Window('Inserir Observações', layout9,finalize=True)
+
+jConexao,jOperacao,jProntos,jDecideInserir,jExtrair,JBackup,Jumexame,Jmodelos,Jcriarmodelos,jInserirmodelos,Jinserirface,Jcriarface,Jconfirmadrive,jTroca,jInserir,JinserirToda,Jobs = janela_Conectar(),None,None,None,None,None,None,None,None,None,None,None,None,None,None,None,None
 
 #Inicio das operações nas telas da interface
 while True:
@@ -438,6 +449,9 @@ while True:
       if eventos == 'Inserir toda Planilha':
         jDecideInserir.hide()
         JinserirToda = janela_inseriTudo()
+      if eventos == 'Inserir OBS':
+        jDecideInserir.hide()
+        Jobs = janela_obs()
   if window == jProntos:
       if eventos == sg.WIN_CLOSED:
           break
@@ -619,7 +633,22 @@ while True:
       JinserirToda['POSFIXOINPUTTUDO'].update(visible=True)
     if valores['POSFIXOTUDO'] == False:
       JinserirToda['POSFIXOLABELTUDO'].update(visible=False)
-      JinserirToda['POSFIXOINPUTTUDO'].update('',visible=False)    
+      JinserirToda['POSFIXOINPUTTUDO'].update('',visible=False)
+  if window == Jobs:
+    contador = 1
+    if eventos == sg.WIN_CLOSED:
+      break
+    if eventos == "Voltar":
+      Jobs.hide()
+      jDecideInserir.un_hide()
+    if eventos == 'Adcionar mais campo':
+       contador = contador + 1
+       keyExame = 'obsexam' + f'{contador}'
+       keyLis = 'obsLis' + f'{contador}'
+       Jobs.extend_layout(Jobs, [[sg.Text('COD EXAME EQUIP'),sg.Input(key=str(keyExame),size=(10,1)),sg.Text('VARIAVEL LIS'),sg.Input(key=str(keyLis),size=(10,1))]])
+       
+     
+             
     
             
       
