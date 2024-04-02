@@ -1,7 +1,7 @@
 
 import mysql.connector
 
-def getConection(host='localhost',user='UNIWARE', senha='DBUCFGS', porta='3309'):
+def getConection(host,user, senha, porta):
   return mysql.connector.connect(
     host=str(host),
     user=str(user),
