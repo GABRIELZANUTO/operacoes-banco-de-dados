@@ -4,6 +4,7 @@ import database as db
 from classes import *
 import pickle
 
+CONTADOROBS = 1
 ie_exam = c_ie_exam()
 ie_var = c_ie_var()
 ie_iface = c_ie_face()
@@ -384,7 +385,7 @@ def janela_inseriTudo():
 def janela_obs():
   sg.theme('DarkGrey12')
   layout9= [
-  [sg.Text('Id inter.', size=8),sg.Input(key='numeroPlanilha',size =(20,1))],
+  [sg.Text('Id inter.', size=8),sg.Input(key='numeroInterfaceOBS',size =(20,1))],
   [sg.Button('Voltar',button_color='red',size=(22,1)), sg.Button('Enviar',button_color='green',size=(22,1)) ],
   [sg.Button('Adcionar mais campo')],
   [sg.Text('COD EXAME EQUIP'),sg.Input(key='obsexam1',size=(10,1)),sg.Text('VARIAVEL LIS'),sg.Input(key='obslis1',size=(10,1))],
@@ -635,17 +636,24 @@ while True:
       JinserirToda['POSFIXOLABELTUDO'].update(visible=False)
       JinserirToda['POSFIXOINPUTTUDO'].update('',visible=False)
   if window == Jobs:
-    contador = 1
     if eventos == sg.WIN_CLOSED:
       break
     if eventos == "Voltar":
       Jobs.hide()
       jDecideInserir.un_hide()
     if eventos == 'Adcionar mais campo':
-       contador = contador + 1
-       keyExame = 'obsexam' + f'{contador}'
-       keyLis = 'obsLis' + f'{contador}'
+       CONTADOROBS = CONTADOROBS + 1
+       keyExame = 'obsexam' + f'{CONTADOROBS}'
+       keyLis = 'obslis' + f'{CONTADOROBS}'
        Jobs.extend_layout(Jobs, [[sg.Text('COD EXAME EQUIP'),sg.Input(key=str(keyExame),size=(10,1)),sg.Text('VARIAVEL LIS'),sg.Input(key=str(keyLis),size=(10,1))]])
+       print(CONTADOROBS)
+    if eventos == 'Enviar':
+        while CONTADOROBS >=1:
+          obsexamDinamico = 'obsexam' + f'{CONTADOROBS}'
+          obslisDinamico = 'obslis' + f'{CONTADOROBS}'
+          db.insertOBS(host,user,senha,porta,valores['numeroInterfaceOBS'],valores[str(obsexamDinamico)],valores[str(obslisDinamico)])
+          CONTADOROBS = CONTADOROBS - 1
+        sg.popup('Inserido com sucesso')  
        
      
              

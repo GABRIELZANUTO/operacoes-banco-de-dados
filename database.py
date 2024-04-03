@@ -260,6 +260,28 @@ def trocaCodExame(host,user,passwd,port,interface,codAntigo,codNovo,mnemonico,tr
       insert(host,user,passwd,port,updateAmostras)
   else:
      raise ValueError('Não foi econtrado nenhum exame com esses dados!!!')
+  
+def insertOBS(host,user,passwd,port,interface,obsexam,obslis):
+    nidexansSelect = f'SELECT NIDEXAM,CEXAMEQUIEXAM FROM ie_exam WHERE NIDIFACE="{interface}"'
+    nidexans = select_database(host,user,passwd,port,nidexansSelect,modo='ALL')
+    for nidexam in nidexans:
+      if nidexam[1] != 'Desmembrado':
+          nordemvarSelect = F'SELECT MAX(NORDEMVAR) FROM ie_var WHERE NIDEXAM = {nidexam[0]}'
+          nordemvar = select_database(host,user,passwd,port,nordemvarSelect)
+          nordemvar1 = int(nordemvar[0]) + 1
+          insertOBS= f"INSERT INTO ie_var(NIDEXAM,CNOMEEQUIVAR,CNOMELISVAR,NORDEMVAR,TINC) values({nidexam[0]},'{obsexam}','{obslis}',{nordemvar1},now())"
+          insert(host,user,passwd,port,insertOBS)  
+      else:
+        desmemSelect = f'SELECT CEXAMEQUIVAR FROM ie_var WHERE NIDEXAM =  {nidexam[0]}'
+        desmem = select_database(host,user,passwd,port,desmemSelect,modo='ALL')
+        nordemvarSelect = f'SELECT MAX(NORDEMVAR) FROM ie_var WHERE NIDEXAM = {nidexam[0]}'
+        nordemvar = select_database(host,user,passwd,port,nordemvarSelect)
+        nordemvar1 = int(nordemvar[0]) + 1
+        insertOBS= f"INSERT INTO ie_var(NIDEXAM,CNOMEEQUIVAR,CNOMELISVAR,NORDEMVAR,TINC,CEXAMEQUIVAR) values({nidexam[0]},'{obsexam}','{obslis}',{nordemvar1},now(),'{desmem[0][0]}')"
+        insert(host,user,passwd,port,insertOBS) 
+      
+      
+     
 
 
 
